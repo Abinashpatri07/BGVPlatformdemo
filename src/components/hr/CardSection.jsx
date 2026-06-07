@@ -51,7 +51,7 @@ const CARD_CONFIG = [
 /* ── Single Card ─────────────────────────────── */
 function StatCard({ label, value, icon: Icon, iconBg, iconColor, loading }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col justify-between min-h-[110px] flex-1 min-w-[150px]">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col justify-between min-h-27.5 flex-1 min-w-37.5">
 
       {/* TOP: Title + Icon */}
       <div className="flex items-start justify-between gap-2">

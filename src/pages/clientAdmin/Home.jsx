@@ -1,18 +1,14 @@
 import ProfileHeader from "../../components/clientAdmin/home/ProfileHeader";
-
 import HROverview from "../../components/clientAdmin/home/HROverview";
-
 import CandidateOverview from "../../components/clientAdmin/home/CandidateOverview";
-
 import VerificationCredits from "../../components/clientAdmin/home/VerificationCredits";
-
 import RecentProfiles from "../../components/clientAdmin/home/RecentProfiles";
 
 function Home() {
   return (
     <div className="p-3 bg-[#F5F7FF] min-h-screen">
       {/* ───────────────── HEADER ───────────────── */}
-      <div className="bg-white rounded-2xl border border-[#E8EBFF] shadow-sm px-5 py-5">
+      <div className="bg-white rounded-2xl border border-[#E8EBFF] shadow-sm px-5 py-3">
         <ProfileHeader showExport={false} showCreateHR={false} />
       </div>
 

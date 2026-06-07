@@ -8,47 +8,24 @@ import {
 export function VerificationCredits() {
 
   const credits = [
-
     {
       label: "Total Credits",
       value: "5,000",
-
-      icon: (
-        <FileText
-          size={18}
-          className="text-white/80"
-        />
-      ),
+      icon: <FileText size={18} className="text-white/80" />,
     },
-
     {
       label: "Credits Used",
       value: "3,850",
-
-      icon: (
-        <CreditCard
-          size={18}
-          className="text-white/80"
-        />
-      ),
+      icon: <CreditCard size={18} className="text-white/80" />,
     },
-
     {
       label: "Available Remaining",
       value: "1,150",
-
-      icon: (
-        <Wallet
-          size={18}
-          className="text-white/80"
-        />
-      ),
+      icon: <Wallet size={18} className="text-white/80" />,
     },
-
   ];
 
   return (
-
     <div
       className="
         relative overflow-hidden
@@ -60,7 +37,6 @@ export function VerificationCredits() {
         h-full
       "
     >
-
       {/* TOP LIGHT EFFECT */}
       <div className="
         absolute -top-20 -right-20
@@ -75,25 +51,15 @@ export function VerificationCredits() {
 
         {/* LEFT */}
         <div>
-
           <div className="flex items-center gap-2">
-
-            <CircleDollarSign
-              size={18}
-              className="text-white/80"
-            />
-
-            <h2 className="text-[18px] font-semibold text-white">
-
+            <CircleDollarSign size={18} className="text-white/80" />
+            <h2 className="text-[15px] font-semibold text-white">
               Verification Credits
-
             </h2>
-
           </div>
 
           {/* PLAN */}
           <div className="mt-3">
-
             <span className="
               px-3 py-1 rounded-full
               bg-indigo-400/20
@@ -102,13 +68,9 @@ export function VerificationCredits() {
               font-medium
               border border-indigo-300/10
             ">
-
               Standard Employment Plan
-
             </span>
-
           </div>
-
         </div>
 
         {/* RIGHT ICON */}
@@ -123,56 +85,41 @@ export function VerificationCredits() {
 
       {/* CREDIT CARDS */}
       <div className="relative space-y-4 z-10">
-
         {credits.map((item, index) => (
-
           <div
             key={index}
             className="
               bg-white/10
               backdrop-blur-md
               border border-white/10
-              rounded-2xl
-              px-4 py-4
+              rounded-xl
+              px-3 py-3
               flex items-center justify-between
-
               shadow-[0_4px_20px_rgba(0,0,0,0.15)]
             "
           >
-
             {/* LEFT */}
             <div>
-
-              <p className="text-[13px] text-white/70 mb-1">
-
+              <p className="text-[12px] text-white/70 mb-0.5">
                 {item.label}
-
               </p>
-
-              <h1 className="text-[40px] font-semibold leading-none text-white">
-
+              <h1 className="text-[28px] font-semibold leading-none text-white">
                 {item.value}
-
               </h1>
-
             </div>
 
             {/* RIGHT ICON */}
             <div className="
-              w-11 h-11 rounded-xl
+              w-9 h-9 rounded-lg
               bg-white/10
               border border-white/10
               flex items-center justify-center
             ">
-
               {item.icon}
-
             </div>
 
           </div>
-
         ))}
-
       </div>
 
     </div>

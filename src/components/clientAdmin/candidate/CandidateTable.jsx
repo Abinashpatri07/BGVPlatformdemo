@@ -179,13 +179,13 @@ function CandidateTable() {
 
   const getStatusStyle = (status) => {
     switch (status) {
-      case "In Progress":  return "bg-orange-100 text-orange-500";
-      case "Verify":       return "bg-indigo-100 text-indigo-600";
-      case "Verified":     return "bg-teal-100 text-teal-600";
-      case "Complete":     return "bg-green-100 text-green-600";
-      case "On Hold":      return "bg-yellow-100 text-yellow-600";
-      case "Rejected":     return "bg-red-100 text-red-500";
-      default:             return "bg-gray-100 text-gray-500";
+      case "In Progress": return "bg-orange-100 text-orange-500";
+      case "Verify": return "bg-indigo-100 text-indigo-600";
+      case "Verified": return "bg-teal-100 text-teal-600";
+      case "Complete": return "bg-green-100 text-green-600";
+      case "On Hold": return "bg-yellow-100 text-yellow-600";
+      case "Rejected": return "bg-red-100 text-red-500";
+      default: return "bg-gray-100 text-gray-500";
     }
   };
 
@@ -274,68 +274,68 @@ function CandidateTable() {
       )}
 
       {/* ── FLOATING BULK ACTION BAR ── */}
-{selectedRows.length >= 2 && (
+      {selectedRows.length >= 2 && (
 
-  <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#02027A] text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-6 z-9999 animate-[fadeIn_.2s_ease-in-out]">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#02027A] text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-6 z-9999 animate-[fadeIn_.2s_ease-in-out]">
 
-    {/* LEFT */}
-    <div className="flex items-center gap-3">
+          {/* LEFT */}
+          <div className="flex items-center gap-3">
 
-      {/* ICON */}
-      <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center">
+            {/* ICON */}
+            <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center">
 
-        <CheckCircle
-          size={22}
-          className="text-white"
-        />
+              <CheckCircle
+                size={22}
+                className="text-white"
+              />
 
-      </div>
+            </div>
 
-      {/* TEXT */}
-      <div>
+            {/* TEXT */}
+            <div>
 
-        <p className="text-sm text-indigo-200">
+              <p className="text-sm text-indigo-200">
 
-          Selected Candidates
+                Selected Candidates
 
-        </p>
+              </p>
 
-        <h3 className="text-lg font-semibold">
+              <h3 className="text-lg font-semibold">
 
-          {selectedRows.length} Candidates Selected
+                {selectedRows.length} Candidates Selected
 
-        </h3>
+              </h3>
 
-      </div>
+            </div>
 
-    </div>
+          </div>
 
-    {/* BUTTON */}
-    <button
-      onClick={() => {
+          {/* BUTTON */}
+          <button
+            onClick={() => {
 
-        navigate(
-          "/admin/bulk-assign",
-          {
-            state: {
-              selectedCandidates:
-                candidateTableData.filter(
-                  (item) =>
-                    selectedRows.includes(item.id)
-                ),
-            },
-          }
-        );
-      }}
-      className="bg-white text-[#02027A] hover:bg-indigo-50 px-5 py-2.5 rounded-xl font-semibold transition"
-    >
+              navigate(
+                "/admin/bulk-assign",
+                {
+                  state: {
+                    selectedCandidates:
+                      candidateTableData.filter(
+                        (item) =>
+                          selectedRows.includes(item.id)
+                      ),
+                  },
+                }
+              );
+            }}
+            className="bg-white text-[#02027A] hover:bg-indigo-50 px-5 py-2.5 rounded-xl font-semibold transition"
+          >
 
-      Bulk Assign
+            Bulk Assign
 
-    </button>
+          </button>
 
-  </div>
-)}
+        </div>
+      )}
 
       {/* ── TABLE ── */}
       <div className="bg-white rounded-2xl border border-gray-200 overflow-visible shadow-sm">
@@ -427,9 +427,8 @@ function CandidateTable() {
 
                     {openMenu === index && (
                       <div
-                        className={`absolute right-12 w-56 z-9999 ${
-                          index >= candidateTableData.length - 3 ? "bottom-10" : "top-10"
-                        }`}
+                        className={`absolute right-12 w-56 z-9999 ${index >= candidateTableData.length - 3 ? "bottom-10" : "top-10"
+                          }`}
                       >
                         <ActionDropdown
                           onView={() => {
@@ -444,7 +443,7 @@ function CandidateTable() {
                             setShowEmailModal(true);
                             setOpenMenu(null);
                           }}
-                         onAssignHr={() => {
+                          onAssignHr={() => {
                             navigate("/admin/assign-verification");
                             setOpenMenu(null);
                           }}

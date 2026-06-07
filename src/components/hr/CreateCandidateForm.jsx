@@ -31,9 +31,16 @@ function CreateCandidateForm() {
     setSuccessMessage("");
 
     try {
+      // TODO: createdById ko auth/session se lo — abhi hardcoded
+      const createdById = 1; // logged-in HR ka users_id
+
       const response = await axios.post(
         "http://localhost:5000/api/candidates/single_candidate_add",
-        data
+        {
+          ...data,
+          createdByRole: "hr",   // ← HR create kar raha hai
+          createdById,
+        }
       );
 
       if (response.data.success) {

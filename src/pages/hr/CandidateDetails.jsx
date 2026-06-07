@@ -12,6 +12,8 @@ import {
   Briefcase,
   Calendar,
   Hash,
+  Users,
+  MapPin,
 } from "lucide-react";
 
 /* ── Helpers ──────────────────────────────────── */
@@ -170,6 +172,12 @@ const CandidateDetails = () => {
               ? new Date(candidate.date_of_birth).toLocaleDateString("en-IN")
               : null}
             />
+            <LabelRow icon={Users}    label="Gender"        value={
+              candidate.gender === 1 ? "Male"
+              : candidate.gender === 2 ? "Female"
+              : candidate.gender === 3 ? "Other"
+              : null
+            } />
             <LabelRow icon={User}     label="Father Name"   value={candidate.father_name} />
             <LabelRow icon={User}     label="Nationality"   value={candidate.nationality} />
             <LabelRow icon={Tag}      label="Tag"           value={candidate.tag} />
@@ -209,6 +217,50 @@ const CandidateDetails = () => {
           <EmptySection message="Criminal record check not done yet." />
         </SectionCard>
       </div>
+
+      {/* ── Location Verification ── */}
+      <SectionCard title="📍 Location Verification">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+          {/* ON-SITE PHOTO */}
+          <div>
+            <p className="text-sm font-medium text-gray-600 mb-3">On-Site Photo</p>
+            <div className="rounded-xl w-full h-48 bg-gray-100 border flex items-center justify-center">
+              <div className="flex flex-col items-center gap-2 text-gray-300">
+                <MapPin size={28} />
+                <p className="text-xs text-gray-400">Not uploaded yet</p>
+              </div>
+            </div>
+          </div>
+
+          {/* IDENTITY SELFIE */}
+          <div>
+            <p className="text-sm font-medium text-gray-600 mb-3">Identity Selfie</p>
+            <div className="rounded-xl w-full h-48 bg-gray-100 border flex items-center justify-center">
+              <div className="flex flex-col items-center gap-2 text-gray-300">
+                <User size={28} />
+                <p className="text-xs text-gray-400">Not uploaded yet</p>
+              </div>
+            </div>
+          </div>
+
+          {/* STATUS */}
+          <div>
+            <p className="text-sm font-medium text-gray-600 mb-3">Status</p>
+            <div className="space-y-3">
+              <p className="flex items-center gap-2 text-sm text-gray-400">
+                <CheckCircle size={16} className="text-gray-300" />
+                On-Site Photo — Pending
+              </p>
+              <p className="flex items-center gap-2 text-sm text-gray-400">
+                <CheckCircle size={16} className="text-gray-300" />
+                Identity Selfie — Pending
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </SectionCard>
 
       {/* ── Meta Info ── */}
       <div className="text-xs text-gray-400 text-right pb-4">

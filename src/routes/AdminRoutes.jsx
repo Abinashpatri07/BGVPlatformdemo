@@ -18,7 +18,7 @@ import EditCandidate from "../components/clientAdmin/candidate/EditCandidate";
 import AuditPage from "../pages/clientAdmin/AuditPage";
 import AssignVerificationOfficerPage from "../pages/clientAdmin/AssignVerificationOfficerPage";
 import BulkAssignPage from "../pages/clientAdmin/BulkAssignPage";
-import CreateCandidateForm from "../components/hr/CreateCandidateForm";
+import CreateCandidateForm from "../components/clientAdmin/candidate/CreateCandidateForm";
 import Analytics from "../pages/clientAdmin/Analytics";
 import BulkUpload from "../pages/clientAdmin/BulkUpload";
 

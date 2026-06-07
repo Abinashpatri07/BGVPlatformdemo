@@ -32,12 +32,12 @@ const ProfileHeader = ({
   }, []);
 
   return (
-    <div className="flex items-start justify-between mb-6">
+    <div className="flex items-start justify-between mb-3">
 
       {/* LEFT */}
       <div>
-        <h1 className="text-[30px] font-bold text-black leading-tight">{title}</h1>
-        <p className="text-[18px] text-gray-700 mt-1">{subtitle}</p>
+        <h1 className="text-[24px] font-bold text-black leading-tight">{title}</h1>
+        <p className="text-[14px] text-gray-600 mt-0.5">{subtitle}</p>
       </div>
 
       {/* RIGHT */}
@@ -47,7 +47,7 @@ const ProfileHeader = ({
         {showCreateHR && (
           <button
             onClick={() => navigate("/admin/create-hr")}
-            className="flex items-center gap-2 bg-[#02027A] hover:bg-[#00005E] text-white px-5 py-3 rounded-xl text-sm font-medium transition-all"
+            className="flex items-center gap-2 bg-[#02027A] hover:bg-[#00005E] text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
           >
             <Plus size={18} />
             Create HR
@@ -59,7 +59,7 @@ const ProfileHeader = ({
           <div className="relative" ref={candidateRef}>
             <button
               onClick={() => setShowCandidateDropdown((p) => !p)}
-              className="flex items-center gap-2 bg-[#02027A] hover:bg-[#00005E] text-white px-5 py-3 rounded-xl text-sm font-medium transition-all"
+              className="flex items-center gap-2 bg-[#02027A] hover:bg-[#00005E] text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
             >
               <Plus size={18} />
               Create Candidate
@@ -100,7 +100,6 @@ const ProfileHeader = ({
                   </div>
                   <div className="text-left">
                     <p className="font-medium text-sm">Add in Bulk</p>
-                    
                   </div>
                 </button>
 
@@ -114,7 +113,7 @@ const ProfileHeader = ({
           <div className="relative" ref={exportRef}>
             <button
               onClick={() => setShowExportModal(!showExportModal)}
-              className="flex items-center gap-2 border border-[#02027A] text-[#02027A] hover:bg-indigo-50 px-5 py-3 rounded-xl text-sm font-medium transition-all"
+              className="flex items-center gap-2 border border-[#02027A] text-[#02027A] hover:bg-indigo-50 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             >
               <Download size={18} />
               Export
