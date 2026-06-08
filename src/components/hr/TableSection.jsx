@@ -304,7 +304,7 @@ function TableSection({ searchTerm = "", sortBy = "all" }) {
 
       {/* ── EMAIL SUCCESS MODAL ── */}
       {showEmailModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-9999">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
           <div className="bg-white rounded-2xl w-120 overflow-hidden shadow-xl text-center">
 
             <div className="relative bg-purple-600 h-40 flex items-center justify-center">
@@ -316,11 +316,11 @@ function TableSection({ searchTerm = "", sortBy = "all" }) {
 
             <div className="px-8 py-6">
               <h2 className="text-lg font-bold text-purple-600 mb-2">
-                Invitation E-Mail Sent Successfully
+                E-Mail has been Sent Successfully
               </h2>
-              <p className="text-sm text-gray-500">
+              {/* <p className="text-sm text-gray-500">
                 We've Sent You An Email — Check Your Inbox.
-              </p>
+              </p> */}
               <button
                 onClick={() => setShowEmailModal(false)}
                 className="mt-6 border border-purple-500 text-purple-600 hover:bg-purple-50 px-8 py-2.5 rounded-xl text-sm font-medium transition"
@@ -468,7 +468,7 @@ function TableSection({ searchTerm = "", sortBy = "all" }) {
 
                     {openMenu === index && (
                       <div
-                        className={`absolute right-12 w-56 z-9999 ${
+                        className={`absolute right-12 w-56 z-[9999] ${
                           index >= candidates.length - 3 ? "bottom-10" : "top-10"
                         }`}
                       >

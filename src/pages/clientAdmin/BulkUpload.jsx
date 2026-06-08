@@ -94,6 +94,42 @@ const BulkUpload = () => {
     URL.revokeObjectURL(url);
   };
 
+  const handleUpload = async () => {
+    setUploading(true);
+    /* === FOR DEMO: BACKEND BYPASSED ===
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await axios.post(
+        "http://localhost:5000/api/candidates/multiple_candidate_add",
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      if (res.data.success) {
+        setUploadResult({
+          created: res.data.created,
+          skipped: res.data.skipped,
+          total: res.data.totalRecords,
+          skippedList: res.data.skippedList || [],
+        });
+        setShowTable(false);
+      }
+      */
+
+      // Mocking a successful response
+      setTimeout(() => {
+        setUploadResult({
+          created: data.length,
+          skipped: 0,
+          total: data.length,
+          skippedList: [],
+        });
+        setShowTable(false);
+        setUploading(false);
+      }, 800);
+  };
+
   const handleNext = () => {
     if (!file) return;
 
@@ -102,8 +138,8 @@ const BulkUpload = () => {
   };
 
   return (
-    <div className="p-8 bg-white min-h-screen">
-      <div className="max-w-5xl mx-auto space-y-7">
+    <div className="p-6 bg-white min-h-screen">
+      <div className="max-w-5xl mx-auto space-y-4">
 
         {/* HEADER */}
         <div>
@@ -119,32 +155,46 @@ const BulkUpload = () => {
 
         {!showTable && (
           <>
+            {/* ================= RESULT MODAL ================= */}
+        {uploadResult && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-3xl p-8 w-100 text-center shadow-xl">
+              <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                <CheckCircle size={36} className="text-green-500" />
+              </div>
+              <h3 className="text-[#01026E] font-bold text-xl mb-2">
+                Success!
+              </h3>
+              <p className="text-gray-600 text-sm mb-6">
+                Candidates Uploaded Successfully! ✅
+              </p>
+              <button
+                onClick={() => {
+                  handleReset();
+                  navigate("/admin/candidates");
+                }}
+                className="px-8 py-3 bg-[#01026E] text-white rounded-xl text-base hover:bg-[#02038a] transition font-medium w-full"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        )}
             {/* FIRST TIME UPLOADING */}
-            <div className="flex items-center justify-between bg-indigo-50 border border-indigo-100 rounded-3xl px-6 py-5">
-
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center shrink-0">
-                  <FileText
-                    size={22}
-                    className="text-indigo-600"
-                  />
+            <div className="flex items-center justify-between bg-indigo-50 border border-indigo-100 rounded-2xl px-5 py-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center shrink-0">
+                  <FileText size={20} className="text-indigo-600" />
                 </div>
-
                 <div>
-                  <p className="text-base font-semibold text-indigo-700">
-                    First time uploading?
-                  </p>
-
-                  <p className="text-sm text-gray-500 mt-1">
-                    Download our dummy data template to see the
-                    required column headers and format types.
-                  </p>
+                  <p className="text-sm font-semibold text-indigo-700">First time uploading?</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Download our dummy data template to see the required format.</p>
                 </div>
               </div>
 
               <button
                 onClick={handleDownloadTemplate}
-                className="flex items-center gap-2 bg-[#02027A] hover:bg-[#00005E] text-white text-base font-semibold px-6 py-3 rounded-xl transition shrink-0 ml-4"
+                className="flex items-center gap-2 bg-[#02027A] hover:bg-[#00005E] text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shrink-0 ml-4"
               >
                 <Download size={18} />
                 Download CSV Template
@@ -153,10 +203,10 @@ const BulkUpload = () => {
 
             {/* UPLOAD ZONE */}
             <div
-              onClick={handleClick}
+              onClick={() => fileRef.current.click()}
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-3xl h-72 flex flex-col items-center justify-center cursor-pointer transition ${
+              className={`border-2 border-dashed rounded-2xl h-48 flex flex-col items-center justify-center cursor-pointer transition ${
                 uploadError
                   ? "border-red-300 bg-red-50"
                   : file
@@ -166,14 +216,11 @@ const BulkUpload = () => {
             >
               {file ? (
                 <>
-                  <div className="w-24 h-24 flex items-center justify-center rounded-full bg-green-100 mb-5">
-                    <CheckCircle
-                      size={42}
-                      className="text-green-500"
-                    />
+                  <div className="w-16 h-16 flex items-center justify-center rounded-full bg-green-100 mb-3">
+                    <CheckCircle size={32} className="text-green-500" />
                   </div>
 
-                  <p className="text-lg text-green-700 font-semibold">
+                  <p className="text-base text-green-700 font-semibold">
                     Document uploaded successfully
                   </p>
 
@@ -183,10 +230,10 @@ const BulkUpload = () => {
                 </>
               ) : (
                 <>
-                  <div className="w-24 h-24 rounded-full bg-[#E0EEFF] flex items-center justify-center mb-6">
+                  <div className="w-16 h-16 rounded-full bg-[#E0EEFF] flex items-center justify-center mb-3">
                     <svg
-                      width="50"
-                      height="50"
+                      width="32"
+                      height="32"
                       viewBox="0 0 44 44"
                       fill="none"
                     >
@@ -219,14 +266,14 @@ const BulkUpload = () => {
                     </svg>
                   </div>
 
-                  <p className="text-lg text-gray-600">
+                  <p className="text-base text-gray-600">
                     <span className="text-[#01026E] font-bold">
                       Click Here
                     </span>{" "}
                     to upload your File or Drag
                   </p>
 
-                  <p className="text-sm text-gray-400 mt-4">
+                  <p className="text-xs text-gray-400 mt-2">
                     Supported formats: .CSV, .XLSX
                   </p>
                 </>
@@ -250,13 +297,13 @@ const BulkUpload = () => {
             )}
 
             {/* GUIDELINES */}
-            <div className="bg-[#FDF2F2] border border-[#FECACA] rounded-2xl p-5">
+            <div className="bg-[#FDF2F2] border border-[#FECACA] rounded-xl p-4">
 
-              <p className="text-base font-semibold text-orange-500 mb-3 flex items-center gap-2">
+              <p className="text-sm font-semibold text-orange-500 mb-2 flex items-center gap-2">
                 ⓘ Important Guidelines
               </p>
 
-              <ul className="text-sm text-gray-600 space-y-2 list-disc pl-5">
+              <ul className="text-xs text-gray-600 space-y-1.5 list-disc pl-5">
                 <li>
                   Only .csv, .xls, .xlsx file types are accepted.
                 </li>
@@ -301,7 +348,7 @@ const BulkUpload = () => {
               <div className="flex gap-4 ml-auto">
                 <button
                   onClick={() => navigate(-1)}
-                  className="px-10 py-3 border-2 border-gray-300 rounded-xl text-base text-gray-700 hover:bg-gray-50 transition font-medium"
+                  className="px-8 py-2.5 border-2 border-gray-300 rounded-xl text-sm text-gray-700 hover:bg-gray-50 transition font-medium"
                 >
                   Back
                 </button>
@@ -309,7 +356,7 @@ const BulkUpload = () => {
                 <button
                   onClick={handleNext}
                   disabled={!file}
-                  className="px-12 py-3 bg-[#02027A] text-white rounded-xl text-base hover:bg-[#00005E] disabled:opacity-50 transition font-semibold"
+                  className="px-10 py-2.5 bg-[#02027A] text-white rounded-xl text-sm hover:bg-[#02038a] disabled:opacity-50 transition font-semibold"
                 >
                   Next
                 </button>

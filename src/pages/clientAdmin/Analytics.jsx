@@ -8,16 +8,29 @@ import TATTable from "../../components/clientAdmin/analytics/TATTable";
 import MISTable from "../../components/clientAdmin/analytics/MISTable";
 import { analyticsData } from "../../components/clientAdmin/analytics/analyticsData";
 import { misData } from "../../components/clientAdmin/analytics/misData";
+import { tatData } from "../../components/clientAdmin/analytics/tatData";
 
 export default function Analytics() {
   const [activeTab, setActiveTab] = useState("MIS");
   const [search, setSearch] = useState("");
 
-  // Filter SLA/TAT data
+  // Filter SLA data
   const filteredAnalytics = useMemo(() => {
     if (!search.trim()) return analyticsData;
     const q = search.toLowerCase();
     return analyticsData.filter(
+      (r) =>
+        r.name.toLowerCase().includes(q) ||
+        r.hr.toLowerCase().includes(q) ||
+        String(r.candId).includes(q)
+    );
+  }, [search]);
+
+  // Filter TAT data
+  const filteredTAT = useMemo(() => {
+    if (!search.trim()) return tatData;
+    const q = search.toLowerCase();
+    return tatData.filter(
       (r) =>
         r.name.toLowerCase().includes(q) ||
         r.hr.toLowerCase().includes(q) ||
@@ -60,11 +73,11 @@ export default function Analytics() {
       );
     } else if (activeTab === "TAT") {
       headers = [
-        "Cand ID,Candidate Name,Email,Phone,Assign HR,Status,Check ID,Employment,TAT Days",
+        "Cand ID,Candidate Name,Email,Phone,Assign HR,Status,Check ID,Check Type,Initiation Day,Actual TAT,Target TAT",
       ];
-      rows = filteredAnalytics.map(
+      rows = filteredTAT.map(
         (r) =>
-          `${r.candId},${r.name},${r.email},${r.phone},${r.hr},${r.status},${r.checkId},${r.employment},${r.tatDays}`
+          `${r.candId},${r.name},${r.email},${r.phone},${r.hr},${r.status},${r.checkId},${r.checkType},${r.initiationDay},${r.actual},${r.target}`
       );
     }
 
@@ -102,7 +115,7 @@ export default function Analytics() {
       {activeTab === "MIS" && <MISTable data={filteredMIS} />}
       {activeTab === "SLA Breach" && <SLABreachTable data={filteredAnalytics} />}
       {/* {activeTab === "MIS" && <MISTable data={filteredMIS} />} */}
-      {activeTab === "TAT" && <TATTable data={filteredAnalytics} />}
+      {activeTab === "TAT" && <TATTable data={filteredTAT} />}
     </div>
   );
 }

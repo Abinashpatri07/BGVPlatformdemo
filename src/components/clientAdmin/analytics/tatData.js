@@ -10,7 +10,7 @@ export const tatData = [
     checkId: 6946,
     checkType: "Address Check",
     initiationDay: "May 05, 2026",
-    actual: 6,
+    actual: 2,
     target: 4,
   },
 
@@ -55,7 +55,7 @@ export const tatData = [
     checkId: 3408,
     checkType: "Identity Check",
     initiationDay: "May 09, 2026",
-    actual: 11,
+    actual: 3,
     target: 6,
   },
 
@@ -70,7 +70,7 @@ export const tatData = [
     checkId: 3477,
     checkType: "Address Check",
     initiationDay: "May 04, 2026",
-    actual: 10,
+    actual: 2,
     target: 8,
   },
 
@@ -130,7 +130,7 @@ export const tatData = [
     checkId: 2386,
     checkType: "Education Check",
     initiationDay: "May 11, 2026",
-    actual: 5,
+    actual: 3,
     target: 7,
   },
 ];

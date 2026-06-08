@@ -1,4 +1,4 @@
-import { Download, Plus, UserPlus, Upload, FileText, Loader2 } from "lucide-react";
+import { Download, Plus, UserPlus, Users, FileText, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
@@ -125,75 +125,125 @@ const ProfileHeader = ({ showExport, showAddCandidate }) => {
     <div className="flex justify-between items-center mb-4">
       {/* LEFT SECTION */}
       <div>
-        <p className="text-3xl font-semibold text-gray-800">
-          Hi Puja Good Morning!
-        </p>
-
-        <p className="text-xl font-semibold text-gray-800">
+        <h1 className="text-[24px] font-bold text-black leading-tight">
+          Welcome Back Puja 👋🏻
+        </h1>
+        <p className="text-[14px] text-gray-600 mt-0.5">
           Let's Customize Your Workspace
         </p>
       </div>
 
       {/* RIGHT SECTION */}
-      <div className="flex gap-3 items-center">
+      <div className="flex items-center gap-4 relative">
+        {/* ADD CANDIDATE BUTTON + DROPDOWN */}
+        {showAddCandidate && (
+          <div className="relative" ref={candidateRef}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenCandidateDropdown(!openCandidateDropdown);
+              }}
+              className="flex items-center gap-2 bg-[#02027A] hover:bg-[#00005E] text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            >
+              <Plus size={18} />
+              Add Candidate
+            </button>
+
+            {/* DROPDOWN */}
+            {openCandidateDropdown && (
+              <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-100 rounded-2xl shadow-lg py-2 z-50">
+                {/* ADD SINGLE */}
+                <button
+                  onClick={() => {
+                    setOpenCandidateDropdown(false);
+                    navigate("/hr/create-candidate");
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-[#02027A] transition"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+                    <UserPlus size={15} className="text-[#02027A]" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium text-sm">Add Single</p>
+                  </div>
+                </button>
+
+                <div className="mx-3 border-t border-gray-100" />
+
+                {/* ADD IN BULK */}
+                <button
+                  onClick={() => {
+                    setOpenCandidateDropdown(false);
+                    navigate("/hr/bulk-upload");
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-[#02027A] transition"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+                    <Users size={15} className="text-[#02027A]" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-medium text-sm">Add in Bulk</p>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* EXPORT DROPDOWN */}
         {showExport && (
           <div className="relative" ref={exportRef}>
             <button
               onClick={(e) => {
                 e.stopPropagation();
-
                 setOpenExport(!openExport);
               }}
-              className="flex items-center gap-2 border px-3 py-1 rounded-lg text-sm hover:bg-gray-100"
+              className="flex items-center gap-2 border border-[#02027A] text-[#02027A] hover:bg-indigo-50 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             >
-              <Download className="w-4 h-4" />
+              <Download size={18} />
               Export
             </button>
 
-            {/* EXPORT PANEL */}
+            {/* EXPORT MODAL */}
             {openExport && (
-              <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg z-50 p-4">
-                {/* TITLE */}
-                <h3 className="text-sm font-semibold text-gray-700 mb-4">
+              <div className="absolute right-0 mt-3 w-80 bg-white border border-gray-200 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.08)] z-50 p-5">
+                <h3 className="text-sm font-semibold text-gray-800 mb-4">
                   Select file type
                 </h3>
 
-                {/* OPTIONS */}
-                <div className="flex gap-3 mb-5">
-                  {/* CSV */}
-                  <div
-                    onClick={() => setSelectedType("csv")}
-                    className={`flex-1 flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer transition ${
-                      selectedType === "csv"
-                        ? "border-[#01026E] bg-blue-50"
-                        : "border-gray-200 hover:bg-gray-50"
-                    }`}
-                  >
-                    <FileText size={16} className="text-green-500" />
-                    <span className="text-sm font-medium">CSV</span>
-                  </div>
-
+                <div className="grid grid-cols-2 gap-3 mb-5">
                   {/* PDF */}
                   <div
                     onClick={() => setSelectedType("pdf")}
-                    className={`flex-1 flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer transition ${
+                    className={`flex flex-col items-center justify-center gap-2 border rounded-xl px-3 py-4 cursor-pointer transition-all ${
                       selectedType === "pdf"
-                        ? "border-[#01026E] bg-blue-50"
+                        ? "border-[#01026E] bg-indigo-50"
                         : "border-gray-200 hover:bg-gray-50"
                     }`}
                   >
-                    <FileText size={16} className="text-red-500" />
-                    <span className="text-sm font-medium">PDF</span>
+                    <FileText size={22} className="text-red-500" />
+                    <span className="text-xs font-medium text-gray-700">PDF</span>
+                  </div>
+
+                  {/* CSV */}
+                  <div
+                    onClick={() => setSelectedType("csv")}
+                    className={`flex flex-col items-center justify-center gap-2 border rounded-xl px-3 py-4 cursor-pointer transition-all ${
+                      selectedType === "csv"
+                        ? "border-[#01026E] bg-indigo-50"
+                        : "border-gray-200 hover:bg-gray-50"
+                    }`}
+                  >
+                    <FileText size={22} className="text-emerald-500" />
+                    <span className="text-xs font-medium text-gray-700">CSV</span>
                   </div>
                 </div>
 
-                {/* DOWNLOAD BUTTON */}
                 <div className="flex justify-end">
                   <button
                     onClick={handleDownload}
                     disabled={exporting}
-                    className="bg-[#01026E] text-white px-5 py-2 rounded-lg text-sm hover:opacity-90 transition flex items-center gap-2 disabled:opacity-60"
+                    className="bg-[#01026E] hover:bg-[#00005E] text-white px-5 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 disabled:opacity-60"
                   >
                     {exporting ? (
                       <>
@@ -204,56 +254,6 @@ const ProfileHeader = ({ showExport, showAddCandidate }) => {
                       "Download"
                     )}
                   </button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ADD CANDIDATE DROPDOWN */}
-        {showAddCandidate && (
-          <div className="relative" ref={candidateRef}>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-
-                setOpenCandidateDropdown(!openCandidateDropdown);
-              }}
-              className="flex items-center gap-2 text-white px-3 py-1 rounded-lg text-sm bg-[#01026E]"
-            >
-              <Plus className="w-4 h-4" />
-              Add Candidate
-            </button>
-
-            {/* DROPDOWN */}
-            {openCandidateDropdown && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-md z-50">
-                {/* SINGLE */}
-                <div
-                  onClick={() => {
-                    setOpenCandidateDropdown(false);
-
-                    navigate("/hr/create-candidate");
-                  }}
-                  className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                >
-                  <UserPlus size={16} />
-
-                  <span>Add Single</span>
-                </div>
-
-                {/* BULK */}
-                <div
-                  onClick={() => {
-                    setOpenCandidateDropdown(false);
-
-                    navigate("/hr/bulk-upload");
-                  }}
-                  className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                >
-                  <Upload size={16} />
-
-                  <span>Add in Bulk</span>
                 </div>
               </div>
             )}

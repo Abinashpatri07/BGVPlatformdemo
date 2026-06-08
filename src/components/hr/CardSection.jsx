@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { tableData } from "./data/tableData";
 import {
   Users,
   CheckCircle,
@@ -99,6 +100,21 @@ const CardSection = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // MOCK DATA FETCH (Backend Bypassed)
+    setLoading(true);
+    setTimeout(() => {
+      const candidates = tableData;
+      setCounts({
+        total:      candidates.length,
+        inProgress: candidates.filter((c) => [1, 2, 3].includes(Number(c.case_status))).length,
+        verified:   candidates.filter((c) => Number(c.case_status) === 4).length,
+        onHold:     candidates.filter((c) => Number(c.case_status) === 5).length,
+        rejected:   candidates.filter((c) => Number(c.case_status) === 6).length,
+      });
+      setLoading(false);
+    }, 600);
+
+    /* === BACKEND BYPASSED FOR DEMO ===
     const fetchCounts = async () => {
       try {
         setLoading(true);
@@ -109,15 +125,6 @@ const CardSection = () => {
         if (res.data.success) {
           const candidates = res.data.candidates;
 
-          /*
-            case_status values:
-            1 = Awaiting Input (In Progress)
-            2 = Profile Complete (In Progress)
-            3 = Verification In Progress (In Progress)
-            4 = Verified
-            5 = On Hold
-            6 = Rejected
-          */
           setCounts({
             total:      candidates.length,
             inProgress: candidates.filter((c) => [1, 2, 3].includes(Number(c.case_status))).length,
@@ -134,6 +141,7 @@ const CardSection = () => {
     };
 
     fetchCounts();
+    */
   }, []);
 
   return (

@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CheckCircle } from "lucide-react";
 
 function CreateCandidateForm() {
   const navigate = useNavigate();
@@ -10,12 +10,14 @@ function CreateCandidateForm() {
   const [phoneMessage, setPhoneMessage]     = useState("");
   const [emailMessage, setEmailMessage]     = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [generalError, setGeneralError]     = useState("");
   const [loading, setLoading]               = useState(false);
 
   const {
     register,
     handleSubmit,
     reset,
+    getValues,
     formState: { errors },
   } = useForm();
 
@@ -25,10 +27,11 @@ function CreateCandidateForm() {
     setPhoneMessage("");
     setEmailMessage("");
     setSuccessMessage("");
+    setGeneralError("");
 
     try {
+      /* === FOR DEMO: BACKEND BYPASSED ===
       const createdById = 2;
-
       const response = await axios.post(
         "http://localhost:5000/api/candidates/single_candidate_add",
         {
@@ -44,19 +47,29 @@ function CreateCandidateForm() {
       );
 
       if (response.data.success) {
-        setSuccessMessage(
-          `Candidate Created Successfully! Case ID: ${response.data.caseId} ✅`
-        );
+      */
+      
+      // Mocking a successful response after a small delay
+      setTimeout(() => {
+        setSuccessMessage("Candidate Created Successfully! Case ID: BGV123456789 ✅");
         reset();
         setTimeout(() => navigate("/admin/candidates"), 2000);
-      }
+      }, 500);
 
     } catch (error) {
       const errData = error.response?.data;
-      if (errData?.errors?.phone)   setPhoneMessage(errData.errors.phone);
-      else if (errData?.errors?.email) setEmailMessage(errData.errors.email);
-      else if (errData?.message)    setEmailMessage(errData.message);
-      else setEmailMessage("Something went wrong. Please try again.");
+      if (errData?.field === "phone") {
+        setPhoneMessage(errData.message);
+      } else if (errData?.field === "email") {
+        setEmailMessage(errData.message);
+      } else if (errData?.errors) {
+        const firstError = Object.values(errData.errors)[0];
+        setGeneralError(firstError || "Validation failed.");
+      } else if (errData?.message) {
+        setGeneralError(errData.message);
+      } else {
+        setGeneralError("Something went wrong. Ensure backend is running and try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -90,12 +103,55 @@ function CreateCandidateForm() {
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 max-w-2xl">
         <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
 
-          {/* SUCCESS BANNER */}
-          {successMessage && (
-            <div className="bg-green-50 border border-green-300 text-green-700 text-sm p-3 rounded-xl">
-              {successMessage}
+      {/* SUCCESS MODAL */}
+      {successMessage && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-[9999]">
+          <div className="relative bg-white w-96 rounded-3xl overflow-hidden shadow-2xl text-center pb-8">
+            {/* GREEN TOP */}
+            <div className="relative h-36 bg-lime-500 rounded-b-[50%] flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-lg">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-9 h-9 text-lime-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
             </div>
-          )}
+
+            {/* CONTENT */}
+            <div className="px-8 mt-6">
+              <h2 className="text-2xl font-bold text-lime-500 leading-tight">
+                Candidate "{getValues("firstName")} {getValues("lastName")}"
+                <br />
+                Successfully Created.
+              </h2>
+              <p className="text-gray-500 text-sm mt-4 leading-6">
+                The Candidate Details Have Been Saved Successfully And Are Now
+                Available In The System.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate("/admin/candidates")}
+                className="mt-5 border-2 border-lime-500 text-lime-500 hover:bg-lime-50 px-10 py-2.5 rounded-xl text-sm font-medium transition"
+              >
+                Okay
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* GENERAL ERROR BANNER */}
+      {generalError && (
+        <div className="bg-red-50 border border-red-300 text-red-700 text-sm p-3 rounded-xl flex items-center gap-2">
+          {generalError}
+        </div>
+      )}
 
           {/* FIRST NAME + LAST NAME */}
           <div className="grid grid-cols-2 gap-4">

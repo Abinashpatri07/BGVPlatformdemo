@@ -6,88 +6,30 @@ function LoginPopup({ type, message, onClose }) {
   const isSuccess = type === "success";
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
-      <div className="bg-white rounded-2xl shadow-2xl w-80 overflow-hidden text-center">
-
-        {/* Header */}
-        <div
-          className={`relative flex items-center justify-center ${
-            isSuccess ? "bg-green-500" : "bg-red-500"
-          }`}
-          style={{ height: "160px" }}
-        >
-          {/* Concave bottom curve */}
-          <div
-            style={{
-              position: "absolute",
-              bottom: "-1px",
-              left: "-10%",
-              width: "120%",
-              height: "50px",
-              backgroundColor: "white",
-              borderRadius: "50% 50% 0 0 / 100% 100% 0 0",
-            }}
-          />
-          {/* Icon */}
-          <div
-            className="relative flex items-center justify-center"
-            style={{
-              width: "68px",
-              height: "68px",
-              backgroundColor: "rgba(255,255,255,0.25)",
-              borderRadius: "16px",
-              marginBottom: "20px",
-            }}
-          >
-            {isSuccess ? (
-              /* Checkmark */
-              <svg width="38" height="38" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M5 13l4 4L19 7"
-                  stroke="white"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            ) : (
-              /* X mark */
-              <svg width="38" height="38" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M6 6l12 12M18 6L6 18"
-                  stroke="white"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            )}
-          </div>
+    <div className="fixed top-6 right-6 z-[9999] animate-[fadeIn_0.3s_ease-out]">
+      <div className={`flex items-center gap-4 px-6 py-4 rounded-xl shadow-lg border-l-4 ${
+        isSuccess ? "bg-green-50 border-green-500 text-green-700" : "bg-red-50 border-red-500 text-red-700"
+      }`}>
+        {isSuccess ? (
+          <svg className="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        ) : (
+          <svg className="w-6 h-6 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        )}
+        <div className="flex flex-col">
+          <span className="font-bold">{isSuccess ? "Login Successful!" : "Login Failed"}</span>
+          <span className="text-sm">{message}</span>
         </div>
-
-        {/* Body */}
-        <div className="px-8 pt-2 pb-8">
-          <h2
-            className={`text-lg font-bold mb-2 ${
-              isSuccess ? "text-green-600" : "text-red-500"
-            }`}
-          >
-            {isSuccess ? "Login Successful!" : "Login Failed"}
-          </h2>
-          <p className="text-sm text-gray-500 mb-6">{message}</p>
-          {!isSuccess && (
-            <button
-              onClick={onClose}
-              className={`border px-10 py-2 rounded-xl text-sm font-semibold transition cursor-pointer ${
-                isSuccess
-                  ? "border-green-500 text-green-600 hover:bg-green-50"
-                  : "border-red-400 text-red-500 hover:bg-red-50"
-              }`}
-            >
-              Try Again
-            </button>
-          )}
-        </div>
-
+        {!isSuccess && (
+          <button onClick={onClose} className="ml-4 text-gray-400 hover:text-gray-600 transition">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );

@@ -2,24 +2,22 @@ import { useState } from "react";
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-
-import PageHeader from "./PageHeader";
+import { ArrowLeft, CheckCircle } from "lucide-react";
 
 function CreateCandidateForm() {
   const navigate = useNavigate();
 
   const [phoneMessage, setPhoneMessage] = useState("");
-
   const [emailMessage, setEmailMessage] = useState("");
-
   const [successMessage, setSuccessMessage] = useState("");
-
+  const [generalError, setGeneralError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
     reset,
+    getValues,
     formState: { errors },
   } = useForm();
 
@@ -29,8 +27,10 @@ function CreateCandidateForm() {
     setPhoneMessage("");
     setEmailMessage("");
     setSuccessMessage("");
+    setGeneralError("");
 
     try {
+      /* === FOR DEMO: BACKEND BYPASSED ===
       // TODO: createdById ko auth/session se lo — abhi hardcoded
       const createdById = 1; // logged-in HR ka users_id
 
@@ -44,24 +44,31 @@ function CreateCandidateForm() {
       );
 
       if (response.data.success) {
+      */
+
+      // Mocking a successful response after a small delay
+      setTimeout(() => {
         setSuccessMessage("Candidate Created Successfully! ✅");
         reset();
-        // 2 second baad HR home pe navigate karo
-        setTimeout(() => {
-          navigate("/hr/home");
-        }, 2000);
-      }
+        setTimeout(() => navigate("/hr/home"), 2000);
+      }, 500);
 
     } catch (error) {
       const errData = error.response?.data;
 
-      // Duplicate phone ya email — field ke neeche dikhao
+      // Handle Duplicate or Validation Errors
       if (errData?.field === "phone") {
         setPhoneMessage(errData.message);
       } else if (errData?.field === "email") {
         setEmailMessage(errData.message);
+      } else if (errData?.errors) {
+        // Validation errors from middleware
+        const firstError = Object.values(errData.errors)[0];
+        setGeneralError(firstError || "Validation failed.");
+      } else if (errData?.message) {
+        setGeneralError(errData.message);
       } else {
-        setEmailMessage(errData?.message || "Something went wrong. Please try again.");
+        setGeneralError("Something went wrong. Ensure backend is running and try again.");
       }
 
     } finally {
@@ -69,109 +76,149 @@ function CreateCandidateForm() {
     }
   };
 
+  // ── INPUT CLASS ────────────────────────────────────────
+  const inputCls = (err) =>
+    `w-full border-2 rounded-xl px-4 py-3 outline-none text-sm transition focus:ring-2 focus:ring-indigo-100 ${
+      err
+        ? "border-red-300 bg-red-50"
+        : "border-indigo-200 bg-[#F5F6FF] focus:border-indigo-400"
+    }`;
+
   return (
     <div className="p-6">
-      <PageHeader />
 
-      <div className="bg-white p-6 rounded-xl shadow max-w-xl ml-28">
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+      {/* BACK + HEADING */}
+      <div className="flex items-center gap-3 mb-6">
+        <button
+          onClick={() => navigate("/hr/home")}
+          className="p-2 rounded-lg hover:bg-gray-100 transition"
+        >
+          <ArrowLeft size={20} className="text-gray-600" />
+        </button>
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">Create Candidate</h1>
+          <p className="text-sm text-gray-500">Fill in the details to add a new candidate</p>
+        </div>
+      </div>
 
-          {/* SUCCESS BANNER */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 max-w-2xl">
+        <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+
+          {/* SUCCESS MODAL */}
           {successMessage && (
-            <div className="bg-green-50 border border-green-300 text-green-700 text-sm p-3 rounded-lg flex items-center gap-2">
-              {successMessage}
+            <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-[9999]">
+              <div className="relative bg-white w-96 rounded-3xl overflow-hidden shadow-2xl text-center pb-8">
+                {/* GREEN TOP */}
+                <div className="relative h-36 bg-lime-500 rounded-b-[50%] flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-lg">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-9 h-9 text-lime-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={3}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* CONTENT */}
+                <div className="px-8 mt-6">
+                  <h2 className="text-2xl font-bold text-lime-500 leading-tight">
+                    Candidate "{getValues("firstName")} {getValues("lastName")}"
+                    <br />
+                    Successfully Created.
+                  </h2>
+                  <p className="text-gray-500 text-sm mt-4 leading-6">
+                    The Candidate Details Have Been Saved Successfully And Are Now
+                    Available In The System.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/hr/home")}
+                    className="mt-5 border-2 border-lime-500 text-lime-500 hover:bg-lime-50 px-10 py-2.5 rounded-xl text-sm font-medium transition"
+                  >
+                    Okay
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
-          {/* FIRST / LAST NAME */}
+          {/* GENERAL ERROR BANNER */}
+          {generalError && (
+            <div className="bg-red-50 border border-red-300 text-red-700 text-sm p-3 rounded-xl flex items-center gap-2">
+              {generalError}
+            </div>
+          )}
 
-          <div className="flex gap-4">
-            {/* FIRST NAME */}
-            <div className="w-1/2">
-              <label className="block text-sm font-medium">
+          {/* FIRST NAME + LAST NAME */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 First/Middle Name <span className="text-red-500">*</span>
               </label>
-
               <input
                 type="text"
-                className="w-full mt-1 p-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Rahul"
+                className={inputCls(errors.firstName)}
                 {...register("firstName", {
                   required: "First name is required",
-                  pattern: {
-                    value: /^[A-Za-z\s]+$/,
-                    message: "Only alphabets allowed",
-                  },
+                  pattern: { value: /^[A-Za-z\s]+$/, message: "Only alphabets allowed" },
                 })}
               />
-
               {errors.firstName && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.firstName.message}
-                </p>
+                <p className="text-red-500 text-xs mt-1">{errors.firstName.message}</p>
               )}
             </div>
 
-            {/* LAST NAME */}
-            <div className="w-1/2">
-              <label className="block text-sm font-medium">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Last Name <span className="text-red-500">*</span>
               </label>
-
               <input
                 type="text"
-                className="w-full mt-1 p-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Sharma"
+                className={inputCls(errors.lastName)}
                 {...register("lastName", {
                   required: "Last name is required",
-                  pattern: {
-                    value: /^[A-Za-z\s]+$/,
-                    message: "Only alphabets allowed",
-                  },
+                  pattern: { value: /^[A-Za-z\s]+$/, message: "Only alphabets allowed" },
                 })}
               />
-
               {errors.lastName && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.lastName.message}
-                </p>
+                <p className="text-red-500 text-xs mt-1">{errors.lastName.message}</p>
               )}
             </div>
           </div>
 
           {/* PHONE */}
           <div>
-            <label className="block text-sm font-medium">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Phone Number <span className="text-red-500">*</span>
             </label>
-
-            <div className="flex items-center mt-1">
-              <span className="px-3 py-2 bg-gray-100 border rounded-l-lg text-sm">
+            <div className={`flex items-center border-2 rounded-xl overflow-hidden transition ${
+              errors.phone ? "border-red-300 bg-red-50" : "border-indigo-200 bg-[#F5F6FF]"
+            }`}>
+              <div className="px-4 py-3 bg-indigo-100 text-gray-600 text-sm border-r-2 border-indigo-200 shrink-0">
                 +91
-              </span>
-
+              </div>
               <input
                 type="text"
                 placeholder="9876543210"
                 maxLength={10}
-                className="w-full p-2 border-t border-b border-r rounded-r-lg outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-3 outline-none text-sm bg-transparent"
                 {...register("phone", {
                   required: "Phone number is required",
-                  pattern: {
-                    value: /^\d{10}$/,
-                    message: "Phone must be exactly 10 digits",
-                  },
+                  pattern: { value: /^\d{10}$/, message: "Phone must be exactly 10 digits" },
                 })}
-                onInput={(e) => {
-                  e.target.value = e.target.value.replace(/\D/g, "");
-                }}
+                onInput={(e) => { e.target.value = e.target.value.replace(/\D/g, ""); }}
               />
             </div>
-
             {errors.phone && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.phone.message}
-              </p>
+              <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>
             )}
-
             {phoneMessage && (
               <p className="text-red-500 text-xs mt-1">{phoneMessage}</p>
             )}
@@ -179,111 +226,93 @@ function CreateCandidateForm() {
 
           {/* EMAIL */}
           <div>
-            <label className="block text-sm font-medium">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Email Address <span className="text-red-500">*</span>
             </label>
-
             <input
               type="text"
               placeholder="abc@example.com"
-              className="w-full mt-1 p-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+              className={inputCls(errors.email)}
               {...register("email", {
                 required: "Email is required",
-                pattern: {
-                  value: /^\S+@\S+\.\S+$/,
-                  message: "Enter a valid email",
-                },
+                pattern: { value: /^\S+@\S+\.\S+$/, message: "Enter a valid email" },
               })}
             />
-
             {errors.email && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors.email.message}
-              </p>
+              <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
             )}
-
             {emailMessage && (
               <p className="text-red-500 text-xs mt-1">{emailMessage}</p>
             )}
-
             <p className="text-xs text-gray-400 mt-1">
               Candidate will receive login credentials at this email
             </p>
           </div>
 
           {/* FUNCTION + TAG */}
-          <div className="flex gap-4">
-            {/* FUNCTION */}
-            <div className="w-1/2">
-              <label className="block text-sm font-medium">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Function <span className="text-red-500">*</span>
               </label>
-
               <input
                 type="text"
                 placeholder="IT"
-                className="w-full mt-1 p-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-               {...register("jobFunction", {
-  required: "Function is required",
-})}
+                className={inputCls(errors.jobFunction)}
+                {...register("jobFunction", {
+                  required: "Function is required",
+                })}
               />
-
-              {errors.function && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.function.message}
-                </p>
+              {errors.jobFunction && (
+                <p className="text-red-500 text-xs mt-1">{errors.jobFunction.message}</p>
               )}
             </div>
 
-            {/* TAG */}
-            <div className="w-1/2">
-              <label className="block text-sm font-medium">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Tag <span className="text-red-500">*</span>
               </label>
-
               <input
                 type="text"
                 placeholder="May Batch"
-                className="w-full mt-1 p-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+                className={inputCls(errors.tag)}
                 {...register("tag", {
                   required: "Tag is required",
                 })}
               />
-
               {errors.tag && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.tag.message}
-                </p>
+                <p className="text-red-500 text-xs mt-1">{errors.tag.message}</p>
               )}
             </div>
           </div>
 
           {/* NOTE */}
-          <div className="bg-indigo-50 border border-indigo-200 text-sm p-3 rounded-lg text-gray-600">
-            <strong>Note:</strong> A Default Password Will Be Sent To The
-            Candidate's Email. The Candidate Can Use These Credentials To Login
-            And Complete Their Verification Profile.
+          <div className="bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3">
+            <p className="text-xs text-gray-700 leading-5">
+              <span className="font-semibold">Note:</span> A Default Password Will Be Sent To The
+              Candidate's Email. The Candidate Can Use These Credentials To Login And Complete
+              Their Verification Profile.
+            </p>
           </div>
 
           {/* BUTTONS */}
-          <div className="flex gap-4 pt-4">
-            {/* SUBMIT */}
+          <div className="grid grid-cols-2 gap-4 pt-1">
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-[#01026E] text-white py-2 rounded-lg hover:bg-indigo-800 disabled:opacity-60 transition"
+              className="bg-[#02027A] text-white py-3 rounded-xl hover:bg-indigo-900 disabled:opacity-60 transition font-medium text-sm"
             >
               {loading ? "Creating..." : "Create Candidate"}
             </button>
-
-            {/* CANCEL */}
             <button
               type="button"
-              className="flex-1 border border-indigo-200 text-indigo-700 py-2 rounded-lg hover:bg-indigo-50 transition"
+              onClick={() => navigate("/hr/home")}
+              className="border-2 border-indigo-200 text-indigo-700 py-3 rounded-xl hover:bg-indigo-50 transition font-medium text-sm"
             >
               Cancel
             </button>
           </div>
+
         </form>
       </div>
     </div>
