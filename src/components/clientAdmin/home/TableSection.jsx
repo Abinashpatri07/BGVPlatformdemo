@@ -150,6 +150,12 @@ function TableSection({ isToolBarRequired }) {
               <td className="px-4 py-5 text-gray-600">
                 {item.Email}
               </td>
+
+              {/* PHONE */}
+              <td className="px-4 py-5 text-gray-700">
+                {item.Phone}
+              </td>
+              
               {/* STATUS */}
             <td className="px-4 py-4">
 
@@ -172,10 +178,6 @@ function TableSection({ isToolBarRequired }) {
 
             </td>
 
-              {/* PHONE */}
-              <td className="px-4 py-5 text-gray-700">
-                {item.Phone}
-              </td>
 
               {/* ACTION */}
               <td className="px-4 py-5 text-center relative overflow-visible">

@@ -62,7 +62,7 @@ function TerminateModal({ candidateId = "EMP-008", onCancel, onSuccess }) {
                     : "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
                 }`}
                 >
-                Terminate To HR
+                Terminate HR
                 </button>
           </div>
 

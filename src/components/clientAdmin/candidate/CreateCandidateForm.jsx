@@ -19,7 +19,7 @@ function CreateCandidateForm() {
     formState: { errors },
   } = useForm();
 
-  // ── SUBMIT ──────────────────────────────────────────────────────────
+  // ── SUBMIT ─────────────────────────────────────────────
   const onSubmit = async (data) => {
     setLoading(true);
     setPhoneMessage("");
@@ -27,8 +27,7 @@ function CreateCandidateForm() {
     setSuccessMessage("");
 
     try {
-      // TODO: createdById ko auth/session se lo — abhi hardcoded
-      const createdById = 2; // users_id = 2 = Test Client Admin (rm_id=2, cm_id=1)
+      const createdById = 2;
 
       const response = await axios.post(
         "http://localhost:5000/api/candidates/single_candidate_add",
@@ -39,7 +38,7 @@ function CreateCandidateForm() {
           email:         data.email,
           jobFunction:   data.jobFunction || "",
           tag:           data.tag || "",
-          createdByRole: "client_admin",   // ← yahi decide karta hai DB mein kaunsa column set hoga
+          createdByRole: "client_admin",
           createdById,
         }
       );
@@ -49,34 +48,32 @@ function CreateCandidateForm() {
           `Candidate Created Successfully! Case ID: ${response.data.caseId} ✅`
         );
         reset();
-        setTimeout(() => {
-          navigate("/admin/candidates");
-        }, 2000);
+        setTimeout(() => navigate("/admin/candidates"), 2000);
       }
 
     } catch (error) {
       const errData = error.response?.data;
-
-      if (errData?.errors?.phone) {
-        setPhoneMessage(errData.errors.phone);
-      } else if (errData?.errors?.email) {
-        setEmailMessage(errData.errors.email);
-      } else if (errData?.message) {
-        setEmailMessage(errData.message);
-      } else {
-        setEmailMessage("Something went wrong. Please try again.");
-      }
-
+      if (errData?.errors?.phone)   setPhoneMessage(errData.errors.phone);
+      else if (errData?.errors?.email) setEmailMessage(errData.errors.email);
+      else if (errData?.message)    setEmailMessage(errData.message);
+      else setEmailMessage("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // ── UI ───────────────────────────────────────────────────────────────
+  // ── INPUT CLASS ────────────────────────────────────────
+  const inputCls = (err) =>
+    `w-full border-2 rounded-xl px-4 py-3 outline-none text-sm transition focus:ring-2 focus:ring-indigo-100 ${
+      err
+        ? "border-red-300 bg-red-50"
+        : "border-indigo-200 bg-[#F5F6FF] focus:border-indigo-400"
+    }`;
+
   return (
     <div className="p-6">
 
-      {/* BACK BUTTON + HEADING */}
+      {/* BACK + HEADING */}
       <div className="flex items-center gap-3 mb-6">
         <button
           onClick={() => navigate("/admin/candidates")}
@@ -90,34 +87,29 @@ function CreateCandidateForm() {
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-xl shadow max-w-xl">
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 max-w-2xl">
+        <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
 
           {/* SUCCESS BANNER */}
           {successMessage && (
-            <div className="bg-green-50 border border-green-300 text-green-700 text-sm p-3 rounded-lg">
+            <div className="bg-green-50 border border-green-300 text-green-700 text-sm p-3 rounded-xl">
               {successMessage}
             </div>
           )}
 
-          {/* FIRST NAME / LAST NAME */}
-          <div className="flex gap-4">
-
-            {/* FIRST NAME */}
-            <div className="w-1/2">
-              <label className="block text-sm font-medium text-gray-700">
-                First / Middle Name <span className="text-red-500">*</span>
+          {/* FIRST NAME + LAST NAME */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                First/Middle Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 placeholder="Rahul"
-                className="w-full mt-1 p-2 border rounded-lg outline-none focus:ring-2 focus:ring-[#02027A]"
+                className={inputCls(errors.firstName)}
                 {...register("firstName", {
                   required: "First name is required",
-                  pattern: {
-                    value: /^[A-Za-z\s]+$/,
-                    message: "Only alphabets allowed",
-                  },
+                  pattern: { value: /^[A-Za-z\s]+$/, message: "Only alphabets allowed" },
                 })}
               />
               {errors.firstName && (
@@ -125,54 +117,46 @@ function CreateCandidateForm() {
               )}
             </div>
 
-            {/* LAST NAME */}
-            <div className="w-1/2">
-              <label className="block text-sm font-medium text-gray-700">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Last Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 placeholder="Sharma"
-                className="w-full mt-1 p-2 border rounded-lg outline-none focus:ring-2 focus:ring-[#02027A]"
+                className={inputCls(errors.lastName)}
                 {...register("lastName", {
                   required: "Last name is required",
-                  pattern: {
-                    value: /^[A-Za-z\s]+$/,
-                    message: "Only alphabets allowed",
-                  },
+                  pattern: { value: /^[A-Za-z\s]+$/, message: "Only alphabets allowed" },
                 })}
               />
               {errors.lastName && (
                 <p className="text-red-500 text-xs mt-1">{errors.lastName.message}</p>
               )}
             </div>
-
           </div>
 
           {/* PHONE */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Phone Number <span className="text-red-500">*</span>
             </label>
-            <div className="flex items-center mt-1">
-              <span className="px-3 py-2 bg-gray-100 border rounded-l-lg text-sm text-gray-600">
+            <div className={`flex items-center border-2 rounded-xl overflow-hidden transition ${
+              errors.phone ? "border-red-300 bg-red-50" : "border-indigo-200 bg-[#F5F6FF]"
+            }`}>
+              <div className="px-4 py-3 bg-indigo-100 text-gray-600 text-sm border-r-2 border-indigo-200 shrink-0">
                 +91
-              </span>
+              </div>
               <input
                 type="text"
                 placeholder="9876543210"
                 maxLength={10}
-                className="w-full p-2 border-t border-b border-r rounded-r-lg outline-none focus:ring-2 focus:ring-[#02027A]"
+                className="w-full px-4 py-3 outline-none text-sm bg-transparent"
                 {...register("phone", {
                   required: "Phone number is required",
-                  pattern: {
-                    value: /^\d{10}$/,
-                    message: "Phone must be exactly 10 digits",
-                  },
+                  pattern: { value: /^\d{10}$/, message: "Phone must be exactly 10 digits" },
                 })}
-                onInput={(e) => {
-                  e.target.value = e.target.value.replace(/\D/g, "");
-                }}
+                onInput={(e) => { e.target.value = e.target.value.replace(/\D/g, ""); }}
               />
             </div>
             {errors.phone && (
@@ -185,19 +169,16 @@ function CreateCandidateForm() {
 
           {/* EMAIL */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Email Address <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              placeholder="rahul@example.com"
-              className="w-full mt-1 p-2 border rounded-lg outline-none focus:ring-2 focus:ring-[#02027A]"
+              placeholder="abc@example.com"
+              className={inputCls(errors.email)}
               {...register("email", {
                 required: "Email is required",
-                pattern: {
-                  value: /^\S+@\S+\.\S+$/,
-                  message: "Enter a valid email",
-                },
+                pattern: { value: /^\S+@\S+\.\S+$/, message: "Enter a valid email" },
               })}
             />
             {errors.email && (
@@ -211,26 +192,65 @@ function CreateCandidateForm() {
             </p>
           </div>
 
+          {/* FUNCTION + TAG */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Function <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="IT"
+                className={inputCls(errors.jobFunction)}
+                {...register("jobFunction", {
+                  required: "Function is required",
+                })}
+              />
+              {errors.jobFunction && (
+                <p className="text-red-500 text-xs mt-1">{errors.jobFunction.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Tag <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="May Batch"
+                className={inputCls(errors.tag)}
+                {...register("tag", {
+                  required: "Tag is required",
+                })}
+              />
+              {errors.tag && (
+                <p className="text-red-500 text-xs mt-1">{errors.tag.message}</p>
+              )}
+            </div>
+          </div>
+
           {/* NOTE */}
-          <div className="bg-indigo-50 border border-indigo-200 text-sm p-3 rounded-lg text-gray-600">
-            <strong>Note:</strong> A default password will be sent to the candidate's email.
-            The candidate can use these credentials to login and complete their verification profile.
+          <div className="bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3">
+            <p className="text-xs text-gray-700 leading-5">
+              <span className="font-semibold">Note:</span> A Default Password Will Be Sent To The
+              Candidate's Email. The Candidate Can Use These Credentials To Login And Complete
+              Their Verification Profile.
+            </p>
           </div>
 
           {/* BUTTONS */}
-          <div className="flex gap-4 pt-2">
+          <div className="grid grid-cols-2 gap-4 pt-1">
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-[#02027A] text-white py-2 rounded-lg hover:bg-indigo-900 disabled:opacity-60 transition font-medium"
+              className="bg-[#02027A] text-white py-3 rounded-xl hover:bg-indigo-900 disabled:opacity-60 transition font-medium text-sm"
             >
               {loading ? "Creating..." : "Create Candidate"}
             </button>
-
             <button
               type="button"
               onClick={() => navigate("/admin/candidates")}
-              className="flex-1 border border-indigo-200 text-indigo-700 py-2 rounded-lg hover:bg-indigo-50 transition font-medium"
+              className="border-2 border-indigo-200 text-indigo-700 py-3 rounded-xl hover:bg-indigo-50 transition font-medium text-sm"
             >
               Cancel
             </button>

@@ -1,34 +1,20 @@
 import { useState } from "react";
 import { Square } from "lucide-react";
-import axios from "axios";
 
 function OnHoldModal({ candidate, onClose, onSuccess }) {
   const [reason, setReason] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  const handleOnHold = async () => {
+  // ── Candidate name — HR data (first_name/last_name) ya Client Admin data (name) dono handle karo
+  const candidateName =
+    candidate?.first_name
+      ? `${candidate.first_name} ${candidate.last_name}`
+      : candidate?.name || "";
+
+  const handleOnHold = () => {
     if (!reason.trim()) return;
-
-    setLoading(true);
-    setError("");
-
-    try {
-      await axios.patch(
-        `http://localhost:5000/api/candidates/on_hold/${candidate.cand_id}`,
-        { reason }
-      );
-
-      setIsSuccess(true);
-      // Table refresh ke liye callback
-      if (onSuccess) onSuccess();
-
-    } catch (err) {
-      setError(err.response?.data?.message || "Something went wrong. Try again.");
-    } finally {
-      setLoading(false);
-    }
+    setIsSuccess(true);
+    if (onSuccess) onSuccess();
   };
 
   // ── SUCCESS SCREEN ─────────────────────────────────
@@ -49,9 +35,7 @@ function OnHoldModal({ candidate, onClose, onSuccess }) {
           <div className="px-8 py-6">
             <h2 className="text-orange-500 text-lg font-bold mb-3 leading-7">
               Candidate{" "}
-              <span className="font-bold">
-                {candidate?.first_name} {candidate?.last_name}
-              </span>{" "}
+              <span className="font-bold">{candidateName}</span>{" "}
               Has Been Successfully Placed On Hold.
             </h2>
             <p className="text-sm text-gray-500 leading-6">
@@ -81,9 +65,7 @@ function OnHoldModal({ candidate, onClose, onSuccess }) {
         <h2 className="text-2xl font-semibold text-center mb-6 leading-9">
           Are You Sure You Want To Place
           <br />
-          <span className="font-bold">
-            {candidate?.first_name} {candidate?.last_name}
-          </span>{" "}
+          <span className="font-bold">{candidateName}</span>{" "}
           <span className="text-orange-500 font-bold">On Hold</span>?
         </h2>
 
@@ -104,29 +86,24 @@ function OnHoldModal({ candidate, onClose, onSuccess }) {
           <p className="text-xs text-red-500 mt-2">Reason is required</p>
         )}
 
-        {error && (
-          <p className="text-xs text-red-500 mt-2">{error}</p>
-        )}
-
         {/* BUTTONS */}
         <div className="flex justify-center gap-4 mt-8">
           <button
             onClick={onClose}
-            disabled={loading}
-            className="px-8 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-medium transition disabled:opacity-60"
+            className="px-8 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-medium transition"
           >
             Cancel
           </button>
           <button
-            disabled={!reason.trim() || loading}
+            disabled={!reason.trim()}
             onClick={handleOnHold}
             className={`px-8 py-2.5 border rounded-xl text-sm font-medium transition ${
-              reason.trim() && !loading
+              reason.trim()
                 ? "border-orange-400 text-orange-500 hover:bg-orange-50"
                 : "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
             }`}
           >
-            {loading ? "Placing On Hold..." : "Place On Hold"}
+            Place On Hold
           </button>
         </div>
 

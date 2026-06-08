@@ -1,34 +1,20 @@
 import { useState } from "react";
 import { X } from "lucide-react";
-import axios from "axios";
 
 function RejectModal({ candidate, onClose, onSuccess }) {
   const [reason, setReason] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
-  const handleReject = async () => {
+  // ── Candidate name — HR data (first_name/last_name) ya Client Admin data (name) dono handle karo
+  const candidateName =
+    candidate?.first_name
+      ? `${candidate.first_name} ${candidate.last_name}`
+      : candidate?.name || "";
+
+  const handleReject = () => {
     if (!reason.trim()) return;
-
-    setLoading(true);
-    setError("");
-
-    try {
-      await axios.patch(
-        `http://localhost:5000/api/candidates/reject/${candidate.cand_id}`,
-        { reason }
-      );
-
-      setIsSuccess(true);
-      // Table refresh ke liye callback
-      if (onSuccess) onSuccess();
-
-    } catch (err) {
-      setError(err.response?.data?.message || "Something went wrong. Try again.");
-    } finally {
-      setLoading(false);
-    }
+    setIsSuccess(true);
+    if (onSuccess) onSuccess();
   };
 
   // ── SUCCESS SCREEN ─────────────────────────────────
@@ -49,9 +35,7 @@ function RejectModal({ candidate, onClose, onSuccess }) {
           <div className="px-8 py-6">
             <h2 className="text-red-500 text-lg font-bold mb-3 leading-7">
               Candidate{" "}
-              <span className="font-bold">
-                {candidate?.first_name} {candidate?.last_name}
-              </span>{" "}
+              <span className="font-bold">{candidateName}</span>{" "}
               Has Been Successfully Rejected.
             </h2>
             <p className="text-sm text-gray-500 leading-6">
@@ -80,9 +64,7 @@ function RejectModal({ candidate, onClose, onSuccess }) {
         <h2 className="text-2xl font-semibold text-center mb-6 leading-8">
           Reject Candidate
           <br />
-          <span className="text-red-500">
-            {candidate?.first_name} {candidate?.last_name}
-          </span>?
+          <span className="text-red-500">{candidateName}</span>?
         </h2>
 
         <label className="block text-sm font-medium mb-2">
@@ -101,28 +83,23 @@ function RejectModal({ candidate, onClose, onSuccess }) {
           <p className="text-xs text-red-500 mt-2">Rejection reason is required</p>
         )}
 
-        {error && (
-          <p className="text-xs text-red-500 mt-2">{error}</p>
-        )}
-
         <div className="flex justify-center gap-4 mt-6">
           <button
             onClick={onClose}
-            disabled={loading}
-            className="px-8 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition disabled:opacity-60"
+            className="px-8 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
           >
             Cancel
           </button>
           <button
-            disabled={!reason.trim() || loading}
+            disabled={!reason.trim()}
             onClick={handleReject}
             className={`px-8 py-2.5 border rounded-lg transition ${
-              reason.trim() && !loading
+              reason.trim()
                 ? "border-red-400 text-red-500 hover:bg-red-50"
                 : "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
             }`}
           >
-            {loading ? "Rejecting..." : "Reject Application"}
+            Reject Application
           </button>
         </div>
 

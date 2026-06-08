@@ -42,7 +42,7 @@ function HRActionDropdown({ onView, onEdit, candidateId = "EMP-0002" }) {
                 E-Mail Has Been Sent Successfully
               </h2>
               <p className="text-sm text-gray-500">
-                "We've Sent You An Email—Take A Look In Inbox."
+                Take A Look In Inbox."
               </p>
 
               <button

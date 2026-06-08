@@ -14,7 +14,8 @@ import {
 
 import { useNavigate } from "react-router-dom";
 
-import axios from "axios";
+// ── DUMMY DATA (demo ke liye — baad mein API se replace hoga) ──
+import { tableData as dummyCandidates } from "./data/tableData";
 
 import ActionDropdown from "../../components/hr/ActionDropdown";
 import RejectModal from "../clientAdmin/candidate/RejectModal";
@@ -156,8 +157,8 @@ function TableSection({ searchTerm = "", sortBy = "all" }) {
 
   const navigate = useNavigate();
 
-  const [candidates, setCandidates] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [candidates, setCandidates] = useState(dummyCandidates);
+  const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState("");
 
   const [openMenu, setOpenMenu] = useState(null);
@@ -172,28 +173,28 @@ function TableSection({ searchTerm = "", sortBy = "all" }) {
 
   const menuRefs = useRef([]);
 
-  // ── FETCH CANDIDATES FROM API ──
-  const fetchCandidates = async () => {
-    try {
-      setLoading(true);
-      setFetchError("");
-      const response = await axios.get(
-        "http://localhost:5000/api/candidates/get_all_candidates"
-      );
-      if (response.data.success) {
-        setCandidates(response.data.candidates);
-      }
-    } catch (error) {
-      setFetchError("Failed to load candidates. Please try again.");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // ── LIVE API (DB ready hone par yeh use karna) ──
+  // const fetchCandidates = async () => {
+  //   try {
+  //     setLoading(true);
+  //     setFetchError("");
+  //     const response = await axios.get(
+  //       "http://localhost:5000/api/candidates/get_all_candidates"
+  //     );
+  //     if (response.data.success) {
+  //       setCandidates(response.data.candidates);
+  //     }
+  //   } catch (error) {
+  //     setFetchError("Failed to load candidates. Please try again.");
+  //     console.error(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchCandidates();
-  }, []);
+  // useEffect(() => {
+  //   fetchCandidates();
+  // }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -380,9 +381,10 @@ function TableSection({ searchTerm = "", sortBy = "all" }) {
                 />
               </th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Candidate ID</th>
-              <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Case ID</th>
+              <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Date</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Name</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Phone</th>
+              <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Assigned HR</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Function / Tag</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Status</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-center w-20">Action</th>
@@ -408,7 +410,15 @@ function TableSection({ searchTerm = "", sortBy = "all" }) {
                 </td>
 
                 <td className="px-5 py-2.5 text-sm text-gray-700 font-mono">{item.cand_id}</td>
-                <td className="px-5 py-2.5 text-sm text-gray-700 font-mono">{item.case_id}</td>
+
+                <td className="px-5 py-2.5">
+                  <div className="text-sm text-gray-700 font-medium">
+                    {item.created_at ? new Date(item.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-0.5">
+                    {item.created_at ? new Date(item.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true }) : ""}
+                  </div>
+                </td>
 
                 <td className="px-5 py-2.5">
                   <div className="font-semibold text-[15px] text-gray-900 leading-5">
@@ -418,6 +428,15 @@ function TableSection({ searchTerm = "", sortBy = "all" }) {
                 </td>
 
                 <td className="px-5 py-2.5 text-sm text-gray-700">{item.phone}</td>
+
+                <td className="px-5 py-2.5">
+                  {item.assigned_hr ? (
+                    <>
+                      <div className="text-sm text-gray-800 font-medium">{item.assigned_hr.name}</div>
+                      <div className="text-xs text-gray-400 mt-0.5">{item.assigned_hr.email}</div>
+                    </>
+                  ) : null}
+                </td>
 
                 <td className="px-5 py-2.5">
                   <div className="text-sm text-gray-700 font-medium">{item.job_function}</div>

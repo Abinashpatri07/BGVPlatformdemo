@@ -163,6 +163,8 @@ function CandidateTable() {
   const [selectedRows, setSelectedRows] = useState([]);
   const [showAssignVerificationModal, setShowAssignVerificationModal] = useState(false);
   const [assignVerificationCandidate, setAssignVerificationCandidate] = useState(null);
+  const [showAssignHrModal, setShowAssignHrModal] = useState(false);
+  const [assignHrCandidate, setAssignHrCandidate] = useState(null);
 
   const menuRefs = useRef([]);
 
@@ -228,18 +230,66 @@ function CandidateTable() {
         />
       )}
 
-      {/* ── ASSIGN VERIFICATION MODAL (includes success state) ── */}
-      {showAssignVerificationModal && (
-        <AssignVerificationModal
-          candidate={assignVerificationCandidate}
-          onClose={() => {
-            setShowAssignVerificationModal(false);
-            setAssignVerificationCandidate(null);
-          }}
-          onAssign={(candidate) => {
-            console.log("Assigned for verification:", candidate);
-          }}
-        />
+      {/* ── ASSIGN HR SUCCESS MODAL ── */}
+      {showAssignHrModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
+          <div className="bg-white rounded-2xl w-96 overflow-hidden shadow-2xl text-center">
+
+            {/* INDIGO HEADER */}
+            <div className="relative bg-indigo-600 flex items-center justify-center" style={{ height: "170px" }}>
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "-1px",
+                  left: "-10%",
+                  width: "120%",
+                  height: "50px",
+                  backgroundColor: "white",
+                  borderRadius: "50% 50% 0 0 / 100% 100% 0 0",
+                }}
+              />
+              <div
+                className="relative flex items-center justify-center"
+                style={{
+                  width: "68px",
+                  height: "68px",
+                  backgroundColor: "rgba(255,255,255,0.2)",
+                  borderRadius: "16px",
+                  marginBottom: "20px",
+                }}
+              >
+                <svg width="38" height="38" viewBox="0 0 24 24" fill="none">
+                  <circle cx="9" cy="7" r="4" fill="white" />
+                  <path d="M2 20c0-4 3-7 7-7h4c4 0 7 3 7 7" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none" />
+                  <path d="M19 8l1.5 1.5L23 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            </div>
+
+            {/* BODY */}
+            <div className="px-8 pt-2 pb-8">
+              <h2 className="text-lg font-bold text-indigo-600 mb-2">
+                HR Assigned Successfully!
+              </h2>
+              <p className="text-sm text-gray-500 mb-6">
+                <span className="font-semibold text-gray-700">
+                  {assignHrCandidate?.name || `${assignHrCandidate?.first_name || ""} ${assignHrCandidate?.last_name || ""}`.trim()}
+                </span>
+                {" "}has been successfully assigned to an HR for verification.
+              </p>
+              <button
+                onClick={() => {
+                  setShowAssignHrModal(false);
+                  setAssignHrCandidate(null);
+                }}
+                className="border border-indigo-500 text-indigo-600 hover:bg-indigo-50 px-10 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer"
+              >
+                Okay
+              </button>
+            </div>
+
+          </div>
+        </div>
       )}
 
       {/* ── EMAIL SUCCESS MODAL ── */}
@@ -355,9 +405,10 @@ function CandidateTable() {
                 />
               </th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Candidate ID</th>
-              <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Case ID</th>
+              <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Date</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Name</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Phone</th>
+              <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Assigned HR</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Progress</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Status</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-center w-20">Action</th>
@@ -381,7 +432,15 @@ function CandidateTable() {
                 </td>
 
                 <td className="px-5 py-2.5 text-sm text-gray-700">{item.candidateId}</td>
-                <td className="px-5 py-2.5 text-sm text-gray-700">{item.caseId}</td>
+
+                <td className="px-5 py-2.5">
+                  <div className="text-sm text-gray-700 font-medium">
+                    {item.created_at ? new Date(item.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-0.5">
+                    {item.created_at ? new Date(item.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true }) : ""}
+                  </div>
+                </td>
 
                 <td className="px-5 py-2.5">
                   <div className="font-semibold text-[15px] text-gray-900 leading-5">{item.name}</div>
@@ -389,6 +448,15 @@ function CandidateTable() {
                 </td>
 
                 <td className="px-5 py-2.5 text-sm text-gray-700">{item.phone}</td>
+
+                <td className="px-5 py-2.5">
+                  {item.assigned_hr ? (
+                    <>
+                      <div className="text-sm text-gray-800 font-medium">{item.assigned_hr.name}</div>
+                      <div className="text-xs text-gray-400 mt-0.5">{item.assigned_hr.email}</div>
+                    </>
+                  ) : null}
+                </td>
 
                 <td className="px-5 py-2.5">
                   <div className="flex items-center gap-3">

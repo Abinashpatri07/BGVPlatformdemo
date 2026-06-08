@@ -1,9 +1,7 @@
-// src/components/clientAdmin/hr/HRForm.jsx
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-// ── Success Modal (View page) ───────────────────────────────────
+// ── Success Modal ───────────────────────────────────────
 function SuccessModal({ onDone }) {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -22,8 +20,12 @@ function SuccessModal({ onDone }) {
 
         {/* Content */}
         <div className="px-6 py-5">
-          <h2 className="text-lg font-semibold text-gray-900 mb-1">Submitted Successfully</h2>
-          <p className="text-sm text-gray-500 mb-5">Your Information Has Been Submitted Successfully.</p>
+          <h2 className="text-lg font-semibold text-gray-900 mb-1">
+            Submitted Successfully
+          </h2>
+          <p className="text-sm text-gray-500 mb-5">
+            Your Information Has Been Submitted Successfully.
+          </p>
           <button
             onClick={onDone}
             className="bg-green-500 hover:bg-green-600 text-white px-10 py-2.5 rounded-xl text-sm font-medium transition"
@@ -37,7 +39,7 @@ function SuccessModal({ onDone }) {
   );
 }
 
-// ── Confirm Modal (Edit page) ───────────────────────────────────
+// ── Confirm Modal ───────────────────────────────────────
 function ConfirmModal({ onBack, onSubmit }) {
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -79,39 +81,38 @@ function ConfirmModal({ onBack, onSubmit }) {
   );
 }
 
-// ── Main Form ───────────────────────────────────────────────────
+// ── Main Form ───────────────────────────────────────────
 function HRForm({ mode = "view" }) {
   const navigate = useNavigate();
   const isView = mode === "view";
 
-  const [showSuccess, setShowSuccess] = useState(false); // view page
-  const [showConfirm, setShowConfirm] = useState(false); // edit page
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  // VIEW: "Done" button → show success modal
-  const handleDoneClick = () => setShowSuccess(true);
+  // VIEW — Done button
+  const handleDoneClick = () => navigate("/admin/hr");
 
-  // VIEW: "Done" inside success modal → redirect to HR list
-  const handleSuccessDone = () => navigate("/admin/hr"); // adjust route
+  // VIEW — Done inside success modal
+  const handleSuccessDone = () => navigate("/admin/hr");
 
-  // EDIT: "Submit" button → show confirm modal
+  // EDIT — Submit button → show confirm
   const handleSubmitClick = () => setShowConfirm(true);
 
-  // EDIT: "Back" inside confirm modal → close, stay on form
+  // EDIT — Back inside confirm modal
   const handleConfirmBack = () => setShowConfirm(false);
 
-  // EDIT: "Submit" inside confirm modal → API call → redirect
+  // EDIT — Submit inside confirm → show success
   const handleConfirmSubmit = () => {
-    // your API call here
     setShowConfirm(false);
-    navigate("/admin/hr"); // adjust route
+    setShowSuccess(true);
   };
 
   return (
     <>
-      {/* View page modal */}
+      {/* SUCCESS MODAL */}
       {showSuccess && <SuccessModal onDone={handleSuccessDone} />}
 
-      {/* Edit page modal */}
+      {/* CONFIRM MODAL */}
       {showConfirm && (
         <ConfirmModal
           onBack={handleConfirmBack}
@@ -202,14 +203,6 @@ function HRForm({ mode = "view" }) {
           />
         </div>
 
-        {/* NOTE */}
-        {/* <div className="bg-[#ECECFF] border border-indigo-300 rounded-xl p-3 mb-5">
-          <p className="text-xs text-gray-700 leading-5">
-            <span className="font-semibold">Note:</span>{" "}
-            The HR will be notified via email if login credentials or access permissions are updated.
-          </p>
-        </div> */}
-
         {/* BUTTONS */}
         <div className="flex justify-end gap-3">
           <button
@@ -219,11 +212,11 @@ function HRForm({ mode = "view" }) {
             {isView ? "Back" : "Cancel"}
           </button>
           <button
-            onClick={isView ? handleDoneClick : handleSubmitClick}
-            className="bg-[#02027A] hover:bg-[#00005E] text-white px-8 py-2.5 rounded-xl text-sm font-medium transition"
-          >
-            {isView ? "Done" : "Submit"}
-          </button>
+  onClick={isView ? handleDoneClick : handleSubmitClick}
+  className="bg-[#02027A] hover:bg-[#00005E] text-white px-8 py-2.5 rounded-xl text-sm font-medium transition"
+>
+  {isView ? "Done" : "Submit"}
+</button>
         </div>
 
       </div>

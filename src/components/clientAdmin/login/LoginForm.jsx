@@ -2,79 +2,153 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+/* ── LOGIN POPUP ─────────────────────────────────────────── */
+function LoginPopup({ type, message, onClose }) {
+  const isSuccess = type === "success";
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
+      <div className="bg-white rounded-2xl shadow-2xl w-80 overflow-hidden text-center">
+
+        {/* Header */}
+        <div
+          className={`relative flex items-center justify-center ${
+            isSuccess ? "bg-green-500" : "bg-red-500"
+          }`}
+          style={{ height: "160px" }}
+        >
+          {/* Concave bottom curve */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: "-1px",
+              left: "-10%",
+              width: "120%",
+              height: "50px",
+              backgroundColor: "white",
+              borderRadius: "50% 50% 0 0 / 100% 100% 0 0",
+            }}
+          />
+          {/* Icon */}
+          <div
+            className="relative flex items-center justify-center"
+            style={{
+              width: "68px",
+              height: "68px",
+              backgroundColor: "rgba(255,255,255,0.25)",
+              borderRadius: "16px",
+              marginBottom: "20px",
+            }}
+          >
+            {isSuccess ? (
+              /* Checkmark */
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M5 13l4 4L19 7"
+                  stroke="white"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            ) : (
+              /* X mark */
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M6 6l12 12M18 6L6 18"
+                  stroke="white"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            )}
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="px-8 pt-2 pb-8">
+          <h2
+            className={`text-lg font-bold mb-2 ${
+              isSuccess ? "text-green-600" : "text-red-500"
+            }`}
+          >
+            {isSuccess ? "Login Successful!" : "Login Failed"}
+          </h2>
+          <p className="text-sm text-gray-500 mb-6">{message}</p>
+          {!isSuccess && (
+            <button
+              onClick={onClose}
+              className="border border-red-400 text-red-500 hover:bg-red-50 px-10 py-2 rounded-xl text-sm font-semibold transition cursor-pointer"
+            >
+              Try Again
+            </button>
+          )}
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+/* ── CLIENT ADMIN LOGIN FORM ─────────────────────────────── */
 export default function LoginForm() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
+  const [popup, setPopup]       = useState(null); // { type, message }
 
   const handleLogin = () => {
-    const dummyEmail = "magnesh@gmail.com";
+    const dummyEmail    = "magnesh@gmail.com";
     const dummyPassword = "123456";
 
+    if (!email || !password) {
+      setPopup({ type: "error", message: "Please enter email and password." });
+      return;
+    }
+
     if (email === dummyEmail && password === dummyPassword) {
-      // ✅ Store role
       localStorage.setItem("role", "admin");
-
-      // ✅ Store user info
-     localStorage.setItem(
+      localStorage.setItem(
         "user",
-        JSON.stringify({
-          name: "Magnesh Shamal",
-          email: "magnesh@gmail.com",
-          role: "Client Admin",
-        })
+        JSON.stringify({ name: "Magnesh Shamal", email: "magnesh@gmail.com", role: "Client Admin" })
       );
-
-      // ✅ Redirect to admin dashboard
-      navigate("/admin/home");
+      setPopup({ type: "success", message: "Welcome back, Magnesh Shamal!" });
+      setTimeout(() => navigate("/admin/home"), 1500);
+    } else if (email === dummyEmail && password !== dummyPassword) {
+      setPopup({ type: "error", message: "Incorrect password. Please try again." });
     } else {
-      alert("Invalid email or password");
+      setPopup({ type: "error", message: "Invalid email or password." });
     }
   };
 
 //   const handleLogin = async () => {
-
 //   try {
-
 //     const response = await axios.post(
 //       "http://localhost:5000/api/client-admin/auth/login",
-//       {
-//         email,
-//         password,
-//       }
+//       { email, password }
 //     );
-
 //     console.log(response.data);
-
-//     localStorage.setItem(
-//       "role",
-//       "admin"
-//     );
-
-//     localStorage.setItem(
-//       "user",
-//       JSON.stringify({
-//         email,
-//         role: "Client Admin",
-//       })
-//     );
-
+//     localStorage.setItem("role", "admin");
+//     localStorage.setItem("user", JSON.stringify({ email, role: "Client Admin" }));
 //     navigate("/admin/home");
-
 //   } catch (error) {
-
 //     console.log(error);
-
-//     alert(
-//       error.response?.data?.message ||
-//       "Invalid email or password"
-//     );
+//     alert(error.response?.data?.message || "Invalid email or password");
 //   }
 // };
 
   return (
     <div className="relative z-10 w-full max-w-sm px-8">
+
+      {/* POPUP */}
+      {popup && (
+        <LoginPopup
+          type={popup.type}
+          message={popup.message}
+          onClose={() => setPopup(null)}
+        />
+      )}
 
       <h1 className="text-4xl font-black text-center tracking-widest uppercase text-gray-900 mb-1">
         Welcome
@@ -117,7 +191,6 @@ export default function LoginForm() {
           <input type="checkbox" />
           Remember me
         </label>
-
         <button
           onClick={() => navigate("/forgot-password")}
           className="text-sm text-gray-500 hover:text-indigo-600"
@@ -138,6 +211,7 @@ export default function LoginForm() {
         Don't have an account?{" "}
         <span className="text-indigo-500 cursor-pointer">Sign up</span>
       </p>
+
     </div>
   );
 }

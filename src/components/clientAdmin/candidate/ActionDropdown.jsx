@@ -1,11 +1,11 @@
 import {
   Eye, Pencil, Mail, PauseCircle,
-  XCircle, UserPlus, ShieldCheck, ClipboardList,
+  XCircle, UserPlus, ClipboardList,
 } from "lucide-react";
 
 function ActionDropdown({
   onView, onEdit, onEmail, onAssignHr,
-  onAuditLog, onAssignVerification, onHold, onReject,
+  onAuditLog, onHold, onReject,
 }) {
 
   const handleClick = (callback) => (e) => {
@@ -32,9 +32,6 @@ function ActionDropdown({
       </button>
       <button onClick={handleClick(onAuditLog)} className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition">
         <ClipboardList size={16} /> Audit Log
-      </button>
-      <button onClick={handleClick(onAssignVerification)} className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-green-50 text-sm text-green-700 transition">
-        <ShieldCheck size={16} /> Assign Verification
       </button>
       <button onClick={handleClick(onHold)} className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-yellow-50 text-sm text-yellow-600 transition">
         <PauseCircle size={16} /> On Hold
