@@ -28,7 +28,7 @@ export const adminMenu = [
   activePaths: [
     "/admin/candidates",
     "/admin/create-candidate",
-    "/admin/view",
+    "/admin/view/",
     "/admin/edit-candidate",
     "/admin/candidate-details",
   ],

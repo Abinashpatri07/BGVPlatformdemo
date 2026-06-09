@@ -11,6 +11,8 @@ const BulkUpload = () => {
   const [showTable, setShowTable] = useState(false);
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [uploadResult, setUploadResult] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const data = [
     {
@@ -44,6 +46,13 @@ const BulkUpload = () => {
   ];
 
   const handleClick = () => fileRef.current.click();
+
+  const handleReset = () => {
+    setFile(null);
+    setShowTable(false);
+    setUploadResult(null);
+    setUploadError(false);
+  };
 
   const validateAndSetFile = (selectedFile) => {
     if (!selectedFile) return;
@@ -113,7 +122,6 @@ const BulkUpload = () => {
           total: res.data.totalRecords,
           skippedList: res.data.skippedList || [],
         });
-        setShowTable(false);
       }
       */
 
@@ -125,7 +133,6 @@ const BulkUpload = () => {
           total: data.length,
           skippedList: [],
         });
-        setShowTable(false);
         setUploading(false);
       }, 800);
   };
@@ -153,17 +160,15 @@ const BulkUpload = () => {
           </p>
         </div>
 
-        {!showTable && (
-          <>
-            {/* ================= RESULT MODAL ================= */}
+        {/* ================= RESULT MODAL ================= */}
         {uploadResult && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-9999">
             <div className="bg-white rounded-3xl p-8 w-100 text-center shadow-xl">
               <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle size={36} className="text-green-500" />
               </div>
               <h3 className="text-[#01026E] font-bold text-xl mb-2">
-                Success!
+                {uploadResult.created} Successful Candidates Added
               </h3>
               <p className="text-gray-600 text-sm mb-6">
                 Candidates Uploaded Successfully! ✅
@@ -180,6 +185,9 @@ const BulkUpload = () => {
             </div>
           </div>
         )}
+
+        {!showTable && (
+          <>
             {/* FIRST TIME UPLOADING */}
             <div className="flex items-center justify-between bg-indigo-50 border border-indigo-100 rounded-2xl px-5 py-3">
               <div className="flex items-center gap-3">
@@ -454,8 +462,12 @@ const BulkUpload = () => {
                 Back
               </button>
 
-              <button className="px-7 py-3 bg-[#01026E] text-white rounded-xl text-base hover:bg-[#02038a] transition font-medium">
-                Upload
+              <button 
+                onClick={handleUpload}
+                disabled={uploading}
+                className="px-7 py-3 bg-[#01026E] text-white rounded-xl text-base hover:bg-[#02038a] transition font-medium disabled:opacity-60"
+              >
+                {uploading ? "Uploading..." : "Upload"}
               </button>
             </div>
           </div>

@@ -13,6 +13,37 @@ const BulkUpload = () => {
   const [parsedData, setParsedData] = useState([]);
   const [downloading, setDownloading] = useState(false);
 
+  const data = [
+    {
+      name: "Padmini Gupta",
+      phone: "+91 9854713254",
+      email: "padmini457@gmail.com",
+      function: "IT",
+      tag: "May Batch",
+    },
+    {
+      name: "Kamlesh Desai",
+      phone: "+91 9854713254",
+      email: "kamesh54@gmail.com",
+      function: "IT",
+      tag: "May Batch",
+    },
+    {
+      name: "Puja Rani",
+      phone: "+91 9854713254",
+      email: "puja475@gmail.com",
+      function: "Marketing",
+      tag: "May Batch",
+    },
+    {
+      name: "Deepak Nath",
+      phone: "+91 9854713254",
+      email: "deepak54@gmail.com",
+      function: "Sales",
+      tag: "June Batch",
+    },
+  ];
+
   // Upload result state
   const [uploading, setUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState(null); // { created, skipped, skippedList }
@@ -97,6 +128,7 @@ const BulkUpload = () => {
   const handleNext = () => {
     if (!file) return;
     setShowTable(true);
+    setShowDuplicateModal(true);
   };
 
   /* ─── UPLOAD TO API ─── */
@@ -129,12 +161,11 @@ const BulkUpload = () => {
       // Mocking a successful response
       setTimeout(() => {
         setUploadResult({
-          created: parsedData.length,
+          created: data.length,
           skipped: 0,
-          total: parsedData.length,
+          total: data.length,
           skippedList: [],
         });
-        setShowTable(false);
         setUploading(false);
       }, 800);
     } catch (err) {
@@ -174,13 +205,13 @@ const BulkUpload = () => {
 
         {/* ================= RESULT MODAL ================= */}
         {uploadResult && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
             <div className="bg-white rounded-3xl p-8 w-[400px] text-center shadow-xl">
               <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle size={36} className="text-green-500" />
               </div>
               <h3 className="text-[#01026E] font-bold text-xl mb-2">
-                Success!
+                {uploadResult.created} Successful Candidates Added
               </h3>
               <p className="text-gray-600 text-sm mb-6">
                 Candidates Uploaded Successfully! ✅
@@ -337,34 +368,76 @@ const BulkUpload = () => {
         )}
 
         {/* TABLE PREVIEW */}
-        {showTable && !uploadResult && (
+        {showTable && (
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
             <div className="px-5 pt-5 pb-3 text-base text-gray-500 border-b border-gray-100 flex items-center justify-between">
-              <span>Total Records: <strong className="text-gray-700">{parsedData.length}</strong></span>
+              <span>Total Records: <strong className="text-gray-700">{data.length}</strong></span>
               <span className="text-sm text-gray-400">{file?.name}</span>
             </div>
 
             <div className="overflow-x-auto max-h-[500px]">
               <table className="w-full text-base">
+
                 <thead className="bg-gray-50 text-gray-500 text-sm uppercase tracking-wide sticky top-0">
                   <tr>
-                    <th className="px-5 py-4 w-10 text-left">#</th>
-                    {columns.map((col) => (
-                      <th key={col} className="px-5 py-4 text-left whitespace-nowrap">
-                        {col}
+                    <th className="px-5 py-4 w-10">
+                      <input
+                        type="checkbox"
+                        className="accent-[#01026E]"
+                      />
+                    </th>
+
+                    {[
+                      "Name",
+                      "Phone",
+                      "E-Mail",
+                      "Function",
+                      "Tag",
+                    ].map((h) => (
+                      <th
+                        key={h}
+                        className="px-5 py-4 text-left"
+                      >
+                        {h}
                       </th>
                     ))}
                   </tr>
                 </thead>
+
                 <tbody className="divide-y divide-gray-100">
-                  {parsedData.map((row, i) => (
-                    <tr key={i} className="hover:bg-gray-50 transition">
-                      <td className="px-5 py-4 text-gray-400 text-sm">{i + 1}</td>
-                      {columns.map((col) => (
-                        <td key={col} className="px-5 py-4 text-gray-600 whitespace-nowrap">
-                          {String(row[col] ?? "")}
-                        </td>
-                      ))}
+                  {data.map((item, i) => (
+                    <tr
+                      key={i}
+                      className="hover:bg-gray-50 transition"
+                    >
+                      <td className="px-5 py-4">
+                        <input
+                          type="checkbox"
+                          className="accent-[#01026E]"
+                        />
+                      </td>
+
+                      <td className="px-5 py-4 text-gray-800">
+                        {item.name}
+                      </td>
+
+                      <td className="px-5 py-4 text-gray-600">
+                        {item.phone}
+                      </td>
+
+                      <td className="px-5 py-4 text-gray-600">
+                        {item.email}
+                      </td>
+
+                      <td className="px-5 py-4 text-gray-600">
+                        {item.function}
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <span className="bg-blue-50 text-blue-700 text-sm px-3 py-1 rounded-full">
+                          {item.tag}
+                        </span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -391,6 +464,37 @@ const BulkUpload = () => {
         )}
 
       </div>
+
+      {/* MODAL */}
+      {showTable && showDuplicateModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
+          <div className="bg-white rounded-3xl p-8 w-[430px] text-center shadow-xl">
+            <div className="w-14 h-14 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-4">
+              <span className="text-orange-500 text-2xl">⚠</span>
+            </div>
+            <h3 className="text-[#01026E] font-semibold text-xl mb-2">
+              10 Duplicate Records Found
+            </h3>
+            <p className="text-sm text-gray-500 mb-6">
+              Some candidate data is already registered. You can remove duplicates and continue.
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setShowDuplicateModal(false)}
+                className="px-6 py-3 border border-gray-300 rounded-xl text-base text-gray-700 hover:bg-gray-100 transition font-medium"
+              >
+                Back
+              </button>
+              <button
+                onClick={() => setShowDuplicateModal(false)}
+                className="px-6 py-3 bg-[#01026E] text-white rounded-xl text-base hover:bg-[#02038a] transition font-medium"
+              >
+                Delete Duplicate Records
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

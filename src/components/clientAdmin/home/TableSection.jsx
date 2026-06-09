@@ -102,11 +102,11 @@ function TableSection({ isToolBarRequired }) {
             </th>
 
             <th className="px-4 py-4 text-left font-semibold">
-              Status
+              Phone
             </th>
 
             <th className="px-4 py-4 text-left font-semibold">
-              Phone
+              Status
             </th>
 
             <th className="px-4 py-4 text-center font-semibold">
