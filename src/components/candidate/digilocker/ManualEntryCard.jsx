@@ -21,13 +21,21 @@ export default function ManualEntryCard({ onStart }) {
         </p>
       </div>
 
-      {/* CTA Button */}
-      <button
-        onClick={onStart}
-        className="w-full bg-linear-to-r bg-[#05058D] text-white text-sm font-semibold py-3 rounded-xl shadow-md hover:opacity-90 transition-all mt-4"
-      >
-        Start Manual Entry
-      </button>
+      <div>
+        {/* CTA Button */}
+        <button
+          onClick={onStart}
+          className="w-full bg-linear-to-r bg-[#05058D] text-white text-sm font-semibold py-3 rounded-xl shadow-md hover:opacity-90 transition-all mt-8"
+        >
+          Start Manual Entry
+        </button>
+
+        {/* Invisible spacer to perfectly align with the DigiLocker card */}
+        <p className="text-center text-xs mt-4 invisible">
+          Trusted digital verification, powered by{" "}
+          <span className="font-medium">DigiLocker</span>
+        </p>
+      </div>
     </div>
   );
 }

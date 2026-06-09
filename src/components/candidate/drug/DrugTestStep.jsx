@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { AlertCircle, Upload } from "lucide-react";
+import { AlertCircle, Upload, CheckCircle } from "lucide-react";
 import DrugHeader from "./DrugHeader";
 import DrugQuestion from "./DrugQuestion";
 
@@ -114,29 +114,48 @@ function DrugTestStep({ onNext }) {
 
             <div
               onClick={() => fileRef.current.click()}
-              className="border-2 border-dashed border-[#8B8CFF] rounded-2xl bg-[#F7F7FF] p-8 text-center cursor-pointer hover:bg-[#eef0ff]"
+              className="border-2 border-dashed border-[#C3C6F5] rounded-2xl bg-[#F4F7FE] hover:bg-[#eef0fc] h-64 flex flex-col items-center justify-center cursor-pointer transition"
             >
-              <div className="flex justify-center mb-3">
-                <div className="w-12 h-12 rounded-xl bg-cyan-200 flex items-center justify-center">
-                  <Upload size={22} className="text-blue-700" />
-                </div>
-              </div>
-
               {file ? (
                 <>
-                  <p className="text-[#05058D] font-medium">
-                    Document upload successfully
+                  <div className="w-20 h-20 flex items-center justify-center rounded-full bg-blue-100 mb-4">
+                    <CheckCircle size={36} className="text-blue-600" />
+                  </div>
+                  <p className="text-[#01026E] font-semibold text-sm">
+                    Document uploaded successfully
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-400 mt-1">
                     {file.name}
                   </p>
                 </>
               ) : (
                 <>
-                  <p className="text-[#05058D] font-medium">
-                    Click here to upload
+                  <div className="w-20 h-20 rounded-full bg-[#E0EEFF] flex items-center justify-center mb-5">
+                    <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M6 14C6 11.8 7.8 10 10 10H18L21 14H34C36.2 14 38 15.8 38 18V32C38 34.2 36.2 36 34 36H10C7.8 36 6 34.2 6 32V14Z"
+                        fill="url(#folderGrad)"
+                      />
+                      <path
+                        d="M22 29V21M22 21L19 24M22 21L25 24"
+                        stroke="white"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <defs>
+                        <linearGradient id="folderGrad" x1="6" y1="10" x2="38" y2="36" gradientUnits="userSpaceOnUse">
+                          <stop stopColor="#5BB8F5" />
+                          <stop offset="1" stopColor="#1A56DB" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    <span className="text-[#01026E] font-bold">Click Here</span>{" "}
+                    to upload your File or Drag
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-400 mt-3">
                     Supported format PDF, JPG, PNG, up to 5MB
                   </p>
                 </>
