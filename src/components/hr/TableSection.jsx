@@ -14,8 +14,8 @@ import {
 
 import { useNavigate } from "react-router-dom";
 
-// ── DUMMY DATA (demo ke liye — baad mein API se replace hoga) ──
-import { tableData as dummyCandidates } from "./data/tableData";
+// ── LIVE API INTEGRATION ──
+import axios from "axios";
 
 import ActionDropdown from "../../components/hr/ActionDropdown";
 import RejectModal from "../clientAdmin/candidate/RejectModal";
@@ -153,11 +153,11 @@ function AssignVerificationModal({ candidate, onClose, onAssign }) {
 }
 
 // ── CANDIDATE TABLE ───────────────────────────────────────────────────────────
-function TableSection({ searchTerm = "", sortBy = "all" }) {
+function TableSection({ searchTerm = "", sortBy = "all", page = 1, onTotalPagesChange }) {
 
   const navigate = useNavigate();
 
-  const [candidates, setCandidates] = useState(dummyCandidates);
+  const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState("");
 
@@ -173,28 +173,31 @@ function TableSection({ searchTerm = "", sortBy = "all" }) {
 
   const menuRefs = useRef([]);
 
-  // ── LIVE API (DB ready hone par yeh use karna) ──
-  // const fetchCandidates = async () => {
-  //   try {
-  //     setLoading(true);
-  //     setFetchError("");
-  //     const response = await axios.get(
-  //       "http://localhost:5000/api/candidates/get_all_candidates"
-  //     );
-  //     if (response.data.success) {
-  //       setCandidates(response.data.candidates);
-  //     }
-  //   } catch (error) {
-  //     setFetchError("Failed to load candidates. Please try again.");
-  //     console.error(error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  // ── LIVE API ──
+  const fetchCandidates = async () => {
+    try {
+      setLoading(true);
+      setFetchError("");
+      const response = await axios.get(
+        `http://localhost:5000/api/candidates/get_all_candidates?page=${page}&limit=10`
+      );
+      if (response.data.success) {
+        setCandidates(response.data.candidates);
+        if (onTotalPagesChange && response.data.pagination) {
+          onTotalPagesChange(response.data.pagination.totalPages);
+        }
+      }
+    } catch (error) {
+      setFetchError("Failed to load candidates. Please try again.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // useEffect(() => {
-  //   fetchCandidates();
-  // }, []);
+  useEffect(() => {
+    fetchCandidates();
+  }, [page]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -335,38 +338,7 @@ function TableSection({ searchTerm = "", sortBy = "all" }) {
 
       {/* ── TABLE ── */}
       <div className="bg-white rounded-2xl border border-gray-200 overflow-visible shadow-sm">
-
-        {/* LOADING STATE */}
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <Loader2 size={36} className="text-[#4338CA] animate-spin" />
-            <p className="text-sm text-gray-400">Loading candidates...</p>
-          </div>
-        )}
-
-        {/* ERROR STATE */}
-        {!loading && fetchError && (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <p className="text-sm text-red-500">{fetchError}</p>
-          </div>
-        )}
-
-        {/* EMPTY STATE */}
-        {!loading && !fetchError && filteredCandidates.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <Users size={40} className="text-gray-300" />
-            <p className="text-sm text-gray-400">
-              {searchTerm
-                ? `No results for "${searchTerm}"`
-                : "No candidates found. Add one to get started!"}
-            </p>
-          </div>
-        )}
-
-        {/* TABLE */}
-        {!loading && !fetchError && filteredCandidates.length > 0 && (
         <table className="w-full border-collapse">
-
           <thead className="bg-[#FAFAFA] border-b border-gray-200">
             <tr>
               <th className="px-5 py-4 w-12">
@@ -392,9 +364,40 @@ function TableSection({ searchTerm = "", sortBy = "all" }) {
           </thead>
 
           <tbody>
-            {filteredCandidates.map((item, index) => {
-              const statusLabel = getStatusLabel(item.case_status);
-              return (
+            {loading ? (
+              <tr>
+                <td colSpan="9">
+                  <div className="flex flex-col items-center justify-center py-20 gap-3">
+                    <Loader2 size={36} className="text-[#4338CA] animate-spin" />
+                    <p className="text-sm text-gray-400">Loading candidates...</p>
+                  </div>
+                </td>
+              </tr>
+            ) : fetchError ? (
+              <tr>
+                <td colSpan="9">
+                  <div className="flex flex-col items-center justify-center py-20 gap-3">
+                    <p className="text-sm text-red-500">{fetchError}</p>
+                  </div>
+                </td>
+              </tr>
+            ) : filteredCandidates.length === 0 ? (
+              <tr>
+                <td colSpan="9">
+                  <div className="flex flex-col items-center justify-center py-20 gap-3">
+                    <Users size={40} className="text-gray-300" />
+                    <p className="text-sm text-gray-400">
+                      {searchTerm
+                        ? `No results for "${searchTerm}"`
+                        : "No candidates found. Add one to get started!"}
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              filteredCandidates.map((item, index) => {
+                const statusLabel = getStatusLabel(item.case_status);
+                return (
               <tr
                 key={item.cand_id}
                 className="border-b border-gray-100 hover:bg-[#FAFAFA] transition-all duration-150"
@@ -409,7 +412,7 @@ function TableSection({ searchTerm = "", sortBy = "all" }) {
                   />
                 </td>
 
-                <td className="px-5 py-2.5 text-sm text-gray-700 font-mono">{item.cand_id}</td>
+                <td className="px-5 py-2.5 text-sm text-gray-700 font-mono">{item.case_id}</td>
 
                 <td className="px-5 py-2.5">
                   <div className="text-sm text-gray-700 font-medium">
@@ -430,17 +433,21 @@ function TableSection({ searchTerm = "", sortBy = "all" }) {
                 <td className="px-5 py-2.5 text-sm text-gray-700">{item.phone}</td>
 
                 <td className="px-5 py-2.5">
-                  {item.assigned_hr ? (
-                    <>
-                      <div className="text-sm text-gray-800 font-medium">{item.assigned_hr.name}</div>
-                      <div className="text-xs text-gray-400 mt-0.5">{item.assigned_hr.email}</div>
-                    </>
-                  ) : null}
+                  <div className="text-sm text-gray-800 font-medium">
+                    {item.created_by_name && item.created_by_name !== '-' ? item.created_by_name : '—'}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-0.5">
+                    {item.created_by_role && item.created_by_role !== 'Unknown' ? item.created_by_role : ''}
+                  </div>
                 </td>
 
                 <td className="px-5 py-2.5">
-                  <div className="text-sm text-gray-700 font-medium">{item.job_function}</div>
-                  <div className="text-xs text-gray-400 mt-0.5">{item.tag}</div>
+                  <div className="text-sm text-gray-800 font-medium">
+                    {item.job_function || <span className="text-gray-300">—</span>}
+                  </div>
+                  {item.tag && (
+                    <div className="text-xs text-gray-400 mt-0.5">{item.tag}</div>
+                  )}
                 </td>
 
                 <td className="px-5 py-2.5">
@@ -503,11 +510,11 @@ function TableSection({ searchTerm = "", sortBy = "all" }) {
 
               </tr>
               );
-            })}
+            })
+          )}
           </tbody>
 
         </table>
-        )}
       </div>
 
     </>

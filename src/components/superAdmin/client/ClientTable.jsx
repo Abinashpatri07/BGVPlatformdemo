@@ -7,59 +7,10 @@ import {
   Ban,
   X,
   MailCheck,
+  Loader2,
 } from "lucide-react";
+import axios from "axios";
 
-const CLIENT_DATA = [
-  {
-    id: "CLT100245",
-    name: "Ananya Iyer",
-    email: "ananya.iyer@example.com",
-    gst: "29ABCDE1234F1Z5",
-    status: "Active",
-  },
-  {
-    id: "CLT100246",
-    name: "Advait Joshi",
-    email: "advait.joshi@mail.com",
-    gst: "27PQRSX5678L1Z2",
-    status: "Active",
-  },
-  {
-    id: "CLT100247",
-    name: "Niten Sharma",
-    email: "nitenkumar34@gmail.com",
-    gst: "07LMNOP4321K1Z8",
-    status: "In Active",
-  },
-  {
-    id: "CLT100259",
-    name: "Reyansh Reddy",
-    email: "niten.sharma@webmail.org",
-    gst: "19GHJKL9876M1Z4",
-    status: "Suspended",
-  },
-  {
-    id: "CLT100253",
-    name: "Sia Banerjee",
-    email: "sia.banerjee@example.com",
-    gst: "33ZXCVB2468N1Z7",
-    status: "In Active",
-  },
-  {
-    id: "CLT100258",
-    name: "Myra Kulkarni",
-    email: "myra.kulkarni@mail.com",
-    gst: "06ASDFG7531H1Z3",
-    status: "Active",
-  },
-  {
-    id: "CLT100250",
-    name: "Navya Sharma",
-    email: "nitenkumar34@gmail.com",
-    gst: "30QAZWS7788E1Z2",
-    status: "Active",
-  },
-];
 
 const statusStyle = {
   Active: "bg-green-100 text-green-600",
@@ -99,7 +50,7 @@ function ActionMenu({ onView, onEdit, onEmail, onSuspend }) {
 }
 
 export default function ClientTable({
-  data = CLIENT_DATA,
+  data = [],
   onView,
   onEdit,
   onEmail,
@@ -110,8 +61,11 @@ export default function ClientTable({
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showSuspendModal, setShowSuspendModal] = useState(false);
   const [showSuspendSuccess, setShowSuspendSuccess] = useState(false);
+  const [isSuspending, setIsSuspending] = useState(false);
+  const [suspendError, setSuspendError] = useState("");
   const [suspendReason, setSuspendReason] = useState("");
   const [selectedClientId, setSelectedClientId] = useState("");
+  const [selectedClientName, setSelectedClientName] = useState("");
   const menuRefs = useRef([]);
 
   useEffect(() => {
@@ -135,6 +89,28 @@ export default function ClientTable({
     );
   };
 
+  /* ── SUSPEND HANDLER ── */
+  const handleSuspendConfirm = async () => {
+    try {
+      setIsSuspending(true);
+      setSuspendError("");
+      await axios.patch(
+        `http://localhost:5000/api/client/suspend-client/${selectedClientId}`,
+        { reason: suspendReason.trim() }
+      );
+      setShowSuspendModal(false);
+      setShowSuspendSuccess(true);
+      // Notify parent to refresh the list
+      onSuspend && onSuspend({ id: selectedClientId, name: selectedClientName });
+    } catch (err) {
+      setSuspendError(
+        err.response?.data?.message || "Failed to suspend client. Please try again."
+      );
+    } finally {
+      setIsSuspending(false);
+    }
+  };
+
   return (
     <div className="bg-white border border-gray-200 rounded-2xl overflow-visible shadow-sm">
       <table className="w-full border-collapse">
@@ -149,7 +125,7 @@ export default function ClientTable({
                 className="w-4 h-4 accent-indigo-600 cursor-pointer"
               />
             </th>
-            {["Client ID", "Name", "E-Mail", "GST", "Status", "Action"].map(
+            {["Client ID", "Client Name", "GST", "POC Name", "POC Phone", "Status", "Action"].map(
               (col) => (
                 <th
                   key={col}
@@ -181,21 +157,25 @@ export default function ClientTable({
 
               {/* CLIENT ID */}
               <td className="px-5 py-3 text-sm text-gray-700 font-medium">
-                {row.id}
+                {row.displayId || row.id}
               </td>
 
-              {/* NAME */}
+              {/* CLIENT NAME */}
               <td className="px-5 py-3 text-sm text-gray-900 font-semibold">
                 {row.name}
               </td>
 
-              {/* EMAIL */}
-              <td className="px-5 py-3 text-sm text-indigo-500 font-medium">
-                {row.email}
-              </td>
-
               {/* GST */}
               <td className="px-5 py-3 text-sm text-gray-700">{row.gst}</td>
+
+              {/* POC NAME + EMAIL */}
+              <td className="px-5 py-3">
+                <div className="text-sm text-gray-900 font-semibold">{row.pocName}</div>
+                <div className="text-xs text-gray-400 mt-0.5">{row.pocEmail}</div>
+              </td>
+
+              {/* POC PHONE */}
+              <td className="px-5 py-3 text-sm text-gray-700">{row.pocPhone}</td>
 
               {/* STATUS */}
               <td className="px-5 py-3">
@@ -238,8 +218,10 @@ export default function ClientTable({
                         setOpenMenu(null);
                       }}
                       onSuspend={() => {
-                        onSuspend && onSuspend(row);
                         setSelectedClientId(row.id);
+                        setSelectedClientName(row.name || row.displayId || `CLT${row.id}`);
+                        setSuspendReason("");
+                        setSuspendError("");
                         setShowSuspendModal(true);
                         setOpenMenu(null);
                       }}
@@ -288,7 +270,7 @@ export default function ClientTable({
               “Are You Sure You Want To
               <br />
               Suspend{" "}
-              <span className="text-orange-500">{selectedClientId}</span>”
+              <span className="text-orange-500">{selectedClientName || `CLT${selectedClientId}`}</span>”
             </h2>
 
             {/* Textarea */}
@@ -313,28 +295,33 @@ export default function ClientTable({
                 onClick={() => {
                   setShowSuspendModal(false);
                   setSuspendReason("");
+                  setSuspendError("");
                 }}
-                className="bg-orange-500 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-orange-600 transition"
+                disabled={isSuspending}
+                className="bg-orange-500 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-orange-600 transition disabled:opacity-60"
               >
                 Cancel
               </button>
 
               {/* SUSPEND */}
               <button
-                disabled={suspendReason.trim() === ""}
-                onClick={() => {
-                  setShowSuspendModal(false);
-                  setShowSuspendSuccess(true);
-                }}
-                className={`px-8 py-2.5 rounded-lg font-medium transition border ${
-                  suspendReason.trim() === ""
-                    ? "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed pointer-events-none"
+                disabled={suspendReason.trim() === "" || isSuspending}
+                onClick={handleSuspendConfirm}
+                className={`px-8 py-2.5 rounded-lg font-medium transition border flex items-center gap-2 ${
+                  suspendReason.trim() === "" || isSuspending
+                    ? "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
                     : "border-orange-400 text-orange-500 hover:bg-orange-50"
                 }`}
               >
-                Suspend
+                {isSuspending && <Loader2 size={14} className="animate-spin" />}
+                {isSuspending ? "Suspending..." : "Suspend"}
               </button>
             </div>
+
+            {/* Error */}
+            {suspendError && (
+              <p className="text-center text-sm text-red-500 mt-4">{suspendError}</p>
+            )}
           </div>
         </div>
       )}
@@ -354,9 +341,9 @@ export default function ClientTable({
             {/* CONTENT */}
             <div className="px-8 pt-7 pb-8 text-center">
               <h2 className="text-[24px] font-bold text-orange-500 leading-snug">
-                “{selectedClientId}”
+                "{selectedClientName || `CLT${selectedClientId}`}"
                 <br />
-                Suspend Successfully
+                Suspended Successfully
               </h2>
 
               {/* BUTTON */}
@@ -364,6 +351,8 @@ export default function ClientTable({
                 onClick={() => {
                   setShowSuspendSuccess(false);
                   setSuspendReason("");
+                  // Re-fetch to guarantee stats cards are up-to-date
+                  onSuspend && onSuspend({ id: selectedClientId, name: selectedClientName });
                 }}
                 className="mt-8 border border-orange-400 text-orange-500 px-10 py-2.5 rounded-xl font-medium hover:bg-orange-50 transition"
               >

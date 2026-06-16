@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Building2, UserCircle, CreditCard } from "lucide-react";
+import { Building2, UserCircle, CreditCard, CheckCircle2 } from "lucide-react";
 import axios from "axios";
 
 function Field({ label, required, hint, error, children }) {
@@ -16,7 +16,7 @@ function Field({ label, required, hint, error, children }) {
 }
 
 const inputCls =
-  "w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-800 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 transition placeholder-gray-300";
+  "w-full px-4 py-2.5 bg-[#F8FAFF] border border-[#B3C9FF] rounded-xl outline-none focus:ring-2 focus:ring-indigo-400 transition placeholder-gray-400 text-gray-700";
 
 const PLANS = [
   { id: "starter", name: "Starter Identity", description: "100 Units • Basic Checks", popular: false },
@@ -35,13 +35,15 @@ export default function CreateClientForm({ onSubmit, onCancel }) {
     state: "",
     pinCode: "",
     country: "",
-    fullName: "",
+    firstName: "",
+    lastName: "",
     email: "",
     phone: "",
     plan: "standard",
   });
 
   const [errors, setErrors] = useState({});
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const handle = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -78,19 +80,12 @@ const handleSubmit = async () => {
 
   try {
 
-    const fullPhone = `+91${form.phone}`;
-
-    const finalData = {
-      ...form,
-      phone: fullPhone,
-    };
-
     const response = await axios.post(
       "http://localhost:5000/api/client/create-client",
-      finalData
+      form
     );
 
-    alert(response.data.message);
+    setShowSuccessModal(true);
 
     console.log(response.data);
 
@@ -105,7 +100,8 @@ const handleSubmit = async () => {
       state: "",
       pinCode: "",
       country: "",
-      fullName: "",
+      firstName: "",
+      lastName: "",
       email: "",
       phone: "",
       plan: "standard",
@@ -198,25 +194,35 @@ const handleSubmit = async () => {
             <h2 className="text-base font-bold text-gray-900">Primary Contact Person</h2>
           </div>
           <div className="flex flex-col gap-4">
-            <Field label="Full Name" required error={errors.fullName}>
-              <input className={inputCls} placeholder="Manav Joshi"
-                value={form.fullName} onChange={handle("fullName")} />
-            </Field>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="First Name" required error={errors.firstName}>
+                <input className={inputCls} placeholder="Manav"
+                  value={form.firstName} onChange={handle("firstName")} />
+              </Field>
+              <Field label="Last Name" required error={errors.lastName}>
+                <input className={inputCls} placeholder="Joshi"
+                  value={form.lastName} onChange={handle("lastName")} />
+              </Field>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <Field label="Contact Email" required error={errors.email}>
                 <input className={inputCls} placeholder="manav.joshi@example.com"
                   value={form.email} onChange={handle("email")} />
               </Field>
               <Field label="Phone Number" required error={errors.phone} hint="Must be a unique active number.">
-                <div className="flex">
-                  <span className="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-gray-200 bg-gray-50 text-sm text-gray-600">
+                <div className="flex items-center">
+                  <span className="px-4 py-2.5 bg-[#F8FAFF] border border-[#B3C9FF] border-r-0 rounded-l-xl text-gray-500 text-sm">
                     +91
                   </span>
                   <input
-                    className="flex-1 border border-gray-200 rounded-r-xl px-4 py-2.5 text-sm text-gray-800 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 transition placeholder-gray-300"
+                    className="w-full px-4 py-2.5 bg-[#F8FAFF] border border-[#B3C9FF] rounded-r-xl outline-none focus:ring-2 focus:ring-indigo-400 transition placeholder-gray-400 text-gray-700"
                     placeholder="8485214690"
+                    maxLength={10}
                     value={form.phone}
                     onChange={handle("phone")}
+                    onInput={(e) => {
+                      e.target.value = e.target.value.replace(/\D/g, "");
+                    }}
                   />
                 </div>
               </Field>
@@ -310,9 +316,33 @@ const handleSubmit = async () => {
           onClick={handleSubmit}
           className="bg-indigo-700 text-white text-sm font-semibold px-8 py-2.5 rounded-xl hover:bg-indigo-800 transition cursor-pointer shadow-sm"
         >
-          Complete Registration
+          Create Client
         </button>
       </div>
+
+      {/* SUCCESS MODAL */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-[400px] bg-white rounded-2xl shadow-2xl p-8 text-center flex flex-col items-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+              <CheckCircle2 size={32} className="text-green-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Success!</h2>
+            <p className="text-gray-500 text-sm mb-8">
+              The client has been successfully created.
+            </p>
+            <button
+              onClick={() => {
+                setShowSuccessModal(false);
+                if (onSubmit) onSubmit();
+              }}
+              className="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl hover:bg-indigo-700 transition cursor-pointer"
+            >
+              Okay
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

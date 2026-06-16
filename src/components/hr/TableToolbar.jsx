@@ -6,7 +6,34 @@ import {
   Upload,
   FileText,
   Loader2,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
+
+function ExportPopup({ type, message, onClose }) {
+  const isSuccess = type === "success";
+
+  return (
+    <div className="fixed top-6 right-6 z-[9999] animate-[fadeIn_0.3s_ease-out]">
+      <div className={`flex items-center gap-4 px-6 py-4 rounded-xl shadow-lg border-l-4 ${
+        isSuccess ? "bg-green-50 border-green-500 text-green-700" : "bg-red-50 border-red-500 text-red-700"
+      }`}>
+        {isSuccess ? (
+          <CheckCircle className="w-6 h-6 text-green-500 flex-shrink-0" />
+        ) : (
+          <XCircle className="w-6 h-6 text-red-500 flex-shrink-0" />
+        )}
+        <div className="flex flex-col">
+          <span className="font-bold">{isSuccess ? "Export Successful" : "Export Failed"}</span>
+          <span className="text-sm">{message}</span>
+        </div>
+        <button onClick={onClose} className="ml-4 text-gray-400 hover:text-gray-600 transition">
+          ✕
+        </button>
+      </div>
+    </div>
+  );
+}
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import jsPDF from "jspdf";
@@ -22,6 +49,7 @@ function TableToolbar({
   const [showExportModal, setShowExportModal] = useState(false);
   const [selectedType, setSelectedType] = useState("csv");
   const [exporting, setExporting] = useState(false);
+  const [popup, setPopup] = useState(null);
   const dropdownRef = useRef();
 
   // Close on outside click
@@ -139,7 +167,9 @@ function TableToolbar({
     try {
       const candidates = await fetchForExport();
       if (candidates.length === 0) {
-        alert("No candidates to export.");
+        setPopup({ type: "error", message: "No candidates to export." });
+        setExporting(false);
+        setTimeout(() => setPopup(null), 3000);
         return;
       }
       if (selectedType === "csv") {
@@ -148,15 +178,25 @@ function TableToolbar({
         exportPDF(candidates);
       }
       setShowExportModal(false);
+      setPopup({ type: "success", message: `Successfully exported ${candidates.length} candidates.` });
     } catch (err) {
-      alert("Export failed. Please try again.");
+      setPopup({ type: "error", message: "Export failed. Please try again." });
     } finally {
       setExporting(false);
+      setTimeout(() => setPopup(null), 3000);
     }
   };
 
   return (
-    <div className="flex justify-between items-center mb-1 flex-wrap gap-3">
+    <>
+      {popup && (
+        <ExportPopup
+          type={popup.type}
+          message={popup.message}
+          onClose={() => setPopup(null)}
+        />
+      )}
+      <div className="flex justify-between items-center mb-1 flex-wrap gap-3">
 
       {/* ── LEFT SIDE ── */}
       <div className="flex gap-2 flex-wrap items-center">
@@ -189,7 +229,7 @@ function TableToolbar({
       <div className="flex items-center gap-3">
 
         {/* Search */}
-        <div className="flex items-center bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition">
+        <div className="flex items-center bg-white border border-gray-300 hover:border-gray-400 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 px-3 py-2 rounded-lg transition">
           <input
             type="text"
             value={searchTerm}
@@ -279,6 +319,7 @@ function TableToolbar({
 
       </div>
     </div>
+    </>
   );
 }
 

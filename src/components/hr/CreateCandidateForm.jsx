@@ -3,6 +3,7 @@ import axios from "axios";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle } from "lucide-react";
+import PageHeader from "./PageHeader";
 
 function CreateCandidateForm() {
   const navigate = useNavigate();
@@ -30,7 +31,6 @@ function CreateCandidateForm() {
     setGeneralError("");
 
     try {
-      /* === FOR DEMO: BACKEND BYPASSED ===
       // TODO: createdById ko auth/session se lo — abhi hardcoded
       const createdById = 1; // logged-in HR ka users_id
 
@@ -44,14 +44,10 @@ function CreateCandidateForm() {
       );
 
       if (response.data.success) {
-      */
-
-      // Mocking a successful response after a small delay
-      setTimeout(() => {
         setSuccessMessage("Candidate Created Successfully! ✅");
         reset();
         setTimeout(() => navigate("/hr/home"), 2000);
-      }, 500);
+      }
 
     } catch (error) {
       const errData = error.response?.data;
@@ -88,18 +84,7 @@ function CreateCandidateForm() {
     <div className="p-6">
 
       {/* BACK + HEADING */}
-      <div className="flex items-center gap-3 mb-6">
-        <button
-          onClick={() => navigate("/hr/home")}
-          className="p-2 rounded-lg hover:bg-gray-100 transition"
-        >
-          <ArrowLeft size={20} className="text-gray-600" />
-        </button>
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Create Candidate</h1>
-          <p className="text-sm text-gray-500">Fill in the details to add a new candidate</p>
-        </div>
-      </div>
+      <PageHeader />
 
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 max-w-2xl">
         <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { tableData } from "./data/tableData";
 import {
   Users,
   CheckCircle,
@@ -100,21 +99,6 @@ const CardSection = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // MOCK DATA FETCH (Backend Bypassed)
-    setLoading(true);
-    setTimeout(() => {
-      const candidates = tableData;
-      setCounts({
-        total:      candidates.length,
-        inProgress: candidates.filter((c) => [1, 2, 3].includes(Number(c.case_status))).length,
-        verified:   candidates.filter((c) => Number(c.case_status) === 4).length,
-        onHold:     candidates.filter((c) => Number(c.case_status) === 5).length,
-        rejected:   candidates.filter((c) => Number(c.case_status) === 6).length,
-      });
-      setLoading(false);
-    }, 600);
-
-    /* === BACKEND BYPASSED FOR DEMO ===
     const fetchCounts = async () => {
       try {
         setLoading(true);
@@ -141,7 +125,6 @@ const CardSection = () => {
     };
 
     fetchCounts();
-    */
   }, []);
 
   return (

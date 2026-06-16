@@ -7,14 +7,18 @@ import TableSection from "../../components/hr/TableSection"
 
 const DashBoard = () => {
   const [page, setPage] = useState(1);
-  const totalPages = 9;
+  const [totalPages, setTotalPages] = useState(1);
 
   return (
     <div className="p-4 flex flex-col gap-5">
         <ProfileHeader showExport={true} showAddCandidate={true}/>
-        <TableSection isToolBarRequired = {false} />
+        <TableSection 
+           isToolBarRequired={false} 
+           page={page} 
+           onTotalPagesChange={setTotalPages} 
+        />
         <Pagination currentPage={page}
-        totalPages={9}
+        totalPages={totalPages}
         onPageChange={setPage}/>
     </div>
 )

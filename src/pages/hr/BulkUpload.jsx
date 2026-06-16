@@ -13,7 +13,7 @@ const BulkUpload = () => {
   const [parsedData, setParsedData] = useState([]);
   const [downloading, setDownloading] = useState(false);
 
-  const data = [
+  const [previewData, setPreviewData] = useState([
     {
       name: "Padmini Gupta",
       phone: "+91 9854713254",
@@ -42,7 +42,7 @@ const BulkUpload = () => {
       function: "Sales",
       tag: "June Batch",
     },
-  ];
+  ]);
 
   // Upload result state
   const [uploading, setUploading] = useState(false);
@@ -161,9 +161,9 @@ const BulkUpload = () => {
       // Mocking a successful response
       setTimeout(() => {
         setUploadResult({
-          created: data.length,
+          created: previewData.length,
           skipped: 0,
-          total: data.length,
+          total: previewData.length,
           skippedList: [],
         });
         setUploading(false);
@@ -371,14 +371,14 @@ const BulkUpload = () => {
         {showTable && (
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
             <div className="px-5 pt-5 pb-3 text-base text-gray-500 border-b border-gray-100 flex items-center justify-between">
-              <span>Total Records: <strong className="text-gray-700">{data.length}</strong></span>
+              <span>Total Records: <strong className="text-gray-700">{previewData.length}</strong></span>
               <span className="text-sm text-gray-400">{file?.name}</span>
             </div>
 
             <div className="overflow-x-auto max-h-[500px]">
               <table className="w-full text-base">
 
-                <thead className="bg-gray-50 text-gray-500 text-sm uppercase tracking-wide sticky top-0">
+                <thead className="bg-[#FAFAFA] border-b border-gray-200 text-sm tracking-wide sticky top-0">
                   <tr>
                     <th className="px-5 py-4 w-10">
                       <input
@@ -388,15 +388,18 @@ const BulkUpload = () => {
                     </th>
 
                     {[
-                      "Name",
-                      "Phone",
-                      "E-Mail",
-                      "Function",
-                      "Tag",
+                      "Candidate ID",
+                      "Date",
+                      "Candidate Name",
+                      "Phone Number",
+                      "Assigned HR",
+                      "Progress",
+                      "Status",
+                      "Action",
                     ].map((h) => (
                       <th
                         key={h}
-                        className="px-5 py-4 text-left"
+                        className="px-5 py-4 text-left font-semibold text-gray-600"
                       >
                         {h}
                       </th>
@@ -405,7 +408,7 @@ const BulkUpload = () => {
                 </thead>
 
                 <tbody className="divide-y divide-gray-100">
-                  {data.map((item, i) => (
+                  {previewData.map((item, i) => (
                     <tr
                       key={i}
                       className="hover:bg-gray-50 transition"
@@ -417,26 +420,71 @@ const BulkUpload = () => {
                         />
                       </td>
 
-                      <td className="px-5 py-4 text-gray-800">
-                        {item.name}
+                      <td className="px-5 py-4 text-gray-500 font-medium text-sm">
+                        Pending
                       </td>
 
-                      <td className="px-5 py-4 text-gray-600">
-                        {item.phone}
-                      </td>
-
-                      <td className="px-5 py-4 text-gray-600">
-                        {item.email}
-                      </td>
-
-                      <td className="px-5 py-4 text-gray-600">
-                        {item.function}
+                      <td className="px-5 py-4 text-gray-500 text-sm">
+                        {new Date().toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
                       </td>
 
                       <td className="px-5 py-4">
-                        <span className="bg-blue-50 text-blue-700 text-sm px-3 py-1 rounded-full">
-                          {item.tag}
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold shrink-0">
+                            {item.name ? item.name.charAt(0).toUpperCase() : "U"}
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-gray-900">
+                              {item.name}
+                            </p>
+                            <p className="text-xs text-gray-500">{item.email}</p>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="px-5 py-4 text-gray-600 text-sm">
+                        {item.phone}
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
+                            HR
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-semibold text-gray-800">
+                              Unassigned
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div className="h-full bg-gray-400 rounded-full" style={{ width: `0%` }} />
+                          </div>
+                          <span className="text-sm text-gray-500">0%</span>
+                        </div>
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <span className="px-3 py-1 rounded-full text-[12px] font-semibold whitespace-nowrap bg-gray-100 text-gray-500">
+                          Pending
                         </span>
+                      </td>
+
+                      <td className="px-5 py-4 text-center">
+                        <button
+                          onClick={() => setPreviewData(prev => prev.filter((_, idx) => idx !== i))}
+                          className="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition"
+                        >
+                          <XCircle size={18} />
+                        </button>
                       </td>
                     </tr>
                   ))}

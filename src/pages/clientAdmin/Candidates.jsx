@@ -8,7 +8,7 @@ import Pagination from "../../components/clientAdmin/home/Pagination";
 
 const Candidates = () => {
   const [page, setPage] = useState(1);
-  const totalPages = 9;
+  const [totalPages, setTotalPages] = useState(1);
 
   return (
     <div className="p-5">
@@ -28,7 +28,10 @@ const Candidates = () => {
 
       {/* TABLE */}
       <div className="mt-4">
-        <CandidateTable />
+        <CandidateTable 
+          page={page} 
+          onTotalPagesChange={setTotalPages} 
+        />
       </div>
 
       {/* PAGINATION */}

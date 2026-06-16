@@ -1,12 +1,14 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Building2,
   MapPin,
   UserCircle,
   Lock,
   ShieldCheck,
+  Loader2,
 } from "lucide-react";
+import axios from "axios";
 import PageHeader from "../../components/superAdmin/client/PageHeader";
 
 /* FIELD */
@@ -48,30 +50,146 @@ function SectionCard({ icon: Icon, title, children, rightTag }) {
 /* MAIN PAGE */
 export default function EditClientPage() {
   const navigate = useNavigate();
+  const { id } = useParams();
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [fetchError, setFetchError] = useState(null);
 
   const [form, setForm] = useState({
-    clientId:    "LCIA-85471325",
-    joinedDate:  "Jan 12, 2024",
-    companyName: "DQNex Consultant",
-    website:     "www.dqnex.com",
-    cin:         "U74999KA2026PTC123456",
-    gst:         "U74999KA2026PTC123456",
-    address1:    "#214, 5th Cross, 2nd Main Road",
-    address2:    "HSR Layout Sector 6",
-    city:        "Bangalore",
-    statePin:    "Karnataka, 560103",
-    fullName:    "Manav Joshi",
-    email:       "manav.joshi@example.com",
-    phone:       "+91 848 521 4690",
+    clientId:     "",
+    joinedDate:   "",
+    companyName:  "",
+    cin:          "",
+    gst:          "",
+    addressLine1: "",
+    addressLine2: "",
+    city:         "",
+    state:        "",
+    pincode:      "",
+    pocFirstName: "",
+    pocLastName:  "",
+    contactEmail: "",
+    contactPhone: "",
+    isActive:     1,
   });
+
+  /* ── FETCH CLIENT DATA ── */
+  useEffect(() => {
+    fetchClient();
+  }, [id]);
+
+  const fetchClient = async () => {
+    try {
+      setIsLoading(true);
+      setFetchError(null);
+      const res = await axios.get(`http://localhost:5000/api/client/get-client/${id}`);
+      if (res.data.success) {
+        const c = res.data.data;
+        setForm({
+          clientId:     `CLT${c.id}`,
+          joinedDate:   c.created_at
+            ? new Date(c.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+            : "—",
+          companyName:  c.companyName  || "",
+          cin:          c.cin          || "",
+          gst:          c.gst          || "",
+          addressLine1: c.addressLine1 || "",
+          addressLine2: c.addressLine2 || "",
+          city:         c.city         || "",
+          state:        c.state        || "",
+          pincode:      c.pincode      || "",
+          pocFirstName: c.pocFirstName || "",
+          pocLastName:  c.pocLastName  || "",
+          contactEmail: c.contactEmail || "",
+          contactPhone: c.contactPhone?.replace(/^\+91/, "") || "",
+          isActive:     c.is_active    ?? 1,
+        });
+      } else {
+        setFetchError("Client not found.");
+      }
+    } catch (err) {
+      console.error("Error fetching client:", err);
+      setFetchError("Failed to load client. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleChange = (field) => (e) =>
     setForm({ ...form, [field]: e.target.value });
 
-  const handleSave = () => {
-    alert("Client Profile Updated Successfully ✅");
-    navigate("/super-admin/clients");
+  /* ── SAVE ── */
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      setErrors({});
+
+      const payload = {
+        companyName:  form.companyName  || undefined,
+        cin:          form.cin          || undefined,
+        gst:          form.gst          || undefined,
+        addressLine1: form.addressLine1 || undefined,
+        addressLine2: form.addressLine2 || undefined,
+        city:         form.city         || undefined,
+        state:        form.state        || undefined,
+        pincode:      form.pincode      || undefined,
+        pocFirstName: form.pocFirstName || undefined,
+        pocLastName:  form.pocLastName  || undefined,
+        contactEmail: form.contactEmail || undefined,
+        contactPhone: form.contactPhone || undefined,
+        isActive:     form.isActive,
+      };
+
+      const res = await axios.patch(
+        `http://localhost:5000/api/client/update-client/${id}`,
+        payload
+      );
+
+      if (res.data.success) {
+        navigate("/super-admin/clients");
+      }
+    } catch (err) {
+      console.error("Error updating client:", err);
+      if (err.response?.data?.errors) {
+        setErrors(err.response.data.errors);
+      } else {
+        setErrors({ general: err.response?.data?.message || "Failed to update client." });
+      }
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  /* ── LOADING ── */
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 size={32} className="animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 font-medium mb-4">{fetchError}</p>
+          <button
+            onClick={() => navigate("/super-admin/clients")}
+            className="bg-indigo-900 text-white px-6 py-2 rounded-xl text-sm font-medium hover:bg-indigo-800 transition"
+          >
+            Back to Clients
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const statusLabel =
+    form.isActive === 1 ? "Active" :
+    form.isActive === 2 ? "Inactive" : "Suspended";
 
   return (
     <div className="min-h-screen bg-[#fafafa] px-6 py-4">
@@ -89,151 +207,187 @@ export default function EditClientPage() {
         {/* ACCOUNT STATUS */}
         <div className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-xl flex items-center gap-2 text-sm font-medium mt-10">
           <ShieldCheck size={15} />
-          Account Status: Active
+          Account Status: {statusLabel}
         </div>
       </div>
 
+      {/* General Error */}
+      {errors.general && (
+        <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
+          {errors.general}
+        </div>
+      )}
+
       {/* MAIN CARD */}
-    <div className="bg-white border border-gray-200 rounded-xl w-3xl flex flex-col h-150">
-  
-  {/* Scrollable content */}
-  <div className="flex-1 overflow-y-auto p-4">
-    <div className="space-y-3">
+      <div className="bg-white border border-gray-200 rounded-xl w-3xl flex flex-col h-150">
 
-      {/* SYSTEM IDENTIFIERS */}
-      <SectionCard icon={Lock} title="System Identifiers" rightTag="Read only">
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Client ID">
-            <input
-              value={form.clientId}
-              disabled
-              className={`${inputCls} bg-gray-50 text-gray-400 cursor-not-allowed`}
-            />
-          </Field>
-          <Field label="Joined Date">
-            <input
-              value={form.joinedDate}
-              disabled
-              className={`${inputCls} bg-gray-50 text-gray-400 cursor-not-allowed`}
-            />
-          </Field>
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="space-y-3">
+
+            {/* SYSTEM IDENTIFIERS */}
+            <SectionCard icon={Lock} title="System Identifiers" rightTag="Read only">
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Client ID">
+                  <input
+                    value={form.clientId}
+                    disabled
+                    className={`${inputCls} bg-gray-50 text-gray-400 cursor-not-allowed`}
+                  />
+                </Field>
+                <Field label="Joined Date">
+                  <input
+                    value={form.joinedDate}
+                    disabled
+                    className={`${inputCls} bg-gray-50 text-gray-400 cursor-not-allowed`}
+                  />
+                </Field>
+              </div>
+            </SectionCard>
+
+            {/* COMPANY INFORMATION */}
+            <SectionCard icon={Building2} title="Company Information">
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Company Name">
+                  <input
+                    value={form.companyName}
+                    onChange={handleChange("companyName")}
+                    className={inputCls}
+                  />
+                  {errors.companyName && <p className="text-xs text-red-500 mt-1">{errors.companyName}</p>}
+                </Field>
+                <Field label="CIN (Corporate Identification Number)">
+                  <input
+                    value={form.cin}
+                    onChange={handleChange("cin")}
+                    className={inputCls}
+                  />
+                  {errors.cin && <p className="text-xs text-red-500 mt-1">{errors.cin}</p>}
+                </Field>
+                <Field label="GST Number">
+                  <input
+                    value={form.gst}
+                    onChange={handleChange("gst")}
+                    className={inputCls}
+                  />
+                  {errors.gst && <p className="text-xs text-red-500 mt-1">{errors.gst}</p>}
+                </Field>
+                <Field label="Account Status">
+                  <select
+                    value={form.isActive}
+                    onChange={(e) => setForm({ ...form, isActive: parseInt(e.target.value) })}
+                    className={inputCls}
+                  >
+                    <option value={1}>Active</option>
+                    <option value={2}>Inactive</option>
+                    <option value={3}>Suspended</option>
+                  </select>
+                </Field>
+              </div>
+            </SectionCard>
+
+            {/* REGISTERED ADDRESS */}
+            <SectionCard icon={MapPin} title="Registered Address">
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Address Line 1">
+                  <input
+                    value={form.addressLine1}
+                    onChange={handleChange("addressLine1")}
+                    className={inputCls}
+                  />
+                </Field>
+                <Field label="Address Line 2">
+                  <input
+                    value={form.addressLine2}
+                    onChange={handleChange("addressLine2")}
+                    className={inputCls}
+                  />
+                </Field>
+                <Field label="City">
+                  <input
+                    value={form.city}
+                    onChange={handleChange("city")}
+                    className={inputCls}
+                  />
+                </Field>
+                <Field label="State">
+                  <input
+                    value={form.state}
+                    onChange={handleChange("state")}
+                    className={inputCls}
+                  />
+                </Field>
+                <Field label="Pin Code">
+                  <input
+                    value={form.pincode}
+                    onChange={handleChange("pincode")}
+                    className={inputCls}
+                  />
+                  {errors.pincode && <p className="text-xs text-red-500 mt-1">{errors.pincode}</p>}
+                </Field>
+              </div>
+            </SectionCard>
+
+            {/* PRIMARY CONTACT PERSON */}
+            <SectionCard icon={UserCircle} title="Primary Contact Person">
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="First Name">
+                  <input
+                    value={form.pocFirstName}
+                    onChange={handleChange("pocFirstName")}
+                    className={inputCls}
+                  />
+                </Field>
+                <Field label="Last Name">
+                  <input
+                    value={form.pocLastName}
+                    onChange={handleChange("pocLastName")}
+                    className={inputCls}
+                  />
+                </Field>
+                <Field label="Contact Email">
+                  <input
+                    value={form.contactEmail}
+                    onChange={handleChange("contactEmail")}
+                    className={inputCls}
+                  />
+                  {errors.contactEmail && <p className="text-xs text-red-500 mt-1">{errors.contactEmail}</p>}
+                </Field>
+                <Field label="Phone Number (10 digits)">
+                  <input
+                    value={form.contactPhone}
+                    onChange={handleChange("contactPhone")}
+                    placeholder="9876543210"
+                    className={inputCls}
+                  />
+                  {errors.contactPhone && <p className="text-xs text-red-500 mt-1">{errors.contactPhone}</p>}
+                </Field>
+              </div>
+            </SectionCard>
+
+          </div>
         </div>
-      </SectionCard>
 
-      {/* COMPANY INFORMATION */}
-      <SectionCard icon={Building2} title="Company Information">
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Company Name">
-            <input
-              value={form.companyName}
-              onChange={handleChange("companyName")}
-              className={inputCls}
-            />
-          </Field>
-          <Field label="Company Website">
-            <input
-              value={form.website}
-              onChange={handleChange("website")}
-              className={inputCls}
-            />
-          </Field>
-          <Field label="CIN (Corporate Identification Number)">
-            <input
-              value={form.cin}
-              onChange={handleChange("cin")}
-              className={inputCls}
-            />
-          </Field>
-          <Field label="GST Number">
-            <input
-              value={form.gst}
-              onChange={handleChange("gst")}
-              className={inputCls}
-            />
-          </Field>
+        {/* Fixed footer */}
+        <div className="flex items-center justify-end gap-3 p-4 border-t bg-white">
+          <button
+            onClick={() => navigate(-1)}
+            disabled={isSaving}
+            className="border border-indigo-700 text-indigo-700 px-8 py-2 rounded-lg text-sm font-medium hover:bg-indigo-50 transition disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="bg-indigo-900 text-white px-8 py-2 rounded-lg text-sm font-medium hover:bg-indigo-800 transition flex items-center gap-2 disabled:opacity-70"
+          >
+            {isSaving && <Loader2 size={14} className="animate-spin" />}
+            {isSaving ? "Saving..." : "Save Changes"}
+          </button>
         </div>
-      </SectionCard>
 
-      {/* REGISTERED ADDRESS */}
-      <SectionCard icon={MapPin} title="Registered Address">
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Address Line 1">
-            <input
-              value={form.address1}
-              onChange={handleChange("address1")}
-              className={inputCls}
-            />
-          </Field>
-          <Field label="Address Line 2">
-            <input
-              value={form.address2}
-              onChange={handleChange("address2")}
-              className={inputCls}
-            />
-          </Field>
-          <Field label="City">
-            <input
-              value={form.city}
-              onChange={handleChange("city")}
-              className={inputCls}
-            />
-          </Field>
-          <Field label="State & Pin Code">
-            <input
-              value={form.statePin}
-              onChange={handleChange("statePin")}
-              className={inputCls}
-            />
-          </Field>
-        </div>
-      </SectionCard>
-
-      {/* PRIMARY CONTACT PERSON */}
-      <SectionCard icon={UserCircle} title="Primary Contact Person">
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Full Name">
-            <input
-              value={form.fullName}
-              onChange={handleChange("fullName")}
-              className={inputCls}
-            />
-          </Field>
-          <Field label="Contact Email">
-            <input
-              value={form.email}
-              onChange={handleChange("email")}
-              className={inputCls}
-            />
-          </Field>
-          <Field label="Phone Number">
-            <input
-              value={form.phone}
-              onChange={handleChange("phone")}
-              className={inputCls}
-            />
-          </Field>
-        </div>
-      </SectionCard>
-
-    </div>
-  </div>
-
-  {/* Fixed footer */}
-  <div className="flex items-center justify-end gap-3 p-4 border-t bg-white">
-    <button
-      onClick={() => navigate(-1)}
-      className="border border-indigo-700 text-indigo-700 px-8 py-2 rounded-lg text-sm font-medium hover:bg-indigo-50 transition"
-    >
-      Cancel
-    </button>
-    <button
-      onClick={handleSave}
-      className="bg-indigo-900 text-white px-8 py-2 rounded-lg text-sm font-medium hover:bg-indigo-800 transition"
-    >
-      Save Changes
-    </button>
-  </div>
-</div>
+      </div>
 
     </div>
   );

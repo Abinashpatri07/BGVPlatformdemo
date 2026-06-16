@@ -1,9 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 /* ── LOGIN POPUP ─────────────────────────────────────────── */
 function LoginPopup({ type, message, onClose }) {
   const isSuccess = type === "success";
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (onClose) onClose();
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
 
   return (
     <div className="fixed top-6 right-6 z-[9999] animate-[fadeIn_0.3s_ease-out]">
@@ -43,27 +51,37 @@ export default function HRLoginForm() {
   const [password, setPassword] = useState("");
   const [popup, setPopup]       = useState(null); // { type, message }
 
-  const handleLogin = () => {
-    const dummyEmail    = "puja@gmail.com";
-    const dummyPassword = "123456";
-
+  const handleLogin = async () => {
     if (!email || !password) {
       setPopup({ type: "error", message: "Please enter email and password." });
       return;
     }
 
-    if (email === dummyEmail && password === dummyPassword) {
-      localStorage.setItem("role", "hr");
-      localStorage.setItem(
-        "user",
-        JSON.stringify({ name: "Puja Gupta", email: "puja@gmail.com", role: "HR Executive" })
-      );
-      setPopup({ type: "success", message: "Welcome back, Puja Gupta!" });
-      setTimeout(() => navigate("/hr/home"), 1500);
-    } else if (email === dummyEmail && password !== dummyPassword) {
-      setPopup({ type: "error", message: "Incorrect password. Please try again." });
-    } else {
-      setPopup({ type: "error", message: "Invalid email or password." });
+    try {
+      const res = await axios.post("http://localhost:5000/api/hr/auth/login", {
+        email,
+        password,
+      });
+
+      if (res.data.success) {
+        localStorage.setItem("role", "hr");
+        // Update user storage based on backend response if available, otherwise default
+        const userName = res.data.user?.name || "HR Executive";
+        localStorage.setItem(
+          "user",
+          JSON.stringify({ name: userName, email: email, role: "HR Executive" })
+        );
+        setPopup({ type: "success", message: `Welcome back, ${userName}!` });
+        setTimeout(() => navigate("/hr/home"), 1500);
+      } else {
+        setPopup({ type: "error", message: res.data.message || "Invalid credentials" });
+      }
+    } catch (error) {
+      console.error("Login Error:", error);
+      setPopup({ 
+        type: "error", 
+        message: error.response?.data?.message || "Invalid email or password." 
+      });
     }
   };
 

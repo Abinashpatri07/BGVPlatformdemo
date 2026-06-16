@@ -2,6 +2,8 @@ import {
   MoreVertical,
   Mail,
   CheckCircle,
+  Loader2,
+  Users,
 } from "lucide-react";
 
 import {
@@ -12,7 +14,8 @@ import {
 
 import { useNavigate } from "react-router-dom";
 
-import { candidateTableData } from "../../../components/clientAdmin/data/candidateTableData";
+// ── LIVE API INTEGRATION ──
+import axios from "axios";
 
 import ActionDropdown from "../candidate/ActionDropdown";
 import RejectModal from "../candidate/RejectModal";
@@ -150,9 +153,50 @@ function AssignVerificationModal({ candidate, onClose, onAssign }) {
 }
 
 // ── CANDIDATE TABLE ───────────────────────────────────────────────────────────
-function CandidateTable() {
+function CandidateTable({ page = 1, onTotalPagesChange }) {
 
   const navigate = useNavigate();
+
+  const [candidates, setCandidates] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState("");
+
+  const fetchCandidates = async () => {
+    try {
+      setLoading(true);
+      setFetchError("");
+      const response = await axios.get(
+        `http://localhost:5000/api/client-admin/candidate/list?page=${page}&limit=10`
+      );
+      if (response.data.success) {
+        setCandidates(response.data.data);
+        if (onTotalPagesChange && response.data.pagination) {
+          onTotalPagesChange(response.data.pagination.totalPages);
+        }
+      }
+    } catch (error) {
+      setFetchError("Failed to load candidates.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCandidates();
+  }, [page]);
+
+  const getStatusLabel = (status) => {
+    switch (Number(status)) {
+      case 1: return "In Progress";
+      case 2: return "Verify";
+      case 3: return "Verified";
+      case 4: return "Complete";
+      case 5: return "On Hold";
+      case 6: return "Rejected";
+      default: return "In Progress";
+    }
+  };
 
   const [openMenu, setOpenMenu] = useState(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -193,7 +237,7 @@ function CandidateTable() {
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      setSelectedRows(candidateTableData.map((item) => item.id));
+      setSelectedRows(candidates.map((item) => item.cand_id));
     } else {
       setSelectedRows([]);
     }
@@ -369,9 +413,9 @@ function CandidateTable() {
                 {
                   state: {
                     selectedCandidates:
-                      candidateTableData.filter(
+                      candidates.filter(
                         (item) =>
-                          selectedRows.includes(item.id)
+                          selectedRows.includes(item.cand_id)
                       ),
                   },
                 }
@@ -397,8 +441,8 @@ function CandidateTable() {
                 <input
                   type="checkbox"
                   checked={
-                    selectedRows.length === candidateTableData.length &&
-                    candidateTableData.length > 0
+                    selectedRows.length === candidates.length &&
+                    candidates.length > 0
                   }
                   onChange={handleSelectAll}
                   className="w-4 h-4 accent-[#4338CA] cursor-pointer"
@@ -409,29 +453,58 @@ function CandidateTable() {
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Name</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Phone</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Assigned HR</th>
-              <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Progress</th>
+              <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Function / Tag</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Status</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-center w-20">Action</th>
             </tr>
           </thead>
 
           <tbody>
-            {candidateTableData.map((item, index) => (
+            {loading ? (
+              <tr>
+                <td colSpan="9">
+                  <div className="flex flex-col items-center justify-center py-20 gap-3">
+                    <Loader2 size={36} className="text-[#4338CA] animate-spin" />
+                    <p className="text-sm text-gray-400">Loading candidates...</p>
+                  </div>
+                </td>
+              </tr>
+            ) : fetchError ? (
+              <tr>
+                <td colSpan="9">
+                  <div className="flex flex-col items-center justify-center py-20 gap-3">
+                    <p className="text-sm text-red-500">{fetchError}</p>
+                  </div>
+                </td>
+              </tr>
+            ) : candidates.length === 0 ? (
+              <tr>
+                <td colSpan="9">
+                  <div className="flex flex-col items-center justify-center py-20 gap-3">
+                    <Users size={40} className="text-gray-300" />
+                    <p className="text-sm text-gray-400">No candidates found. Add one to get started!</p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+            candidates.map((item, index) => {
+              const statusLabel = getStatusLabel(item.case_status);
+              return (
               <tr
-                key={item.id}
+                key={item.cand_id}
                 className="border-b border-gray-100 hover:bg-[#FAFAFA] transition-all duration-150"
               >
 
                 <td className="px-5 py-2.5">
                   <input
                     type="checkbox"
-                    checked={selectedRows.includes(item.id)}
-                    onChange={() => handleRowSelect(item.id)}
+                    checked={selectedRows.includes(item.cand_id)}
+                    onChange={() => handleRowSelect(item.cand_id)}
                     className="w-4 h-4 accent-[#4338CA] cursor-pointer"
                   />
                 </td>
 
-                <td className="px-5 py-2.5 text-sm text-gray-700">{item.candidateId}</td>
+                <td className="px-5 py-2.5 text-sm text-gray-700 font-mono">{item.case_id}</td>
 
                 <td className="px-5 py-2.5">
                   <div className="text-sm text-gray-700 font-medium">
@@ -443,38 +516,35 @@ function CandidateTable() {
                 </td>
 
                 <td className="px-5 py-2.5">
-                  <div className="font-semibold text-[15px] text-gray-900 leading-5">{item.name}</div>
+                  <div className="font-semibold text-[15px] text-gray-900 leading-5">{item.first_name} {item.last_name}</div>
                   <div className="text-xs text-gray-400 mt-0.5">{item.email}</div>
                 </td>
 
                 <td className="px-5 py-2.5 text-sm text-gray-700">{item.phone}</td>
 
                 <td className="px-5 py-2.5">
-                  {item.assigned_hr ? (
-                    <>
-                      <div className="text-sm text-gray-800 font-medium">{item.assigned_hr.name}</div>
-                      <div className="text-xs text-gray-400 mt-0.5">{item.assigned_hr.email}</div>
-                    </>
-                  ) : null}
-                </td>
-
-                <td className="px-5 py-2.5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-[#4338CA] rounded-full"
-                        style={{ width: `${item.progress}%` }}
-                      />
-                    </div>
-                    <span className="text-sm text-gray-700">{item.progress}%</span>
+                  <div className="text-sm text-gray-800 font-medium">
+                    {item.created_by_name && item.created_by_name !== '-' ? item.created_by_name : '—'}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-0.5">
+                    {item.created_by_role && item.created_by_role !== 'Unknown' ? item.created_by_role : ''}
                   </div>
                 </td>
 
                 <td className="px-5 py-2.5">
+                  <div className="text-sm text-gray-800 font-medium">
+                    {item.job_function || <span className="text-gray-300">—</span>}
+                  </div>
+                  {item.tag && (
+                    <div className="text-xs text-gray-400 mt-0.5">{item.tag}</div>
+                  )}
+                </td>
+
+                <td className="px-5 py-2.5">
                   <span
-                    className={`px-3 py-1 rounded-full text-[12px] font-semibold whitespace-nowrap ${getStatusStyle(item.status)}`}
+                    className={`px-3 py-1 rounded-full text-[12px] font-semibold whitespace-nowrap ${getStatusStyle(statusLabel)}`}
                   >
-                    {item.status}
+                    {statusLabel}
                   </span>
                 </td>
 
@@ -495,16 +565,16 @@ function CandidateTable() {
 
                     {openMenu === index && (
                       <div
-                        className={`absolute right-12 w-56 z-[9999] ${index >= candidateTableData.length - 3 ? "bottom-10" : "top-10"
+                        className={`absolute right-12 w-56 z-[9999] ${index >= candidates.length - 3 ? "bottom-10" : "top-10"
                           }`}
                       >
                         <ActionDropdown
                           onView={() => {
-                            navigate(`/admin/view/${item.candidateId}`);
+                            navigate(`/admin/view/${item.cand_id}`);
                             setOpenMenu(null);
                           }}
                           onEdit={() => {
-                            navigate(`/admin/edit-candidate/${item.candidateId}`);
+                            navigate(`/admin/edit-candidate/${item.cand_id}`);
                             setOpenMenu(null);
                           }}
                           onEmail={() => {
@@ -541,7 +611,9 @@ function CandidateTable() {
                 </td>
 
               </tr>
-            ))}
+              );
+            })
+            )}
           </tbody>
 
         </table>

@@ -30,8 +30,7 @@ function CreateCandidateForm() {
     setGeneralError("");
 
     try {
-      /* === FOR DEMO: BACKEND BYPASSED ===
-      const createdById = 2;
+      const createdById = 2; // mock admin ID
       const response = await axios.post(
         "http://localhost:5000/api/candidates/single_candidate_add",
         {
@@ -47,14 +46,10 @@ function CreateCandidateForm() {
       );
 
       if (response.data.success) {
-      */
-      
-      // Mocking a successful response after a small delay
-      setTimeout(() => {
-        setSuccessMessage("Candidate Created Successfully! Case ID: BGV123456789 ✅");
+        setSuccessMessage(`Candidate Created Successfully! Case ID: ${response.data.data?.case_id || "BGV"} ✅`);
         reset();
         setTimeout(() => navigate("/admin/candidates"), 2000);
-      }, 500);
+      }
 
     } catch (error) {
       const errData = error.response?.data;
@@ -105,7 +100,7 @@ function CreateCandidateForm() {
 
       {/* SUCCESS MODAL */}
       {successMessage && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-[9999]">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-9999">
           <div className="relative bg-white w-96 rounded-3xl overflow-hidden shadow-2xl text-center pb-8">
             {/* GREEN TOP */}
             <div className="relative h-36 bg-lime-500 rounded-b-[50%] flex items-center justify-center">
