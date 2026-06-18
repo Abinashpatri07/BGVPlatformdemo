@@ -51,6 +51,7 @@ function ActionMenu({ onView, onEdit, onEmail, onSuspend }) {
 
 export default function ClientTable({
   data = [],
+  isLoading = false,
   onView,
   onEdit,
   onEmail,
@@ -140,8 +141,21 @@ export default function ClientTable({
 
         {/* BODY */}
         <tbody>
-          {data.map((row, index) => (
-            <tr
+          {isLoading ? (
+            <tr>
+              <td colSpan="8" className="px-5 py-10 text-center text-gray-500 font-medium">
+                Loading clients...
+              </td>
+            </tr>
+          ) : data.length === 0 ? (
+            <tr>
+              <td colSpan="8" className="px-5 py-10 text-center text-gray-500 font-medium">
+                No clients found.
+              </td>
+            </tr>
+          ) : (
+            data.map((row, index) => (
+              <tr
               key={row.id}
               className={`hover:bg-gray-50 transition-colors duration-100 ${index < data.length - 1 ? "border-b border-gray-100" : ""}`}
             >
@@ -230,7 +244,7 @@ export default function ClientTable({
                 </div>
               </td>
             </tr>
-          ))}
+          )))}
         </tbody>
       </table>
       {/* EMAIL SUCCESS MODAL */}

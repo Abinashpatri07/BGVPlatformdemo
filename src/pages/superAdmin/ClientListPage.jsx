@@ -7,6 +7,9 @@ import {
   UserX,
   UserMinus,
 } from "lucide-react";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 import ClientPageHeader from "../../components/superAdmin/client/ClientPageHeader";
 import ClientStatCards from "../../components/superAdmin/client/ClientStatCards";
@@ -27,6 +30,7 @@ export default function ClientListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(9);
   const [isLoading, setIsLoading] = useState(true);
+  const [popupMessage, setPopupMessage] = useState(null);
 
   useEffect(() => {
     fetchClients();
@@ -73,27 +77,99 @@ export default function ClientListPage() {
     }
   };
 
+  /* ───────────────── EXPORT ───────────────── */
+  const handleExport = (type) => {
+    if (clients.length === 0) {
+      setPopupMessage({ type: "error", text: "No data to export" });
+      setTimeout(() => setPopupMessage(null), 3000);
+      return;
+    }
+
+    const exportData = clients.map((client) => ({
+      "Display ID": client.displayId,
+      "Name": client.name,
+      "GST": client.gst,
+      "POC Name": client.pocName,
+      "POC Email": client.pocEmail,
+      "POC Phone": client.pocPhone,
+      "City": client.city,
+      "State": client.state,
+      "Status": client.status,
+    }));
+
+    if (type === "CSV") {
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Clients");
+      XLSX.writeFile(workbook, "ClientsData.csv");
+      setPopupMessage({ type: "success", text: "CSV Exported Successfully!" });
+      setTimeout(() => setPopupMessage(null), 3000);
+    } else if (type === "PDF") {
+      const doc = new jsPDF();
+      doc.text("Clients Data", 14, 10);
+
+      const tableColumn = Object.keys(exportData[0]);
+      const tableRows = exportData.map(obj => Object.values(obj));
+
+      doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 15,
+        styles: { fontSize: 8 },
+      });
+
+      doc.save("ClientsData.pdf");
+      setPopupMessage({ type: "success", text: "PDF Exported Successfully!" });
+      setTimeout(() => setPopupMessage(null), 3000);
+    }
+  };
+
   return (
-    <div className="min-h-screen px-10 py-9 font-sans">
+    <div className="min-h-screen px-10 py-9 font-sans relative">
+
+      {/* Toast Popup */}
+      {popupMessage && (
+        <div className="fixed top-6 right-6 z-[9999] animate-[fadeIn_0.3s_ease-out]">
+          <div className={`flex items-center gap-4 px-6 py-4 rounded-xl shadow-lg border-l-4 ${
+            popupMessage.type === "success" ? "bg-green-50 border-green-500 text-green-700" : "bg-red-50 border-red-500 text-red-700"
+          }`}>
+            {popupMessage.type === "success" ? (
+              <svg className="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            )}
+            <div className="flex flex-col">
+              <span className="font-bold">{popupMessage.type === "success" ? "Success!" : "Action Failed"}</span>
+              <span className="text-sm">{popupMessage.text}</span>
+            </div>
+            <button onClick={() => setPopupMessage(null)} className="ml-4 text-gray-400 hover:text-gray-600 transition">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Header */}
-      <ClientPageHeader />
+      <ClientPageHeader onExport={handleExport} />
 
       {/* Stat Cards */}
       <ClientStatCards stats={statsData} />
 
       {/* Table */}
-      {isLoading ? (
-        <div className="py-10 text-center text-gray-500 font-medium">Loading clients...</div>
-      ) : (
-        <ClientTable
-          data={clients}
-          onView={(row) => navigate(`/super-admin/clients/view/${row.id}`)}
-          onEdit={(row) => navigate(`/super-admin/clients/edit/${row.id}`)}
-          onEmail={(row) => console.log("Send email to", row.pocEmail)}
-          onSuspend={() => fetchClients()}
-        />
-      )}
+      <ClientTable
+        data={clients}
+        isLoading={isLoading}
+        onView={(row) => navigate(`/super-admin/clients/view/${row.id}`)}
+        onEdit={(row) => navigate(`/super-admin/clients/edit/${row.id}`)}
+        onEmail={(row) => console.log("Send email to", row.pocEmail)}
+        onSuspend={() => fetchClients()}
+      />
 
       {/* Pagination */}
       {totalClients > 0 && (

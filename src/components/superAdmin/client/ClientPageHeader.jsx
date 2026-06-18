@@ -14,6 +14,7 @@ export default function ClientPageHeader({
   showCreateButton = true,
   showExportButton = true,
   createType = "client",
+  onExport,
 }) {
   const navigate = useNavigate();
 
@@ -87,8 +88,9 @@ export default function ClientPageHeader({
 
   /* ───────────────── DOWNLOAD ───────────────── */
   const handleDownload = () => {
-    console.log("Downloading as", selectedType);
-
+    if (onExport && selectedType) {
+      onExport(selectedType);
+    }
     setShowExportModal(false);
   };
 

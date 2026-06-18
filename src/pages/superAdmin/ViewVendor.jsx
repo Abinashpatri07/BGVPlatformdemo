@@ -1,96 +1,107 @@
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, ChevronRight, MapPin, User, ShieldCheck, Clock, CheckCircle2, Award } from "lucide-react";
+import axios from "axios";
+import {
+  ArrowLeft,
+  ChevronRight,
+  MapPin,
+  User,
+  ShieldCheck,
+  Clock,
+  CheckCircle2,
+  Award,
+  Building2,
+  Loader2,
+} from "lucide-react";
 
-// ── Quality Score Ring ─────────────────────────────────
-const QualityScoreCard = ({ score = 96.5 }) => {
-  const radius = 54;
+// ── State ID → Name lookup ─────────────────────────────────
+const STATE_MAP = {
+  1: "Andhra Pradesh",   2: "Arunachal Pradesh", 3: "Assam",
+  4: "Bihar",           5: "Chhattisgarh",       6: "Goa",
+  7: "Gujarat",         8: "Haryana",             9: "Himachal Pradesh",
+  10: "Jharkhand",      11: "Karnataka",          12: "Kerala",
+  13: "Madhya Pradesh", 14: "Maharashtra",        15: "Manipur",
+  16: "Meghalaya",      17: "Mizoram",            18: "Nagaland",
+  19: "Odisha",         20: "Punjab",             21: "Rajasthan",
+  22: "Sikkim",         23: "Tamil Nadu",         24: "Telangana",
+  25: "Tripura",        26: "Uttar Pradesh",      27: "Uttarakhand",
+  28: "West Bengal",    29: "Delhi",              30: "Jammu & Kashmir",
+  // Mock IDs from CreateVendor
+  1: "Maharashtra",     2: "Karnataka",           3: "Delhi",
+  4: "Gujarat",         5: "Tamil Nadu",
+};
+
+// ── Quality Score Ring ─────────────────────────────────────
+const QualityScoreCard = ({ score = 96.5, status = "Active" }) => {
+  const radius = 45;
   const circumference = 2 * Math.PI * radius;
   const progress = (score / 100) * circumference;
-  const gap = circumference - progress;
 
+  const statusColor =
+    status === "Active"
+      ? "bg-green-100 text-green-700"
+      : status === "Suspended"
+      ? "bg-red-100 text-red-600"
+      : "bg-orange-100 text-orange-600";
 
   return (
-    <div className="bg-[#E9E8FF] rounded-2xl p-6 flex flex-col h-full min-h-80">
+    <div className="bg-[#E9E8FF] rounded-2xl p-5 flex flex-col relative overflow-hidden min-h-[280px]">
 
-  {/* TITLE */}
-  <div className="flex items-center gap-2 mb-4">
-    <div className="w-7 h-7 rounded-full flex items-center justify-center">
-      <Award size={16} className="text-[#6C63FF]" />
-    </div>
+      {/* TITLE */}
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-7 h-7 rounded-full flex items-center justify-center">
+          <Award size={16} className="text-[#6C63FF]" />
+        </div>
+        <h3 className="text-[16px] font-semibold text-[#02027A]">Quality Score</h3>
+      </div>
 
-    <h3 className="text-[18px] font-semibold text-[#02027A]">
-      Quality Score
-    </h3>
-  </div>
+      {/* STATUS BADGE */}
+      <span className={`inline-block w-fit px-3 py-1.5 rounded-full text-[11px] font-semibold mb-3 ${statusColor}`}>
+        {status}
+      </span>
 
-  {/* CONTENT */}
-  <div className="flex-1 flex flex-col items-center justify-center relative">
+      {/* CONTENT */}
+      <div className="flex-1 flex flex-col items-center justify-center relative mt-2">
 
-    {/* Shield */}
-    <div className="absolute top-0 right-2">
-      <ShieldCheck
-        size={90}
-        className="text-[#B7B2FF]"
-        strokeWidth={1.5}
-      />
-    </div>
+        {/* Shield */}
+        <div className="absolute top-[-5px] right-2 opacity-50">
+          <ShieldCheck size={70} className="text-[#B7B2FF]" strokeWidth={1.5} />
+        </div>
 
-    {/* DONUT */}
-    <div className="relative flex items-center justify-center mt-2">
-      <svg width="170" height="170" viewBox="0 0 170 170">
+        {/* DONUT */}
+        <div className="relative flex items-center justify-center">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r={radius} fill="none" stroke="#D7D5FF" strokeWidth="9" />
+            <circle
+              cx="70" cy="70" r={radius}
+              fill="none" stroke="#0BA000" strokeWidth="9"
+              strokeLinecap="round"
+              strokeDasharray={`${progress - 14} ${circumference}`}
+              transform="rotate(-120 70 70)"
+            />
+          </svg>
+          <div className="absolute">
+            <p className="text-[28px] font-bold text-[#02027A]">{score}%</p>
+          </div>
+        </div>
 
-        {/* TRACK */}
-        <circle
-          cx="85"
-          cy="85"
-          r={radius}
-          fill="none"
-          stroke="#D7D5FF"
-          strokeWidth="10"
-        />
+        {/* BADGE */}
+        <div className="mt-4">
+          <span className="bg-[#C8F3CC] text-[#168B2D] text-[11px] font-medium px-4 py-1 rounded-full">
+            Excellent Rating
+          </span>
+        </div>
 
-        {/* PROGRESS */}
-        <circle
-          cx="85"
-          cy="85"
-          r={radius}
-          fill="none"
-          stroke="#0BA000"
-          strokeWidth="10"
-          strokeLinecap="round"
-          strokeDasharray={`${progress-18} ${circumference}`}
-          transform="rotate(-120 85 85)"
-        />
-      </svg>
-
-      {/* CENTER TEXT */}
-      <div className="absolute">
-        <p className="text-[34px] font-bold text-[#02027A]">
-          {score}%
+        {/* TEXT */}
+        <p className="text-[11px] text-[#4B4B8A] text-center leading-snug mt-4">
+          Based On Accuracy And SLA<br />Adherence Over 90 Days.
         </p>
       </div>
     </div>
-
-    {/* BADGE */}
-    <div className="mt-4">
-      <span className="bg-[#C8F3CC] text-[#168B2D] text-[11px] font-medium px-4 py-1.5 rounded-full">
-        Excellent Rating
-      </span>
-    </div>
-
-    {/* TEXT */}
-    <p className="text-[11px] text-[#4B4B8A] text-center leading-4 mt-5">
-      Based On Accuracy And SLA
-      <br />
-      Adherence Over 90 Days.
-    </p>
-
-  </div>
-</div>
   );
 };
 
-// ── Section Wrapper ────────────────────────────────────
+// ── Section Wrapper ────────────────────────────────────────
 const Section = ({ icon: Icon, title, children }) => (
   <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
     <div className="flex items-center gap-2 mb-5">
@@ -103,28 +114,75 @@ const Section = ({ icon: Icon, title, children }) => (
   </div>
 );
 
-// ── Main Page ──────────────────────────────────────────
+// ── Info Field ─────────────────────────────────────────────
+const Info = ({ label, value }) => (
+  <div>
+    <p className="text-xs text-gray-400 mb-1">{label}</p>
+    <p className="text-sm font-medium text-gray-800">{value || "—"}</p>
+  </div>
+);
+
+// ── Main Page ──────────────────────────────────────────────
 export default function ViewVendor() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  // Static vendor data — replace with API call using id
-  const vendor = {
-    states: ["Karnataka", "Maharashtra", "Delhi NCR"],
-    cities: "Bengaluru, Mumbai, Pune, New Delhi",
-    gst: "30QAZWS7788E1Z2",
-    fullName: "Manav Joshi",
-    role: "Head Of Operations",
-    email: "Manav.Joshi@Example.Com",
-    phone: "+91 848 521 4690",
-    services: [
-      { name: "Criminal Background Check", sla: "3 day SLA" },
-      { name: "Education Verification",     sla: "5 day SLA" },
-      { name: "Identity & Address Verification", sla: "6 day SLA" },
-      { name: "Prior Employment Check", sla: "6 day SLA" },
-    ],
-    qualityScore: 96.5,
-  };
+  const [vendor, setVendor] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchVendor = async () => {
+      try {
+        setIsLoading(true);
+        const res = await axios.get(`http://localhost:5000/api/vendor/${id}`);
+        if (res.data.success) {
+          setVendor(res.data.data);
+        } else {
+          setError("Vendor not found.");
+        }
+      } catch (err) {
+        console.error("Error fetching vendor:", err);
+        setError("Failed to load vendor details. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchVendor();
+  }, [id]);
+
+  // ── Loading ─────────────────────────────────────────────
+  if (isLoading) {
+    return (
+      <div className="h-[92vh] flex items-center justify-center">
+        <Loader2 size={32} className="animate-spin text-[#02027A]" />
+      </div>
+    );
+  }
+
+  // ── Error ───────────────────────────────────────────────
+  if (error || !vendor) {
+    return (
+      <div className="h-[92vh] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 font-medium mb-4">{error || "Vendor not found."}</p>
+          <button
+            onClick={() => navigate("/super-admin/vendor")}
+            className="bg-[#02027A] text-white px-6 py-2 rounded-xl text-sm font-medium hover:bg-[#01016a] transition"
+          >
+            Back to Vendors
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const vendorDisplayId = `VND${vendor.vendor_id.toString().padStart(4, "0")}`;
+  const joinedDate = vendor.created_at
+    ? new Date(vendor.created_at).toLocaleDateString("en-IN", {
+        day: "2-digit", month: "short", year: "numeric",
+      })
+    : "—";
 
   return (
     <div className="flex flex-col h-[92vh] bg-gray-50">
@@ -140,8 +198,16 @@ export default function ViewVendor() {
           <ArrowLeft size={15} /> Back
         </button>
 
-        {/* TITLE */}
-        <h1 className="text-2xl font-bold text-[#02027A]">View Vendor Details</h1>
+        {/* TITLE + EDIT BUTTON */}
+        <div className="flex items-start justify-between mb-1">
+          <h1 className="text-2xl font-bold text-[#02027A]">View Vendor Details</h1>
+          <button
+            onClick={() => navigate(`/super-admin/edit-vendor/${vendor.vendor_id}`)}
+            className="bg-[#02027A] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-[#01016a] transition"
+          >
+            Edit Profile
+          </button>
+        </div>
 
         {/* BREADCRUMB */}
         <div className="flex items-center gap-1 text-xs text-gray-400 mt-2 mb-5">
@@ -156,73 +222,100 @@ export default function ViewVendor() {
           {/* LEFT — sections */}
           <div className="col-span-8 space-y-5">
 
-            {/* COVERAGE AREA */}
-            <Section icon={MapPin} title="Coverage Area">
+            {/* COMPANY INFO */}
+            <Section icon={Building2} title="Company Information">
               <div className="grid grid-cols-2 gap-6">
+                <Info label="Company Name"  value={vendor.company_name} />
+                <Info label="Vendor ID"     value={vendorDisplayId} />
+                <Info label="CIN"           value={vendor.cin} />
+                <Info label="GST Number"    value={vendor.gst_number} />
+              </div>
+            </Section>
+
+            {/* REGISTERED ADDRESS */}
+            <Section icon={MapPin} title="Registered Address">
+              <div className="grid grid-cols-3 gap-6">
+                <Info label="Address Line 1" value={vendor.address_line_1} />
+                <Info label="Address Line 2" value={vendor.address_line_2} />
+                <Info label="City"           value={vendor.city} />
+                <Info label="State"          value={vendor.state} />
+                <Info label="Pincode"        value={vendor.pincode} />
+              </div>
+            </Section>
+
+            {/* COVERAGE AREA */}
+            {vendor.coverage_states && vendor.coverage_states.length > 0 && (
+              <Section icon={MapPin} title="Coverage Area">
                 <div>
                   <p className="text-xs text-gray-400 mb-2">Supported States</p>
                   <div className="flex flex-wrap gap-2">
-                    {vendor.states.map((s) => (
-                      <span key={s} className="bg-indigo-50 text-indigo-700 text-xs font-medium px-3 py-1 rounded-full border border-indigo-100">
-                        {s}
+                    {vendor.coverage_states.map((s, i) => (
+                      <span
+                        key={i}
+                        className="bg-indigo-50 text-indigo-700 text-xs font-medium px-3 py-1 rounded-full border border-indigo-100"
+                      >
+                        {STATE_MAP[s] || `State ${s}`}
                       </span>
                     ))}
                   </div>
-                  <p className="text-xs text-gray-400 mt-4 mb-1">Supported Cities</p>
-                  <p className="text-sm text-gray-700">{vendor.cities}</p>
                 </div>
-                <div>
-                  <p className="text-xs text-gray-400 mb-1">GST Number</p>
-                  <p className="text-sm font-medium text-gray-700">{vendor.gst}</p>
-                </div>
-              </div>
-            </Section>
+              </Section>
+            )}
 
             {/* PRIMARY CONTACT */}
             <Section icon={User} title="Primary Contact Person">
               <div className="grid grid-cols-3 gap-6">
                 <div>
                   <p className="text-xs text-gray-400 mb-1">Full Name</p>
-                  <p className="text-sm font-semibold text-gray-800">{vendor.fullName}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{vendor.role}</p>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {vendor.poc_first_name} {vendor.poc_last_name}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 mb-1">Contact Email</p>
-                  <p className="text-sm text-indigo-500 font-medium">{vendor.email}</p>
+                  <p className="text-sm text-indigo-500 font-medium">{vendor.poc_email}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 mb-1">Phone Number</p>
-                  <p className="text-sm text-gray-700">{vendor.phone}</p>
+                  <p className="text-sm text-gray-700">{vendor.poc_mobile}</p>
                 </div>
               </div>
             </Section>
 
             {/* SERVICES & SLAs */}
-            <Section icon={ShieldCheck} title="Services Offered & SLAs">
-              <div className="space-y-3">
-                {vendor.services.map((s, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between border border-gray-100 rounded-xl px-4 py-3 hover:bg-gray-50 transition"
-                  >
-                    <div className="flex items-center gap-3">
-                      <CheckCircle2 size={16} className="text-green-500" />
-                      <span className="text-sm text-gray-700">{s.name}</span>
+            {vendor.services && vendor.services.length > 0 && (
+              <Section icon={ShieldCheck} title="Services Offered & SLAs">
+                <div className="space-y-3">
+                  {vendor.services.map((s, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between border border-gray-100 rounded-xl px-4 py-3 hover:bg-gray-50 transition"
+                    >
+                      <div className="flex items-center gap-3">
+                        <CheckCircle2 size={16} className="text-green-500" />
+                        <span className="text-sm text-gray-700">{s.name}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 bg-indigo-50 text-indigo-600 text-xs font-semibold px-3 py-1.5 rounded-lg">
+                        <Clock size={12} />
+                        {s.sla}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 bg-indigo-50 text-indigo-600 text-xs font-semibold px-3 py-1.5 rounded-lg">
-                      <Clock size={12} />
-                      {s.sla}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Section>
+                  ))}
+                </div>
+              </Section>
+            )}
 
           </div>
 
-          {/* RIGHT — Quality Score */}
-          <div className="col-span-4 h-1/2">
-            <QualityScoreCard score={vendor.qualityScore} />
+          {/* RIGHT — Quality Score + Joined Date */}
+          <div className="col-span-4 space-y-5">
+            <QualityScoreCard score={96.5} status={vendor.status} />
+
+            {/* JOINED DATE CARD */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+              <p className="text-xs text-gray-400 mb-1">Joined On</p>
+              <p className="text-base font-semibold text-gray-900">{joinedDate}</p>
+            </div>
           </div>
 
         </div>
@@ -237,10 +330,10 @@ export default function ViewVendor() {
           Back
         </button>
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(`/super-admin/edit-vendor/${vendor.vendor_id}`)}
           className="px-6 py-2.5 rounded-xl bg-[#02027A] text-white text-sm font-semibold hover:bg-[#01016a] transition"
         >
-          Done
+          Edit Vendor
         </button>
       </div>
 

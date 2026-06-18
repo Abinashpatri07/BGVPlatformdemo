@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import axios from "axios";
 import {
   MoreVertical,
   Mail,
@@ -10,65 +11,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-const initialVendors = [
-  {
-    id: "CLT100245",
-    vendorName: "NovaEdge Solutions",
-    poc: "Ananya Iyer",
-    email: "ananya.iyer@example.com",
-    gst: "29ABCDE1234F1Z5",
-    status: "Active",
-  },
-  {
-    id: "CLT100246",
-    vendorName: "NovaEdge Solutions",
-    poc: "Advait Joshi",
-    email: "advait.joshi@mail.com",
-    gst: "27PQRSX5678L1Z2",
-    status: "Active",
-  },
-  {
-    id: "CLT100247",
-    vendorName: "NextWave Innovations",
-    poc: "Niten Sharma",
-    email: "nitenkumar34@gmail.com",
-    gst: "07LMNOP4321K1Z8",
-    status: "In Active",
-  },
-  {
-    id: "CLT100259",
-    vendorName: "BluePeak Systems",
-    poc: "Reyansh Reddy",
-    email: "niten.sharma@webmail.org",
-    gst: "07LMNOP4321K1Z8",
-    status: "Suspended",
-  },
-  {
-    id: "CLT100253",
-    vendorName: "PrimeAxis Consulting",
-    poc: "Sia Banerjee",
-    email: "sia.banerjee@example.com",
-    gst: "33ZXCVB2468N1Z7",
-    status: "In Active",
-  },
-  {
-    id: "CLT100258",
-    vendorName: "FusionGrid Pvt. Ltd.",
-    poc: "Myra Kulkarni",
-    email: "myra.kulkarni@mail.com",
-    gst: "24QWERT1357P1Z9",
-    status: "Active",
-  },
-  {
-    id: "CLT100250",
-    vendorName: "ApexNova Technologies",
-    poc: "Navya Sharma",
-    email: "nitenkumar34@gmail.com",
-    gst: "06ASDFG7531H1Z3",
-    status: "Active",
-  },
-];
+import ClientPagination from "../client/ClientPagination";
 
 // ── Status Badge ───────────────────────────────────────────
 const StatusBadge = ({ status }) => {
@@ -134,16 +77,16 @@ const TerminateModal = ({ vendor, onClose, onConfirm }) => {
             Cancel
           </button>
           <button
-  onClick={() => onConfirm(reason)}
-  disabled={!reason.trim()}
-  className={`px-5 py-2 rounded-lg text-sm font-semibold transition ${
-    reason.trim()
-      ? "bg-red-600 text-white hover:bg-red-700 cursor-pointer"
-      : "bg-red-100 text-red-300 cursor-not-allowed pointer-events-none"
-  }`}
->
-  Suspend
-</button>
+            onClick={() => onConfirm(reason)}
+            disabled={!reason.trim()}
+            className={`px-5 py-2 rounded-lg text-sm font-semibold transition ${
+              reason.trim()
+                ? "bg-red-600 text-white hover:bg-red-700 cursor-pointer"
+                : "bg-red-100 text-red-300 cursor-not-allowed pointer-events-none"
+            }`}
+          >
+            Suspend
+          </button>
         </div>
       </div>
     </Modal>
@@ -178,7 +121,7 @@ const TerminateSuccessModal = ({ vendor, onClose }) => (
 );
 
 const SendEmailModal = ({ onClose }) => (
-  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-9999">
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
     <div className="bg-white rounded-2xl w-120 overflow-hidden shadow-xl text-center">
       {/* Purple wave top */}
       <div className="relative bg-purple-600 h-40 flex items-center justify-center">
@@ -277,14 +220,54 @@ const ActionMenu = ({ vendor, onView, onEdit, onSendEmail, onTerminate }) => {
 };
 
 // ── Main Table ─────────────────────────────────────────────
-export default function VendorTable() {
+export default function VendorTable({ onStatsFetched }) {
   const navigate = useNavigate();
   const [selected, setSelected] = useState([]);
-  const [vendors, setVendors] = useState(initialVendors);
+  const [vendors, setVendors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(9);
+  const [totalVendors, setTotalVendors] = useState(0);
+  const [refreshToggle, setRefreshToggle] = useState(false);
 
   const [terminateTarget, setTerminateTarget] = useState(null);
   const [terminateSuccess, setTerminateSuccess] = useState(null);
   const [emailSuccess, setEmailSuccess] = useState(false);
+
+  useEffect(() => {
+    const fetchVendors = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/vendor?page=${currentPage}&limit=${perPage}`);
+        const mapped = response.data.vendors.map(v => {
+          let status = "Active";
+          if (v.is_suspend === 1) status = "Suspended";
+          else if (v.is_active === 2) status = "In Active";
+
+          return {
+            id: `VND${v.vendor_id.toString().padStart(4, '0')}`,
+            dbId: v.vendor_id,
+            vendorName: v.company_name,
+            poc: `${v.poc_first_name} ${v.poc_last_name}`,
+            email: v.poc_email,
+            gst: v.gst_number || "N/A",
+            status: status
+          };
+        });
+        setVendors(mapped);
+        if (response.data.pagination) {
+          setTotalVendors(response.data.pagination.total);
+        }
+        if (response.data.stats && onStatsFetched) {
+          onStatsFetched(response.data.stats);
+        }
+      } catch (err) {
+        console.error("Failed to fetch vendors:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVendors();
+  }, [currentPage, perPage, refreshToggle]);
 
   const toggleAll = (e) =>
     setSelected(e.target.checked ? vendors.map((v) => v.id) : []);
@@ -294,19 +277,28 @@ export default function VendorTable() {
       p.includes(id) ? p.filter((x) => x !== id) : [...p, id],
     );
 
-  const handleTerminateConfirm = (reason) => {
-    setVendors((p) => p.filter((v) => v.id !== terminateTarget.id));
-    setTerminateTarget(null);
-    setTerminateSuccess(terminateTarget);
+  const handleTerminateConfirm = async (reason) => {
+    try {
+      const res = await axios.patch(`http://localhost:5000/api/vendor/suspend/${terminateTarget.dbId}`, { reason });
+      if (res.data.success) {
+        // Trigger a re-fetch so that the table and the dashboard stats cards update automatically
+        setRefreshToggle(prev => !prev);
+      }
+    } catch (error) {
+      console.error("Failed to suspend vendor:", error);
+    } finally {
+      setTerminateSuccess(terminateTarget);
+      setTerminateTarget(null);
+    }
   };
 
   return (
     <>
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/50">
-              <th className="px-4 py-4 w-10">
+              <th className="px-4 py-4 w-10 first:rounded-tl-2xl">
                 <input
                   type="checkbox"
                   onChange={toggleAll}
@@ -326,7 +318,7 @@ export default function VendorTable() {
               ].map((h) => (
                 <th
                   key={h}
-                  className="px-4 py-4 text-left text-sm font-medium text-gray-600"
+                  className="px-4 py-4 text-left text-sm font-medium text-gray-600 last:rounded-tr-2xl"
                 >
                   {h}
                 </th>
@@ -334,45 +326,73 @@ export default function VendorTable() {
             </tr>
           </thead>
           <tbody>
-            {vendors.map((v) => (
-              <tr
-                key={v.id}
-                className="border-b border-gray-50 hover:bg-gray-50 transition"
-              >
-                <td className="px-4 py-4">
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(v.id)}
-                    onChange={() => toggleOne(v.id)}
-                    className="rounded"
-                  />
-                </td>
-                <td className="px-4 py-4 text-sm text-gray-700">{v.id}</td>
-                <td className="px-4 py-4 text-sm text-gray-700">
-                  {v.vendorName}
-                </td>
-                <td className="px-4 py-4">
-                  <p className="text-sm text-gray-700">{v.poc}</p>
-                  <p className="text-xs text-indigo-400">{v.email}</p>
-                </td>
-                <td className="px-4 py-4 text-sm text-gray-700">{v.gst}</td>
-                <td className="px-4 py-4">
-                  <StatusBadge status={v.status} />
-                </td>
-                <td className="px-4 py-4">
-                  <ActionMenu
-                    vendor={v}
-                    onView={() => navigate(`/super-admin/view-vendor/${v.id}`)}
-                    onEdit={() => navigate(`/super-admin/edit-vendor/${v.id}`)}
-                    onSendEmail={() => setEmailSuccess(true)}
-                    onTerminate={() => setTerminateTarget(v)}
-                  />
+            {loading ? (
+              <tr>
+                <td colSpan="6" className="px-4 py-8 text-center text-gray-500">
+                  Loading vendors...
                 </td>
               </tr>
-            ))}
+            ) : vendors.length === 0 ? (
+              <tr>
+                <td colSpan="6" className="px-4 py-8 text-center text-gray-500">
+                  No vendors found.
+                </td>
+              </tr>
+            ) : (
+              vendors.map((v) => (
+                <tr
+                  key={v.id}
+                  className="border-b border-gray-50 hover:bg-gray-50 transition"
+                >
+                  <td className="px-4 py-4">
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(v.id)}
+                      onChange={() => toggleOne(v.id)}
+                      className="rounded"
+                    />
+                  </td>
+                  <td className="px-4 py-4 text-sm text-gray-700">{v.id}</td>
+                  <td className="px-4 py-4 text-sm text-gray-700">
+                    {v.vendorName}
+                  </td>
+                  <td className="px-4 py-4">
+                    <p className="text-sm text-gray-700">{v.poc}</p>
+                    <p className="text-xs text-indigo-400">{v.email}</p>
+                  </td>
+                  <td className="px-4 py-4 text-sm text-gray-700">{v.gst}</td>
+                  <td className="px-4 py-4">
+                    <StatusBadge status={v.status} />
+                  </td>
+                  <td className="px-4 py-4">
+                    <ActionMenu
+                      vendor={v}
+                      onView={() => navigate(`/super-admin/view-vendor/${v.dbId}`)}
+                      onEdit={() => navigate(`/super-admin/edit-vendor/${v.dbId}`)}
+                      onSendEmail={() => setEmailSuccess(true)}
+                      onTerminate={() => setTerminateTarget(v)}
+                    />
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
+
+      {/* PAGINATION */}
+      {totalVendors > 0 && (
+        <ClientPagination
+          total={totalVendors}
+          perPage={perPage}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+          onPerPageChange={(val) => {
+            setPerPage(val);
+            setCurrentPage(1);
+          }}
+        />
+      )}
 
       {/* TERMINATE CONFIRM MODAL */}
       {terminateTarget && (

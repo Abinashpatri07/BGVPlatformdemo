@@ -8,38 +8,37 @@ import {
   Maximize2,
 } from "lucide-react";
 
-const stats = [
-  {
-    title: "Total",
-    value: "20",
-    icon: UsersRound,
-    iconBg: "bg-indigo-100",
-    iconColor: "text-indigo-600",
-  },
-  {
-    title: "Active",
-    value: "10",
-    icon: UserCheck,
-    iconBg: "bg-green-100",
-    iconColor: "text-green-500",
-  },
-  {
-    title: "Inactive",
-    value: "09",
-    icon: UserX,
-    iconBg: "bg-orange-100",
-    iconColor: "text-orange-500",
-  },
-  {
-    title: "Suspended",
-    value: "18",
-    icon: UserMinus,
-    iconBg: "bg-red-100",
-    iconColor: "text-red-500",
-  },
-];
-
-export default function VendorStats() {
+export default function VendorStats({ statsData }) {
+  const stats = [
+    {
+      title: "Total",
+      value: statsData?.total?.toString().padStart(2, '0') || "00",
+      icon: UsersRound,
+      iconBg: "bg-indigo-100",
+      iconColor: "text-indigo-600",
+    },
+    {
+      title: "Active",
+      value: statsData?.active?.toString().padStart(2, '0') || "00",
+      icon: UserCheck,
+      iconBg: "bg-green-100",
+      iconColor: "text-green-500",
+    },
+    {
+      title: "Inactive",
+      value: statsData?.inactive?.toString().padStart(2, '0') || "00",
+      icon: UserX,
+      iconBg: "bg-orange-100",
+      iconColor: "text-orange-500",
+    },
+    {
+      title: "Suspended",
+      value: statsData?.suspended?.toString().padStart(2, '0') || "00",
+      icon: UserMinus,
+      iconBg: "bg-red-100",
+      iconColor: "text-red-500",
+    },
+  ];
 
   return (
 

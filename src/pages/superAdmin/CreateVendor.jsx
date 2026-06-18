@@ -10,6 +10,8 @@ import {
   Info,
   CheckCircle2,
   X,
+  Plus,
+  MapPin,
 } from "lucide-react";
 
 const SERVICES = [
@@ -20,68 +22,50 @@ const SERVICES = [
   "Drug Test",
 ];
 
-// ── Tag Input ──────────────────────────────────────────
-const TagInput = ({ value, onChange, tags, setTags, placeholder, error }) => {
-  const handleKey = (e) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      const trimmed = value.trim();
-      if (trimmed && !tags.includes(trimmed)) {
-        setTags([...tags, trimmed]);
-        onChange("");
-      }
-    }
-    if (e.key === "Backspace" && !value && tags.length) {
-      setTags(tags.slice(0, -1));
-    }
-  };
+const MOCK_STATES = [
+  { id: 1, name: "Maharashtra" },
+  { id: 2, name: "Karnataka" },
+  { id: 3, name: "Delhi" },
+  { id: 4, name: "Gujarat" },
+  { id: 5, name: "Tamil Nadu" },
+];
 
-  const removeTag = (tag) => setTags(tags.filter((t) => t !== tag));
-
-  return (
-    <div
-      className={`w-full border rounded-lg px-3 py-2 focus-within:ring-2 transition ${
-        error
-          ? "border-red-400 focus-within:ring-red-200 bg-red-50"
-          : "border-gray-200 focus-within:ring-[#02027A]/20 bg-white"
-      }`}
-    >
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={handleKey}
-        onBlur={() => {
-          const trimmed = value.trim();
-          if (trimmed && !tags.includes(trimmed)) {
-            setTags([...tags, trimmed]);
-            onChange("");
-          }
-        }}
-        placeholder={
-          tags.length === 0 ? placeholder : "Type and press Enter..."
-        }
-        className="w-full text-sm outline-none bg-transparent placeholder-gray-400 h-7"
-      />
-      {tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mt-2">
-          {tags.map((tag) => (
-            <span
-              key={tag}
-              className="flex items-center gap-1 bg-indigo-50 text-indigo-700 text-xs font-medium px-2.5 py-1 rounded-full border border-indigo-100"
-            >
-              {tag}
-              <button
-                onClick={() => removeTag(tag)}
-                className="hover:text-red-500 transition ml-0.5"
-              >
-                <X size={10} />
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+const MOCK_CITIES = {
+  1: [
+    { id: 101, name: "Mumbai" },
+    { id: 102, name: "Pune" },
+    { id: 103, name: "Nagpur" },
+    { id: 104, name: "Nashik" },
+    { id: 105, name: "Thane" },
+  ],
+  2: [
+    { id: 201, name: "Bangalore" },
+    { id: 202, name: "Mysore" },
+    { id: 203, name: "Hubli" },
+    { id: 204, name: "Mangalore" },
+    { id: 205, name: "Belgaum" },
+  ],
+  3: [
+    { id: 301, name: "New Delhi" },
+    { id: 302, name: "Dwarka" },
+    { id: 303, name: "Rohini" },
+    { id: 304, name: "Janakpuri" },
+    { id: 305, name: "Karol Bagh" },
+  ],
+  4: [
+    { id: 401, name: "Ahmedabad" },
+    { id: 402, name: "Surat" },
+    { id: 403, name: "Vadodara" },
+    { id: 404, name: "Rajkot" },
+    { id: 405, name: "Bhavnagar" },
+  ],
+  5: [
+    { id: 501, name: "Chennai" },
+    { id: 502, name: "Coimbatore" },
+    { id: 503, name: "Madurai" },
+    { id: 504, name: "Trichy" },
+    { id: 505, name: "Salem" },
+  ],
 };
 
 // ── Field ──────────────────────────────────────────────
@@ -101,10 +85,8 @@ const Field = ({ label, error, children }) => (
 );
 
 const inputClass = (err) =>
-  `w-full h-11 border rounded-lg px-4 text-sm focus:outline-none focus:ring-2 transition ${
-    err
-      ? "border-red-400 focus:ring-red-200 bg-red-50"
-      : "border-gray-200 focus:ring-[#02027A]/20 bg-white"
+  `w-full px-4 py-2.5 bg-[#F8FAFF] border rounded-xl outline-none focus:ring-2 focus:ring-indigo-400 transition placeholder-gray-400 text-gray-700 ${
+    err ? "border-red-400 bg-red-50" : "border-[#B3C9FF]"
   }`;
 
 // ── Section Header ─────────────────────────────────────
@@ -128,16 +110,22 @@ export default function CreateVendor() {
 
   const [form, setForm] = useState({
     vendorName: "",
+    cin: "",
     gst: "",
-    fullName: "",
+    address1: "",
+    address2: "",
+    city: "",
+    state: "",
+    pinCode: "",
+    firstName: "",
+    lastName: "",
     email: "",
     phone: "",
   });
 
-  const [stateInput, setStateInput] = useState("");
-  const [stateTags, setStateTags] = useState([]);
-  const [cityInput, setCityInput] = useState("");
-  const [cityTags, setCityTags] = useState([]);
+  const [coverageAreas, setCoverageAreas] = useState([
+    { stateId: "", cityIds: [] },
+  ]);
 
   const [errors, setErrors] = useState({});
   const [selectedServices, setSelectedServices] = useState({});
@@ -148,6 +136,36 @@ export default function CreateVendor() {
   const handleChange = (field, value) => {
     setForm((p) => ({ ...p, [field]: value }));
     if (errors[field]) setErrors((p) => ({ ...p, [field]: "" }));
+  };
+
+  const handleAddCoverage = () => {
+    if (coverageAreas.length < 5) {
+      setCoverageAreas([...coverageAreas, { stateId: "", cityIds: [] }]);
+    }
+  };
+
+  const handleRemoveCoverage = (index) => {
+    setCoverageAreas(coverageAreas.filter((_, i) => i !== index));
+  };
+
+  const handleCoverageStateChange = (index, val) => {
+    const updated = [...coverageAreas];
+    updated[index].stateId = val ? parseInt(val) : "";
+    updated[index].cityIds = [];
+    setCoverageAreas(updated);
+  };
+
+  const handleCoverageCityToggle = (index, cityId) => {
+    const updated = [...coverageAreas];
+    const cityList = updated[index].cityIds;
+    if (cityList.includes(cityId)) {
+      updated[index].cityIds = cityList.filter((c) => c !== cityId);
+    } else {
+      if (cityList.length < 5) {
+        updated[index].cityIds = [...cityList, cityId];
+      }
+    }
+    setCoverageAreas(updated);
   };
 
   const toggleService = (index) => {
@@ -168,15 +186,31 @@ export default function CreateVendor() {
     if (!form.vendorName.trim())
       e.vendorName = "Vendor company name is required.";
 
-    if (!form.gst.trim()) e.gst = "GST number is required.";
+    const cinRegex = /^[A-Z]{1}[0-9]{5}[A-Z]{2}[0-9]{4}[A-Z]{3}[0-9]{6}$/;
+    if (form.cin && !cinRegex.test(form.cin.trim())) {
+      e.cin = "Invalid CIN format.";
+    }
 
-    if (!stateTags.length && !stateInput.trim())
-      e.states = "Coverage state is required.";
+    const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+    if (form.gst && !gstRegex.test(form.gst.trim())) {
+      e.gst = "Invalid GST number.";
+    }
 
-    if (!cityTags.length && !cityInput.trim())
-      e.cities = "Coverage city is required.";
+    if (!form.address1.trim()) e.address1 = "Address Line 1 is required.";
+    if (!form.address2.trim()) e.address2 = "Address Line 2 is required.";
+    if (!form.city.trim()) e.city = "City is required.";
+    if (!form.state.trim()) e.state = "State is required.";
+    
+    if (!form.pinCode.trim()) e.pinCode = "Pincode is required.";
+    else if (!/^\d{6}$/.test(form.pinCode)) e.pinCode = "Pincode must be 6 digits.";
 
-    if (!form.fullName.trim()) e.fullName = "Full name is required.";
+    const validCoverage = coverageAreas.filter((c) => c.stateId !== "");
+    if (validCoverage.length === 0) {
+      e.coverageAreas = "At least one valid coverage state is required.";
+    }
+
+    if (!form.firstName.trim()) e.firstName = "First name is required.";
+    if (!form.lastName.trim()) e.lastName = "Last name is required.";
 
     if (!form.email.trim()) {
       e.email = "Email is required.";
@@ -186,12 +220,12 @@ export default function CreateVendor() {
 
     if (!form.phone.trim()) {
       e.phone = "Phone number is required.";
-    } else if (!/^[+]?[\d\s\-]{10,15}$/.test(form.phone)) {
-      e.phone = "Enter a valid phone number.";
+    } else if (!/^[0-9]{10}$/.test(form.phone)) {
+      e.phone = "Enter a valid 10-digit phone number.";
     }
 
     const hasService = Object.values(selectedServices).some(
-      (v) => v !== undefined,
+      (v) => v !== undefined
     );
     if (!hasService) setServiceError("Please select at least one service.");
     else setServiceError("");
@@ -206,44 +240,33 @@ export default function CreateVendor() {
 
   // ── Save ──────────────────────────────────────────────
   const handleSave = async () => {
-    // FRONTEND VALIDATION
     const e = validate();
-
     setErrors(e);
 
     const hasService = Object.values(selectedServices).some(
-      (v) => v !== undefined,
+      (v) => v !== undefined
     );
 
     if (Object.keys(e).length > 0 || !hasService) return;
 
     try {
-      // FINAL DATA
+      const validCoverage = coverageAreas.filter((c) => c.stateId !== "");
+
       const finalData = {
         ...form,
-        states: stateTags,
-        cities: cityTags,
+        coverageAreas: validCoverage,
         services: selectedServices,
       };
 
-      // API CALL
       const response = await axios.post(
         "http://localhost:5000/api/vendor/create",
-        finalData,
+        finalData
       );
 
       console.log(response.data);
-
-      // SUCCESS
       setSubmitted(true);
-
-      setTimeout(() => {
-        navigate(-1);
-      }, 1500);
     } catch (error) {
       console.log(error);
-
-      // BACKEND VALIDATION ERRORS
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
       } else {
@@ -253,21 +276,8 @@ export default function CreateVendor() {
   };
 
   // ── Success Screen ─────────────────────────────────────
-  if (submitted) {
-    return (
-      <div className="h-[92vh] flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <CheckCircle2 size={56} className="text-green-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-800">Vendor Created!</h2>
-          <p className="text-sm text-gray-400 mt-1">Redirecting back...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col h-[92vh] px-6 py-5">
-      {/* BACK */}
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-2 text-sm text-gray-400 hover:text-[#02027A] transition mb-4 w-fit"
@@ -275,52 +285,49 @@ export default function CreateVendor() {
         <ArrowLeft size={15} /> Back
       </button>
 
-      {/* TITLE */}
       <h1 className="text-2xl font-bold text-[#02027A]">Create A New Vendor</h1>
       <p className="text-sm text-gray-400 mt-1">
-        Create a client account to manage users and verifications.
+        Create a vendor account to outsource verification checks.
       </p>
 
-      {/* BREADCRUMB */}
       <div className="flex items-center gap-1 text-xs text-gray-400 mt-3 mb-4">
         <span>Vendor</span>
         <ChevronRight size={12} />
         <span className="text-gray-600 font-medium">Create Vendor</span>
       </div>
 
-      {/* SCROLLABLE CARD */}
       <div className="flex-1 overflow-y-auto">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5 max-w-3xl">
-          {/* ── SECTION 1: Vendor Details ── */}
-          <SectionHeader icon={Building2} title="Vendor Details & Coverage" />
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-6 max-w-3xl">
+          
+          {/* ── SECTION 1: Company Details ── */}
+          <SectionHeader icon={Building2} title="Company Details" />
 
           <div className="space-y-4 -mt-2">
-            {/* ROW 1 — Company Name + GST */}
+            <Field
+              label={
+                <>Company Name <span className="text-red-500">*</span></>
+              }
+              error={errors.vendorName}
+            >
+              <input
+                value={form.vendorName}
+                onChange={(e) => handleChange("vendorName", e.target.value)}
+                placeholder="Apex Background Screeners"
+                className={inputClass(errors.vendorName)}
+              />
+            </Field>
+
             <div className="grid grid-cols-2 gap-4">
-              <Field
-                label={
-                  <>
-                    Vendor Company Name <span className="text-red-500">*</span>
-                  </>
-                }
-                error={errors.vendorName}
-              >
+              <Field label="CIN" error={errors.cin}>
                 <input
-                  value={form.vendorName}
-                  onChange={(e) => handleChange("vendorName", e.target.value)}
-                  placeholder="Apex background screeners"
-                  className={inputClass(errors.vendorName)}
+                  value={form.cin}
+                  onChange={(e) => handleChange("cin", e.target.value)}
+                  placeholder="U72900MH2021PTC364"
+                  className={inputClass(errors.cin)}
                 />
               </Field>
 
-              <Field
-                label={
-                  <>
-                    GST Number <span className="text-red-500">*</span>
-                  </>
-                }
-                error={errors.gst}
-              >
+              <Field label="GST Number" error={errors.gst}>
                 <input
                   value={form.gst}
                   onChange={(e) => handleChange("gst", e.target.value)}
@@ -329,50 +336,59 @@ export default function CreateVendor() {
                 />
               </Field>
             </div>
+          </div>
 
-            {/* ROW 2 — States + Cities tag inputs */}
-            <div className="grid grid-cols-2 gap-4">
-              <Field
-                label={
-                  <>
-                    Coverage Area (States){" "}
-                    <span className="text-red-500">*</span>
-                  </>
-                }
-                error={errors.states}
-              >
-                <TagInput
-                  value={stateInput}
-                  onChange={setStateInput}
-                  tags={stateTags}
-                  setTags={(tags) => {
-                    setStateTags(tags);
-                    if (errors.states) setErrors((p) => ({ ...p, states: "" }));
-                  }}
-                  placeholder="Type state, press Enter"
-                  error={errors.states}
+          <hr className="border-gray-100" />
+
+          {/* ── SECTION 2: Base Address ── */}
+          <SectionHeader icon={MapPin} title="Base Address" />
+
+          <div className="space-y-4 -mt-2">
+            <Field label={<>Address Line 1 <span className="text-red-500">*</span></>} error={errors.address1}>
+              <input
+                value={form.address1}
+                onChange={(e) => handleChange("address1", e.target.value)}
+                placeholder="Unit 201, 2nd Floor, Apex Tower"
+                className={inputClass(errors.address1)}
+              />
+            </Field>
+
+            <Field label={<>Address Line 2 <span className="text-red-500">*</span></>} error={errors.address2}>
+              <input
+                value={form.address2}
+                onChange={(e) => handleChange("address2", e.target.value)}
+                placeholder="Near Tech Park, MIDC"
+                className={inputClass(errors.address2)}
+              />
+            </Field>
+
+            <div className="grid grid-cols-3 gap-4">
+              <Field label={<>City <span className="text-red-500">*</span></>} error={errors.city}>
+                <input
+                  value={form.city}
+                  onChange={(e) => handleChange("city", e.target.value)}
+                  placeholder="Mumbai"
+                  className={inputClass(errors.city)}
                 />
               </Field>
 
-              <Field
-                label={
-                  <>
-                    Coverage Area (Cities){" "}
-                    <span className="text-red-500">*</span>
-                  </>
-                }
-                error={errors.cities}
-              >
-                <TagInput
-                  value={cityInput}
-                  onChange={setCityInput}
-                  tags={cityTags}
-                  setTags={(tags) => {
-                    setCityTags(tags);
-                    if (errors.cities) setErrors((p) => ({ ...p, cities: "" }));
-                  }}
-                  placeholder="Type city, press Enter"
-                  error={errors.cities}
+              <Field label={<>State <span className="text-red-500">*</span></>} error={errors.state}>
+                <input
+                  value={form.state}
+                  onChange={(e) => handleChange("state", e.target.value)}
+                  placeholder="Maharashtra"
+                  className={inputClass(errors.state)}
+                />
+              </Field>
+
+              <Field label={<>Pincode <span className="text-red-500">*</span></>} error={errors.pinCode}>
+                <input
+                  value={form.pinCode}
+                  onChange={(e) => handleChange("pinCode", e.target.value)}
+                  placeholder="400001"
+                  maxLength={6}
+                  onInput={(e) => { e.target.value = e.target.value.replace(/\D/g, ""); }}
+                  className={inputClass(errors.pinCode)}
                 />
               </Field>
             </div>
@@ -380,33 +396,125 @@ export default function CreateVendor() {
 
           <hr className="border-gray-100" />
 
-          {/* ── SECTION 2: Primary Contact ── */}
+          {/* ── SECTION 3: Coverage Area ── */}
+          <SectionHeader icon={MapPin} title="Coverage Area" subtitle="Select up to 5 states and up to 5 cities per state." />
+          
+          <div className="space-y-4 -mt-2">
+            {coverageAreas.map((coverage, idx) => {
+              const availableCities = coverage.stateId ? MOCK_CITIES[coverage.stateId] || [] : [];
+              return (
+                <div key={idx} className="p-4 bg-[#F8FAFF] border border-[#B3C9FF] rounded-xl relative">
+                  {coverageAreas.length > 1 && (
+                    <button
+                      onClick={() => handleRemoveCoverage(idx)}
+                      className="absolute top-3 right-3 text-red-400 hover:text-red-500 transition bg-red-50 p-1 rounded-md"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                  <div className="mb-3 w-1/2">
+                    <Field label={`Coverage State ${idx + 1}`}>
+                      <select
+                        value={coverage.stateId}
+                        onChange={(e) => handleCoverageStateChange(idx, e.target.value)}
+                        className={`w-full px-4 py-2.5 bg-white border border-[#B3C9FF] rounded-xl outline-none focus:ring-2 focus:ring-indigo-400 transition text-sm ${!coverage.stateId ? "text-gray-400" : "text-gray-700"}`}
+                      >
+                        <option value="">Select State</option>
+                        {MOCK_STATES.map((state) => {
+                          // Disable if already selected in another block
+                          const isUsed = coverageAreas.some((c, cIdx) => cIdx !== idx && c.stateId === state.id);
+                          return (
+                            <option key={state.id} value={state.id} disabled={isUsed}>
+                              {state.name}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </Field>
+                  </div>
+
+                  {coverage.stateId && (
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">
+                        Select Cities (Max 5)
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {availableCities.map((city) => {
+                          const isSelected = coverage.cityIds.includes(city.id);
+                          const isDisabled = !isSelected && coverage.cityIds.length >= 5;
+                          return (
+                            <button
+                              key={city.id}
+                              onClick={() => handleCoverageCityToggle(idx, city.id)}
+                              disabled={isDisabled}
+                              className={`px-3 py-1.5 text-xs font-medium rounded-full border transition ${
+                                isSelected
+                                  ? "bg-indigo-600 text-white border-indigo-600"
+                                  : isDisabled
+                                  ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                                  : "bg-white text-gray-600 border-[#B3C9FF] hover:bg-indigo-50"
+                              }`}
+                            >
+                              {city.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {errors.coverageAreas && (
+              <p className="text-[11px] text-red-500 mt-1">{errors.coverageAreas}</p>
+            )}
+
+            {coverageAreas.length < 5 && (
+              <button
+                onClick={handleAddCoverage}
+                className="flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition px-2 py-1"
+              >
+                <Plus size={16} /> Add Another State
+              </button>
+            )}
+          </div>
+
+          <hr className="border-gray-100" />
+
+          {/* ── SECTION 4: Primary Contact ── */}
           <SectionHeader icon={User} title="Primary Contact Person" />
 
           <div className="space-y-4 -mt-2">
-            <Field
-              label={
-                <>
-                  Full Name <span className="text-red-500">*</span>
-                </>
-              }
-              error={errors.fullName}
-            >
-              <input
-                value={form.fullName}
-                onChange={(e) => handleChange("fullName", e.target.value)}
-                placeholder="Manav Joshi"
-                className={inputClass(errors.fullName)}
-              />
-            </Field>
+            <div className="grid grid-cols-2 gap-4">
+              <Field
+                label={<>First Name <span className="text-red-500">*</span></>}
+                error={errors.firstName}
+              >
+                <input
+                  value={form.firstName}
+                  onChange={(e) => handleChange("firstName", e.target.value)}
+                  placeholder="Manav"
+                  className={inputClass(errors.firstName)}
+                />
+              </Field>
+
+              <Field
+                label={<>Last Name <span className="text-red-500">*</span></>}
+                error={errors.lastName}
+              >
+                <input
+                  value={form.lastName}
+                  onChange={(e) => handleChange("lastName", e.target.value)}
+                  placeholder="Joshi"
+                  className={inputClass(errors.lastName)}
+                />
+              </Field>
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
               <Field
-                label={
-                  <>
-                    Contact Email <span className="text-red-500">*</span>
-                  </>
-                }
+                label={<>Contact Email <span className="text-red-500">*</span></>}
                 error={errors.email}
               >
                 <input
@@ -416,39 +524,32 @@ export default function CreateVendor() {
                   placeholder="manav.joshi@example.com"
                   className={inputClass(errors.email)}
                 />
-                {!errors.email && (
-                  <p className="text-[10px] text-gray-400 mt-1">
-                    Must be unique across platform.
-                  </p>
-                )}
               </Field>
 
               <Field
-                label={
-                  <>
-                    Phone Number <span className="text-red-500">*</span>
-                  </>
-                }
+                label={<>Phone Number <span className="text-red-500">*</span></>}
                 error={errors.phone}
               >
-                <input
-                  value={form.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
-                  placeholder="+91 848 521 4690"
-                  className={inputClass(errors.phone)}
-                />
-                {!errors.phone && (
-                  <p className="text-[10px] text-gray-400 mt-1">
-                    Must be a unique active number.
-                  </p>
-                )}
+                <div className="flex items-center">
+                  <span className="px-4 py-2.5 bg-[#F8FAFF] border border-[#B3C9FF] border-r-0 rounded-l-xl text-gray-500 text-sm">
+                    +91
+                  </span>
+                  <input
+                    value={form.phone}
+                    onChange={(e) => handleChange("phone", e.target.value)}
+                    placeholder="8485214690"
+                    maxLength={10}
+                    onInput={(e) => { e.target.value = e.target.value.replace(/\D/g, ""); }}
+                    className="w-full px-4 py-2.5 bg-[#F8FAFF] border border-[#B3C9FF] rounded-r-xl outline-none focus:ring-2 focus:ring-indigo-400 transition placeholder-gray-400 text-gray-700"
+                  />
+                </div>
               </Field>
             </div>
           </div>
 
           <hr className="border-gray-100" />
 
-          {/* ── SECTION 3: Services & SLA ── */}
+          {/* ── SECTION 5: Services & SLA ── */}
           <SectionHeader
             icon={ShieldCheck}
             title="Services Offered & SLA"
@@ -502,9 +603,7 @@ export default function CreateVendor() {
                           <input
                             type="number"
                             value={selectedServices[index]}
-                            onChange={(e) =>
-                              handleSlaChange(index, e.target.value)
-                            }
+                            onChange={(e) => handleSlaChange(index, e.target.value)}
                             placeholder="10"
                             min="1"
                             className="w-14 px-2 text-sm text-center outline-none bg-white"
@@ -514,7 +613,7 @@ export default function CreateVendor() {
                           </div>
                         </div>
                         {slaErr && (
-                          <span className="text-[10px] text-red-500">
+                          <span className="text-[10px] text-red-500 whitespace-nowrap">
                             {slaErr}
                           </span>
                         )}
@@ -528,7 +627,6 @@ export default function CreateVendor() {
         </div>
       </div>
 
-      {/* BUTTONS */}
       <div className="max-w-3xl w-full mt-4 flex justify-end gap-3">
         <button
           onClick={() => navigate(-1)}
@@ -543,6 +641,30 @@ export default function CreateVendor() {
           Save Vendor Details
         </button>
       </div>
+
+      {/* SUCCESS MODAL */}
+      {submitted && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-[400px] bg-white rounded-2xl shadow-2xl p-8 text-center flex flex-col items-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+              <CheckCircle2 size={32} className="text-green-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Success!</h2>
+            <p className="text-gray-500 text-sm mb-8">
+              The vendor has been successfully created.
+            </p>
+            <button
+              onClick={() => {
+                setSubmitted(false);
+                navigate(-1);
+              }}
+              className="w-full bg-[#02027A] text-white font-semibold py-3 rounded-xl hover:bg-[#01016a] transition cursor-pointer"
+            >
+              Okay
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

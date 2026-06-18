@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 import {
   ArrowLeft,
   ChevronRight,
@@ -8,6 +9,7 @@ import {
   ShieldCheck,
   Info,
   X,
+  CheckCircle2,
 } from "lucide-react";
 
 const ALL_SERVICES = [
@@ -15,6 +17,7 @@ const ALL_SERVICES = [
   "Education Verification",
   "Prior Employment Check",
   "Identity Address Verification",
+  "Drug Test",
 ];
 
 // ── Tag Input ──────────────────────────────────────────
@@ -102,27 +105,75 @@ export default function EditVendor() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  // Pre-filled data — replace with API fetch using id
   const [form, setForm] = useState({
-    vendorName: "Apex background screenners",
-    gst: "30QAZWS7788E1Z2",
-    fullName: "Manav Joshi",
-    email: "manav.joshi@example.com",
-    phone: "+91 848 521 4690",
+    vendorName: "",
+    gst: "",
+    fullName: "",
+    email: "",
+    phone: "",
   });
 
-  const [states, setStates] = useState(["Maharashtra", "Delhi NCR"]);
-  const [stateInput, setStateInput] = useState("Karnataka");
-  const [cities, setCities] = useState(["Mumbai", "New Delhi"]);
-  const [cityInput, setCityInput] = useState("Bengaluru");
-
-  const [selectedServices, setSelectedServices] = useState({
-    0: "10",  // Criminal Background Check pre-selected
-    2: "05",  // Prior Employment Check pre-selected
-  });
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [selectedServices, setSelectedServices] = useState({});
 
   const [errors, setErrors] = useState({});
   const [serviceError, setServiceError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [submitted, setSubmitted] = useState(false);
+
+  // Add STATE_MAP to resolve IDs to names
+  const STATE_MAP = {
+    1: "Andhra Pradesh", 2: "Arunachal Pradesh", 3: "Assam", 4: "Bihar",
+    5: "Chhattisgarh", 6: "Goa", 7: "Gujarat", 8: "Haryana", 9: "Himachal Pradesh",
+    10: "Jharkhand", 11: "Karnataka", 12: "Kerala", 13: "Madhya Pradesh",
+    14: "Maharashtra", 15: "Manipur", 16: "Meghalaya", 17: "Mizoram",
+    18: "Nagaland", 19: "Odisha", 20: "Punjab", 21: "Rajasthan",
+    22: "Sikkim", 23: "Tamil Nadu", 24: "Telangana", 25: "Tripura",
+    26: "Uttar Pradesh", 27: "Uttarakhand", 28: "West Bengal", 29: "Delhi NCR",
+    30: "Jammu & Kashmir"
+  };
+
+  useEffect(() => {
+    const fetchVendor = async () => {
+      try {
+        setIsLoading(true);
+        const res = await axios.get(`http://localhost:5000/api/vendor/${id}`);
+        if (res.data.success) {
+          const v = res.data.data;
+          setForm({
+            vendorName: v.company_name || "",
+            gst: v.gst_number || "",
+            fullName: `${v.poc_first_name} ${v.poc_last_name}`,
+            email: v.poc_email || "",
+            phone: v.poc_mobile ? v.poc_mobile.replace("+91", "") : "",
+          });
+
+          // Map coverage states
+          const mappedStates = (v.coverage_states || []).map(sId => STATE_MAP[sId] || `State ${sId}`);
+          setStates(mappedStates);
+          setCities(["Mumbai", "Bangalore"]); // Placeholder for cities as they aren't fully returned yet
+
+          // Map services
+          // The ALL_SERVICES index mapping:
+          // 0: Criminal, 1: Education, 2: Employment, 3: Address, 4: Drug
+          const srvObj = {};
+          v.services.forEach(s => {
+            const index = ALL_SERVICES.indexOf(s.name);
+            if (index !== -1) {
+              srvObj[index] = parseInt(s.sla) || "";
+            }
+          });
+          setSelectedServices(srvObj);
+        }
+      } catch (err) {
+        console.error("Failed to load vendor details:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchVendor();
+  }, [id]);
 
   const handleChange = (field, value) => {
     setForm((p) => ({ ...p, [field]: value }));
@@ -148,7 +199,7 @@ export default function EditVendor() {
     if (!form.gst.trim())        e.gst        = "GST number is required.";
     if (!form.fullName.trim())   e.fullName   = "Full name is required.";
     if (!form.email.trim())      e.email      = "Email is required.";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = "Enter a valid email.";
+    else if (!/^[\w.-]+@[\w.-]+\.\w+$/.test(form.email)) e.email = "Enter a valid email.";
     if (!form.phone.trim())      e.phone      = "Phone number is required.";
 
     const hasService = Object.keys(selectedServices).length > 0;
@@ -158,13 +209,34 @@ export default function EditVendor() {
     return e;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const e = validate();
     setErrors(e);
     if (Object.keys(e).length > 0 || Object.keys(selectedServices).length === 0) return;
-    console.log("UPDATED:", { form, states, cities, selectedServices });
-    navigate(-1);
+
+    try {
+      const payload = {
+        ...form,
+        states,
+        cities,
+        services: selectedServices
+      };
+      
+      const res = await axios.patch(`http://localhost:5000/api/vendor/update/${id}`, payload);
+      if (res.data.success) {
+        setSubmitted(true);
+      }
+    } catch (err) {
+      console.error("Failed to update vendor:", err);
+      if (err.response?.data?.errors) {
+        setErrors(err.response.data.errors);
+      }
+    }
   };
+
+  if (isLoading) {
+    return <div className="flex h-screen items-center justify-center">Loading...</div>;
+  }
 
   return (
     <div className="flex flex-col h-[92vh] bg-gray-50">
@@ -359,6 +431,30 @@ export default function EditVendor() {
           Save Vendor Details
         </button>
       </div>
+
+      {/* SUCCESS MODAL */}
+      {submitted && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-[400px] bg-white rounded-2xl shadow-2xl p-8 text-center flex flex-col items-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+              <CheckCircle2 size={32} className="text-green-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Success!</h2>
+            <p className="text-gray-500 text-sm mb-8">
+              The vendor details have been successfully updated.
+            </p>
+            <button
+              onClick={() => {
+                setSubmitted(false);
+                navigate(-1);
+              }}
+              className="w-full bg-[#02027A] text-white font-semibold py-3 rounded-xl hover:bg-[#01016a] transition cursor-pointer"
+            >
+              Okay
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );
