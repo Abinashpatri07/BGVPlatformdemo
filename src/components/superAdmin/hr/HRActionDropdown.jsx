@@ -4,7 +4,7 @@ import { Eye, Pencil, Mail, Ban } from "lucide-react";
 
 import TerminateModal from "./TerminateModal";
 
-function HRActionDropdown({ onView, onEdit, candidateId = "EMP-0002" }) {
+function HRActionDropdown({ onView, onEdit, candidateId = "EMP-0002", hrId, onTerminateSuccess }) {
   const [showTerminate, setShowTerminate] = useState(false);
 
   const [showEmailSuccess, setShowEmailSuccess] = useState(false);
@@ -22,8 +22,12 @@ function HRActionDropdown({ onView, onEdit, candidateId = "EMP-0002" }) {
       {showTerminate && (
         <TerminateModal
           candidateId={candidateId}
+          hrId={hrId}
           onCancel={() => setShowTerminate(false)}
-          onSuccess={() => setShowTerminate(false)}
+          onSuccess={() => {
+            setShowTerminate(false);
+            if (onTerminateSuccess) onTerminateSuccess();
+          }}
         />
       )}
 

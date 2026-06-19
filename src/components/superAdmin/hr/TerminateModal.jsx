@@ -1,12 +1,24 @@
 import { useState } from "react";
+import axios from "axios";
 
-function TerminateModal({ candidateId = "EMP-008", onCancel, onSuccess }) {
+function TerminateModal({ candidateId = "EMP-008", hrId, onCancel, onSuccess }) {
   const [step, setStep] = useState("confirm"); // "confirm" | "success"
   const [reason, setReason] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleTerminate = () => {
-    // your API call here with `reason`
-    setStep("success");
+  const handleTerminate = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.patch(`http://localhost:5000/api/hr/terminate/${hrId}`, { reason });
+      if (res.data.success) {
+        setStep("success");
+      }
+    } catch (error) {
+      console.error(error);
+      alert(error.response?.data?.message || "Failed to terminate HR.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOkay = () => {
@@ -53,17 +65,17 @@ function TerminateModal({ candidateId = "EMP-008", onCancel, onSuccess }) {
             >
               Cancel
             </button>
-            <button
+              <button
                 onClick={handleTerminate}
-                disabled={!reason.trim()}
+                disabled={!reason.trim() || loading}
                 className={`px-8 py-2.5 rounded-xl text-sm font-medium transition border ${
-                    reason.trim()
+                    reason.trim() && !loading
                     ? "border-red-800 text-red-800 hover:bg-red-50 cursor-pointer"
                     : "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
                 }`}
-                >
-                Terminate To HR
-                </button>
+              >
+                {loading ? "Terminating..." : "Terminate To HR"}
+              </button>
           </div>
 
         </div>
