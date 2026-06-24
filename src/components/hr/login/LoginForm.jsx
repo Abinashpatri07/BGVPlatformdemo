@@ -58,6 +58,19 @@ export default function HRLoginForm() {
     }
 
     try {
+      // ── STATIC BYPASS FOR VERCEL DEPLOYMENT ──
+      if (email === "puja@gmail.com" && password === "123456") {
+        localStorage.setItem("role", "hr");
+        localStorage.setItem(
+          "user",
+          JSON.stringify({ name: "Puja", email: "puja@gmail.com", role: "HR Executive" })
+        );
+        setPopup({ type: "success", message: "Welcome back, Puja!" });
+        setTimeout(() => navigate("/hr/home"), 1500);
+        return;
+      }
+
+      // ── ACTUAL BACKEND CALL ──
       const res = await axios.post("http://localhost:5000/api/hr/auth/login", {
         email,
         password,
@@ -65,7 +78,6 @@ export default function HRLoginForm() {
 
       if (res.data.success) {
         localStorage.setItem("role", "hr");
-        // Update user storage based on backend response if available, otherwise default
         const userName = res.data.user?.name || "HR Executive";
         localStorage.setItem(
           "user",
@@ -80,7 +92,7 @@ export default function HRLoginForm() {
       console.error("Login Error:", error);
       setPopup({ 
         type: "error", 
-        message: error.response?.data?.message || "Invalid email or password." 
+        message: error.response?.data?.message || "Network Error: Could not connect to backend." 
       });
     }
   };
