@@ -1,4 +1,5 @@
 import React from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 function Pagination({ currentPage, totalPages, onPageChange }) {
   const getPages = () => {
@@ -29,52 +30,64 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
   const pages = getPages();
 
   return (
-    <div className="flex items-center justify-between ">
+    <div className="flex items-center justify-between pt-2">
       
-      <p className="text-sm text-gray-600">
-        Showing <span className="font-medium">{currentPage}</span> out of{" "}
-        <span className="font-medium">{totalPages}</span>
-      </p>
+      {/* LEFT SIDE: Showing Text with Dropdown-like active page box */}
+      <div className="flex items-center gap-3 text-sm text-[#8A92A6]">
+        <span>Showing</span>
+        <div className="flex items-center justify-between w-14 px-3 py-1.5 bg-white border border-gray-200 rounded-lg shadow-sm text-gray-700 font-medium cursor-pointer hover:bg-gray-50 transition">
+          {currentPage}
+          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+        <span>out of {totalPages}</span>
+      </div>
 
-      <div className="flex items-center gap-2">
+      {/* RIGHT SIDE: Pagination Buttons */}
+      <div className="flex items-center gap-1">
         
         {/* Previous */}
         <button
           disabled={currentPage === 1}
           onClick={() => onPageChange(currentPage - 1)}
-          className="px-3 py-1 border rounded disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-[#8A92A6] rounded-xl hover:text-[#01026E] disabled:opacity-40 disabled:cursor-not-allowed transition"
         >
+          <ChevronLeft size={16} />
           Previous
         </button>
 
         {/* Pages */}
-        {pages.map((page, index) =>
-          page === "..." ? (
-            <span key={`dots-${index}`} className="px-2">
-              ...
-            </span>
-          ) : (
-            <button
-              key={`page-${page}`}  // ✅ UNIQUE KEY
-              onClick={() => onPageChange(page)}
-              className={`px-3 py-1 border rounded ${
-                currentPage === page
-                  ? "bg-gray-500 text-white"
-                  : "bg-white"
-              }`}
-            >
-              {page}
-            </button>
-          )
-        )}
+        <div className="flex items-center gap-1">
+          {pages.map((page, index) =>
+            page === "..." ? (
+              <span key={`dots-${index}`} className="px-2 text-gray-400">
+                ...
+              </span>
+            ) : (
+              <button
+                key={`page-${page}`}
+                onClick={() => onPageChange(page)}
+                className={`w-8 h-8 flex items-center justify-center rounded-xl text-sm font-bold transition-all ${
+                  currentPage === page
+                    ? "bg-[#5E3BEE] text-white shadow-md hover:bg-[#4d30c4]"
+                    : "text-gray-500 bg-transparent hover:bg-gray-100"
+                }`}
+              >
+                {page}
+              </button>
+            )
+          )}
+        </div>
 
         {/* Next */}
         <button
           disabled={currentPage === totalPages}
           onClick={() => onPageChange(currentPage + 1)}
-          className="px-3 py-1 border rounded disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-[#8A92A6] rounded-xl hover:text-[#01026E] disabled:opacity-40 disabled:cursor-not-allowed transition"
         >
           Next
+          <ChevronRight size={16} />
         </button>
       </div>
     </div>

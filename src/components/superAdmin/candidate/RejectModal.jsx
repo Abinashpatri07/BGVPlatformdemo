@@ -1,9 +1,46 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 
-function RejectModal({ candidate, onClose }) {
-  const [reason, setReason] = useState("");
+function RejectModal({ candidate, onClose, onSuccess }) {
+  const [reason, setReason]     = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError]   = useState("");
+
+  // ── HANDLE SUBMIT ───────────────────────────────────
+  const handleSubmit = async () => {
+    if (!reason.trim()) return;
+
+    setIsLoading(true);
+    setApiError("");
+
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/candidate/reject/${candidate?.id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reason: reason.trim() }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setApiError(data.message || "Something went wrong. Please try again.");
+        return;
+      }
+
+      // Notify parent table to update status in local state
+      onSuccess && onSuccess(candidate?.id, "Rejected");
+      setIsSuccess(true);
+
+    } catch {
+      setApiError("Network error. Please check your connection.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // ── SUCCESS SCREEN ─────────────────────────────────
   if (isSuccess) {
@@ -23,9 +60,9 @@ function RejectModal({ candidate, onClose }) {
           {/* CONTENT */}
           <div className="px-8 py-6">
             <h2 className="text-red-500 text-lg font-bold mb-3 leading-7">
-              "Candidate {candidate?.candidateId} Has Been
+              Candidate {candidate?.candidateId} Has Been
               <br />
-              Successfully Rejected."
+              Successfully Rejected.
             </h2>
             <p className="text-sm text-gray-500 leading-6">
               This Will Mark The Application As Rejected
@@ -62,7 +99,7 @@ function RejectModal({ candidate, onClose }) {
         <textarea
           rows={4}
           value={reason}
-          onChange={(e) => setReason(e.target.value)}
+          onChange={(e) => { setReason(e.target.value); setApiError(""); }}
           placeholder="Enter rejection reason..."
           className="w-full border border-gray-300 rounded-xl p-4 outline-none resize-none focus:ring-2 focus:ring-red-200"
         />
@@ -71,23 +108,29 @@ function RejectModal({ candidate, onClose }) {
           <p className="text-xs text-red-500 mt-2">Rejection reason is required</p>
         )}
 
+        {/* API ERROR */}
+        {apiError && (
+          <p className="text-xs text-red-600 mt-2 text-center">{apiError}</p>
+        )}
+
         <div className="flex justify-center gap-4 mt-6">
           <button
             onClick={onClose}
-            className="px-8 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
+            disabled={isLoading}
+            className="px-8 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition disabled:opacity-60"
           >
             Cancel
           </button>
           <button
-            disabled={!reason.trim()}
-            onClick={() => setIsSuccess(true)}
+            disabled={!reason.trim() || isLoading}
+            onClick={handleSubmit}
             className={`px-8 py-2.5 border rounded-lg transition ${
-              reason.trim()
+              reason.trim() && !isLoading
                 ? "border-red-400 text-red-500 hover:bg-red-50"
                 : "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
             }`}
           >
-            Reject Application
+            {isLoading ? "Saving…" : "Reject Application"}
           </button>
         </div>
 

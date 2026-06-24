@@ -28,7 +28,7 @@ function PageHeader() {
 
       {/* 🧭 Breadcrumb */}
       <div className="text-sm text-gray-500 mt-2 flex items-center gap-2">
-        <span>Home</span>
+        <span>Candidate</span>
         <span>›</span>
         {/* <span>Verified Application</span> */}
         {/* <span>›</span> */}

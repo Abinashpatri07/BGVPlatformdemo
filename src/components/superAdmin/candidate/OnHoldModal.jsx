@@ -1,9 +1,46 @@
 import { useState } from "react";
 import { Square } from "lucide-react";
 
-function OnHoldModal({ candidate, onClose }) {
-  const [reason, setReason] = useState("");
+function OnHoldModal({ candidate, onClose, onSuccess }) {
+  const [reason, setReason]     = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError]   = useState("");
+
+  // ── HANDLE SUBMIT ───────────────────────────────────
+  const handleSubmit = async () => {
+    if (!reason.trim()) return;
+
+    setIsLoading(true);
+    setApiError("");
+
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/candidate/on-hold/${candidate?.id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reason: reason.trim() }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setApiError(data.message || "Something went wrong. Please try again.");
+        return;
+      }
+
+      // Notify parent table to update status in local state
+      onSuccess && onSuccess(candidate?.id, "On Hold");
+      setIsSuccess(true);
+
+    } catch {
+      setApiError("Network error. Please check your connection.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // ── SUCCESS SCREEN ─────────────────────────────────
   if (isSuccess) {
@@ -23,9 +60,9 @@ function OnHoldModal({ candidate, onClose }) {
           {/* CONTENT */}
           <div className="px-8 py-6">
             <h2 className="text-orange-500 text-lg font-bold mb-3 leading-7">
-              "Candidate {candidate?.candidateId} Has Been
+              Candidate {candidate?.candidateId} Has Been
               <br />
-              Successfully Placed On Hold."
+              Successfully Placed On Hold.
             </h2>
             <p className="text-sm text-gray-500 leading-6">
               This Will Pause The Candidate's Progress In The
@@ -52,11 +89,11 @@ function OnHoldModal({ candidate, onClose }) {
 
         {/* TITLE */}
         <h2 className="text-2xl font-semibold text-center mb-6 leading-9">
-          "Are You Sure You Want To Place
+          Are You Sure You Want To Place
           <br />
           Candidate{" "}
           <span className="font-bold">{candidate?.candidateId}</span>{" "}
-          <span className="text-orange-500 font-bold">On Hold</span>"
+          <span className="text-orange-500 font-bold">On Hold</span>
         </h2>
 
         {/* REASON FIELD */}
@@ -67,7 +104,7 @@ function OnHoldModal({ candidate, onClose }) {
         <textarea
           rows={5}
           value={reason}
-          onChange={(e) => setReason(e.target.value)}
+          onChange={(e) => { setReason(e.target.value); setApiError(""); }}
           placeholder="Please describe the reason for placing this candidate on hold."
           className="w-full border border-orange-300 rounded-xl p-4 text-sm outline-none resize-none focus:ring-2 focus:ring-orange-200 placeholder:text-gray-400"
         />
@@ -76,24 +113,30 @@ function OnHoldModal({ candidate, onClose }) {
           <p className="text-xs text-red-500 mt-2">Reason is required</p>
         )}
 
+        {/* API ERROR */}
+        {apiError && (
+          <p className="text-xs text-red-600 mt-2 text-center">{apiError}</p>
+        )}
+
         {/* BUTTONS */}
         <div className="flex justify-center gap-4 mt-8">
           <button
             onClick={onClose}
-            className="px-8 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-medium transition"
+            disabled={isLoading}
+            className="px-8 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-medium transition disabled:opacity-60"
           >
             Cancel
           </button>
           <button
-            disabled={!reason.trim()}
-            onClick={() => setIsSuccess(true)}
+            disabled={!reason.trim() || isLoading}
+            onClick={handleSubmit}
             className={`px-8 py-2.5 border rounded-xl text-sm font-medium transition ${
-              reason.trim()
+              reason.trim() && !isLoading
                 ? "border-orange-400 text-orange-500 hover:bg-orange-50"
                 : "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
             }`}
           >
-            Place On Hold
+            {isLoading ? "Saving…" : "Place On Hold"}
           </button>
         </div>
 

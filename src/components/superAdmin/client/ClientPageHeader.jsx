@@ -6,6 +6,8 @@ import {
   FileText,
   FileSpreadsheet,
   FileDown,
+  UserPlus,
+  Users,
 } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
@@ -134,7 +136,8 @@ export default function ClientPageHeader({
 
                   {/* DROPDOWN */}
                   {showCreateDropdown && createType === "candidate" && (
-                    <div className="absolute right-0 mt-3 w-60 bg-white border border-black rounded-2xl shadow-lg overflow-hidden z-50">
+                    <div className="absolute right-0 mt-3 w-56 bg-white border border-gray-100 rounded-3xl shadow-xl z-50 p-2">
+                      
                       {/* SINGLE */}
                       <button
                         type="button"
@@ -142,11 +145,17 @@ export default function ClientPageHeader({
                           navigate("/super-admin/create-candidate");
                           setShowCreateDropdown(false);
                         }}
-                        className="w-full flex items-center gap-3 px-5 py-5 text-left text-black text-[18px] hover:bg-gray-50 transition"
+                        className="w-full flex items-center gap-4 px-3 py-3 text-left hover:bg-gray-50 rounded-2xl transition"
                       >
-                        <Plus size={20} />
-                        Add Single
+                        <div className="w-10 h-10 bg-[#f4f5fa] text-[#01026E] flex items-center justify-center rounded-[14px] shrink-0">
+                          <UserPlus size={18} strokeWidth={2} />
+                        </div>
+                        <span className="text-[#01026E] font-medium text-base">
+                          Add Single
+                        </span>
                       </button>
+
+                      <div className="h-px bg-gray-100 my-1 mx-3" />
 
                       {/* BULK */}
                       <button
@@ -155,11 +164,16 @@ export default function ClientPageHeader({
                           navigate("/super-admin/create-candidate-bulk");
                           setShowCreateDropdown(false);
                         }}
-                        className="w-full flex items-center gap-3 px-5 py-5 text-left text-black text-[18px] hover:bg-gray-50 transition"
+                        className="w-full flex items-center gap-4 px-3 py-3 text-left hover:bg-gray-50 rounded-2xl transition"
                       >
-                        <Upload size={20} />
-                        Add in Bulk
+                        <div className="w-10 h-10 bg-[#f4f5fa] text-[#01026E] flex items-center justify-center rounded-[14px] shrink-0">
+                          <Users size={18} strokeWidth={2} />
+                        </div>
+                        <span className="text-[#01026E] font-medium text-base">
+                          Add in Bulk
+                        </span>
                       </button>
+                      
                     </div>
                   )}
                 </div>

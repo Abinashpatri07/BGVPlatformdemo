@@ -6,7 +6,7 @@ function PageHeader() {
 
   return (
     <div className="mb-6">
-      
+
       {/* 🔙 Back Button */}
       <button
         onClick={() => navigate(-1)}
@@ -30,8 +30,8 @@ function PageHeader() {
       <div className="text-sm text-gray-500 mt-2 flex items-center gap-2">
         <span>Home</span>
         <span>›</span>
-        {/* <span>Verified Application</span> */}
-        {/* <span>›</span> */}
+        <span>Candidates</span>
+        <span>›</span>
         <span className="text-black font-medium">
           Create Candidate
         </span>
