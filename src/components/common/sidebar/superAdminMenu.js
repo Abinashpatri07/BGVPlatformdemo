@@ -72,8 +72,9 @@ export const superAdminMenu = [
     activePaths: [
       "/super-admin/candidate",
       "/super-admin/create-candidate",
-      "/super-admin/view-candidate",
+      "/super-admin/view/",
       "/super-admin/edit-candidate",
+      "/super-admin/audit",
     ],
   },
 

@@ -7,7 +7,8 @@ import {
   IdCard,
   GraduationCap,
   Briefcase,
-  ShieldCheck,
+  ShieldAlert,
+  Activity,
   Users,
   CheckCircle,
   Pencil,
@@ -30,7 +31,9 @@ const EditCandidate = () => {
   const [activeTab, setActiveTab] = useState("Personal");
   const [showEducationView, setShowEducationView] = useState(false);
   const [showEmploymentView, setShowEmploymentView] = useState(false);
-  const [backgroundView, setBackgroundView] = useState(null);
+  const [criminalView, setCriminalView] = useState(false);
+  const [drugView, setDrugView] = useState(false);
+  const [identityView, setIdentityView] = useState(null);
 
   const tabs = [
     { name: "Personal", icon: User },
@@ -38,7 +41,8 @@ const EditCandidate = () => {
     { name: "Identity", icon: IdCard },
     { name: "Education", icon: GraduationCap },
     { name: "Employment", icon: Briefcase },
-    { name: "Background", icon: ShieldCheck },
+    { name: "Criminal", icon: ShieldAlert },
+    { name: "Drug", icon: Activity },
     { name: "Reference", icon: Users },
   ];
 
@@ -96,7 +100,10 @@ const EditCandidate = () => {
             return (
               <button
                 key={tab.name}
-                onClick={() => setActiveTab(tab.name)}
+                onClick={() => {
+                  setActiveTab(tab.name);
+                  setIdentityView(null);
+                }}
                 className={`flex items-center gap-2 px-4 py-1.5 rounded-full whitespace-nowrap transition ${
                   isActive
                     ? "bg-[#01026E] text-white"
@@ -184,64 +191,170 @@ const EditCandidate = () => {
           )}
           {activeTab === "Identity" && (
             <>
-              <h3 className="text-lg font-semibold text-gray-800">
-                Identity Information
-              </h3>
-              <p className="text-sm text-gray-500 mb-6">
-                General Profile Details And Contact Information.
-              </p>
+              {!identityView ? (
+                <>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Identity Information
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-6">
+                    General Profile Details And Contact Information.
+                  </p>
 
-              <div className="space-y-5">
-                {/* Passport */}
-                <div className="border rounded-xl p-4 shadow-sm">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-[#01026E]">Passport</h4>
-                    <span className="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full">
-                      Verified
-                    </span>
+                  <div className="space-y-5">
+                    {/* Passport */}
+                    <div className="border rounded-xl p-4 shadow-sm">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="font-medium text-[#01026E]">Passport</h4>
+                        <div className="flex items-center gap-4">
+                          <span className="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                            <CheckCircle size={12} /> Verified
+                          </span>
+                          <div 
+                            onClick={() => setIdentityView("passport")}
+                            className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
+                          >
+                            <Eye size={16} />
+                            <span className="text-sm font-medium">View</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <InputField label="ID Number" value="OFE5214VD80015" />
+                    </div>
+
+                    {/* PAN Card */}
+                    <div className="border rounded-xl p-4 shadow-sm">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="font-medium text-[#01026E]">Pan Card</h4>
+                        <div className="flex items-center gap-4">
+                          <span className="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                            <CheckCircle size={12} /> Verified
+                          </span>
+                          <div 
+                            onClick={() => setIdentityView("pan")}
+                            className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
+                          >
+                            <Eye size={16} />
+                            <span className="text-sm font-medium">View</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <InputField label="Card Number" value="JAHPQ6443G" />
+                    </div>
+
+                    {/* Driving License */}
+                    <div className="border rounded-xl p-4 shadow-sm">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="font-medium text-[#01026E]">
+                          Driving License
+                        </h4>
+                        <div className="flex items-center gap-4">
+                          <span className="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                            <CheckCircle size={12} /> Verified
+                          </span>
+                          <div 
+                            onClick={() => setIdentityView("dl")}
+                            className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
+                          >
+                            <Eye size={16} />
+                            <span className="text-sm font-medium">View</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <InputField label="License Number" value="DL-04202000045" />
+                    </div>
+
+                    {/* Voter ID */}
+                    <div className="border rounded-xl p-4 shadow-sm">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="font-medium text-[#01026E]">Voter ID</h4>
+                        <div className="flex items-center gap-4">
+                          <span className="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                            <CheckCircle size={12} /> Verified
+                          </span>
+                          <div 
+                            onClick={() => setIdentityView("voter")}
+                            className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
+                          >
+                            <Eye size={16} />
+                            <span className="text-sm font-medium">View</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <InputField label="Voter ID Number" value="XYZ9088271" />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Identity Details
+                    </h3>
+                    <button 
+                      onClick={() => setIdentityView(null)}
+                      className="text-sm text-[#01026E] border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
+                    >
+                      Back to List
+                    </button>
                   </div>
 
-                  <InputField label="ID Number" value="OFE5214VD80015" />
-                </div>
+                  <div className="grid grid-cols-3 gap-6">
+                    <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
+                      <div className="grid grid-cols-2 gap-5">
+                        {identityView === "passport" && (
+                          <>
+                            <InputField label="Name" value="Ramesh Kumar Mishra" />
+                            <InputField label="Passport Number" value="OFE5214VD80015" />
+                            <InputField label="Issue Date" value="12/05/2018" />
+                            <InputField label="Expiry Date" value="11/05/2028" />
+                            <InputField label="Nationality" value="Indian" />
+                          </>
+                        )}
+                        {identityView === "pan" && (
+                          <>
+                            <InputField label="Name" value="Ramesh Kumar Mishra" />
+                            <InputField label="PAN Number" value="JAHPQ6443G" />
+                            <InputField label="Issue Date" value="20/08/2020" />
+                            <InputField label="Date Of Birth" value="05/10/1998" />
+                            <InputField label="Father's Name" value="Suresh Kumar Mishra" />
+                          </>
+                        )}
+                        {identityView === "dl" && (
+                          <>
+                            <InputField label="Name" value="Ramesh Kumar Mishra" />
+                            <InputField label="DL Number" value="DL-04202000045" />
+                            <InputField label="Issue Date" value="15/01/2019" />
+                            <InputField label="Expiry Date" value="14/01/2039" />
+                            <InputField label="Vehicle Class" value="MCWG, LMV" />
+                          </>
+                        )}
+                        {identityView === "voter" && (
+                          <>
+                            <InputField label="Name" value="Ramesh Kumar Mishra" />
+                            <InputField label="Voter ID Number" value="XYZ9088271" />
+                            <InputField label="Date Of Birth" value="05/10/1998" />
+                            <InputField label="Assembly Constituency" value="Model Town" />
+                            <InputField label="Epic Number" value="XYZ9088271" />
+                          </>
+                        )}
+                      </div>
+                    </div>
 
-                {/* PAN Card */}
-                <div className="border rounded-xl p-4 shadow-sm">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-[#01026E]">Pan Card</h4>
-                    <span className="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full">
-                      Verified
-                    </span>
+                    <div className="bg-white p-4 rounded-xl shadow border text-center">
+                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
+                      <img
+                        src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
+                        alt="document preview"
+                        className="rounded-lg shadow-sm mx-auto h-64 object-cover"
+                      />
+                    </div>
                   </div>
-
-                  <InputField label="Card Number" value="JAHPQ6443G" />
-                </div>
-
-                {/* Driving License */}
-                <div className="border rounded-xl p-4 shadow-sm">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-[#01026E]">
-                      Driving License
-                    </h4>
-                    <span className="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full">
-                      Verified
-                    </span>
-                  </div>
-
-                  <InputField label="License Number" value="DL-04202000045" />
-                </div>
-
-                {/* Voter ID (NEW FIELD) */}
-                <div className="border rounded-xl p-4 shadow-sm">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-[#01026E]">Voter ID</h4>
-                    <span className="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full">
-                      Verified
-                    </span>
-                  </div>
-
-                  <InputField label="Voter ID Number" value="XYZ9088271" />
-                </div>
-              </div>
+                </>
+              )}
             </>
           )}
 
@@ -426,13 +539,10 @@ const EditCandidate = () => {
             </>
           )}
 
-          {activeTab === "Background" && (
+          {activeTab === "Criminal" && (
             <>
-              {!backgroundView ? (
+              {!criminalView ? (
                 <>
-                  {/* ===== LIST VIEW ===== */}
-
-                  {/* Criminal */}
                   <h3 className="text-lg font-semibold text-gray-800">
                     Criminal Record
                   </h3>
@@ -449,16 +559,69 @@ const EditCandidate = () => {
                       </div>
 
                       <div
-                        onClick={() => setBackgroundView("criminal")}
-                        className="flex items-center gap-2 text-[#01026E] cursor-pointer"
+                        onClick={() => setCriminalView(true)}
+                        className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
                       >
                         <Eye size={16} />
-                        <span className="text-sm">View</span>
+                        <span className="text-sm font-medium">View</span>
                       </div>
                     </div>
                   </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Criminal Details
+                    </h3>
+                    <button 
+                      onClick={() => setCriminalView(false)}
+                      className="text-sm text-[#01026E] border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
+                    >
+                      Back to List
+                    </button>
+                  </div>
 
-                  {/* Drug */}
+                  <div className="grid grid-cols-3 gap-6">
+                    <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
+                      <div className="grid grid-cols-2 gap-5">
+                        <InputField label="Name" value="Ramesh Kumar Mishra" />
+                        <InputField label="Case No" value="BAN472-98201" />
+
+                        <div className="col-span-2">
+                          <label className="text-sm text-gray-600 mb-1 block">
+                            Case Details
+                          </label>
+
+                          <textarea
+                            className="w-full border rounded-lg px-3 py-2 text-sm h-28"
+                            defaultValue="On [date], the accused committed offense... case under trial."
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-xl shadow border text-center">
+                      <p className="text-sm text-[#01026E] mb-3 font-medium">
+                        Preview
+                      </p>
+
+                      <img
+                        src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
+                        alt="document preview"
+                        className="rounded-lg shadow-sm mx-auto h-64 object-cover"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {activeTab === "Drug" && (
+            <>
+              {!drugView ? (
+                <>
                   <h3 className="text-lg font-semibold text-gray-800">
                     Drug Test Report
                   </h3>
@@ -475,62 +638,48 @@ const EditCandidate = () => {
                       </div>
 
                       <div
-                        onClick={() => setBackgroundView("drug")}
-                        className="flex items-center gap-2 text-[#01026E] cursor-pointer"
+                        onClick={() => setDrugView(true)}
+                        className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
                       >
                         <Eye size={16} />
-                        <span className="text-sm">View</span>
+                        <span className="text-sm font-medium">View</span>
                       </div>
                     </div>
                   </div>
                 </>
               ) : (
                 <>
-                  {/* ===== DETAIL VIEW ===== */}
-
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                    Background Details
-                  </h3>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Drug Details
+                    </h3>
+                    <button 
+                      onClick={() => setDrugView(false)}
+                      className="text-sm text-[#01026E] border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
+                    >
+                      Back to List
+                    </button>
+                  </div>
 
                   <div className="grid grid-cols-3 gap-6">
-                    {/* LEFT FORM */}
                     <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
                       <div className="grid grid-cols-2 gap-5">
                         <InputField label="Name" value="Ramesh Kumar Mishra" />
-
-                        <InputField
-                          label={
-                            backgroundView === "criminal"
-                              ? "Case No"
-                              : "Test Id"
-                          }
-                          value={
-                            backgroundView === "criminal"
-                              ? "BAN472-98201"
-                              : "15498201"
-                          }
-                        />
+                        <InputField label="Test Id" value="15498201" />
 
                         <div className="col-span-2">
                           <label className="text-sm text-gray-600 mb-1 block">
-                            {backgroundView === "criminal"
-                              ? "Case Details"
-                              : "Test Details"}
+                            Test Details
                           </label>
 
                           <textarea
                             className="w-full border rounded-lg px-3 py-2 text-sm h-28"
-                            defaultValue={
-                              backgroundView === "criminal"
-                                ? "On [date], the accused committed offense... case under trial."
-                                : "The drug test ensures a safe workplace..."
-                            }
+                            defaultValue="The drug test ensures a safe workplace..."
                           />
                         </div>
                       </div>
                     </div>
 
-                    {/* RIGHT PREVIEW */}
                     <div className="bg-white p-4 rounded-xl shadow border text-center">
                       <p className="text-sm text-[#01026E] mb-3 font-medium">
                         Preview
@@ -538,6 +687,7 @@ const EditCandidate = () => {
 
                       <img
                         src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
+                        alt="document preview"
                         className="rounded-lg shadow-sm mx-auto h-64 object-cover"
                       />
                     </div>
@@ -612,8 +762,12 @@ const EditCandidate = () => {
                     setShowEducationView(false);
                   } else if (showEmploymentView) {
                     setShowEmploymentView(false);
-                  } else if (backgroundView) {
-                    setBackgroundView(null);
+                  } else if (criminalView) {
+                    setCriminalView(false);
+                  } else if (drugView) {
+                    setDrugView(false);
+                  } else if (identityView) {
+                    setIdentityView(null);
                   } else {
                     console.log("Go back or reset form");
                   }

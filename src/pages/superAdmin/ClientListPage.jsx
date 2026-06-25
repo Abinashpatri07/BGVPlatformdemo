@@ -53,8 +53,8 @@ export default function ClientListPage() {
           city: client.city || "—",
           state: client.state || "—",
           status:
+            Number(client.is_suspend) === 1 ? "Suspended" :
             Number(client.is_active) === 1 ? "Active" :
-            Number(client.is_active) === 3 ? "Suspended" :
             "In Active",
         }));
         setClients(formattedData);

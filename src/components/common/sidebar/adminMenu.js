@@ -31,6 +31,7 @@ export const adminMenu = [
     "/admin/view/",
     "/admin/edit-candidate",
     "/admin/candidate-details",
+    "/admin/audit-log",
   ],
 },
   /* HR */

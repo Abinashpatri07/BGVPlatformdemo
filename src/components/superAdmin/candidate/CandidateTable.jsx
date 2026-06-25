@@ -19,74 +19,12 @@ import { useNavigate } from "react-router-dom";
 import ActionDropdown from "../candidate/ActionDropdown";
 import RejectModal    from "../candidate/RejectModal";
 import OnHoldModal    from "../candidate/OnHoldModal";
+import RemoveHoldModal from "../candidate/RemoveHoldModal";
+import AssignHRModal  from "../candidate/AssignHRModal";
+import BulkAssignHRModal from "../candidate/BulkAssignHRModal";
 import Pagination     from "../../clientAdmin/home/Pagination";
 
 const API = "http://localhost:5000/api/candidate";
-
-// ── ASSIGN VERIFICATION MODAL ──────────────────────────────────────────────────
-function AssignVerificationModal({ candidate, onClose, onAssign }) {
-  const [success, setSuccess] = useState(false);
-
-  const handleAssign = () => {
-    onAssign && onAssign(candidate);
-    setSuccess(true);
-  };
-
-  if (success) {
-    return (
-      <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
-        <div className="bg-white rounded-3xl w-100 overflow-hidden shadow-2xl text-center">
-          <div className="relative bg-green-500" style={{ height: "180px" }}>
-            <div style={{ position:"absolute", bottom:"-1px", left:"-10%", width:"120%", height:"60px", backgroundColor:"white", borderRadius:"50% 50% 0 0 / 100% 100% 0 0" }} />
-            <div className="absolute inset-0 flex items-center justify-center" style={{ paddingBottom:"30px" }}>
-              <div className="flex items-center justify-center" style={{ width:"72px", height:"72px", backgroundColor:"rgba(255,255,255,0.25)", borderRadius:"18px" }}>
-                <CheckCircle size={42} className="text-white" strokeWidth={1.5} />
-              </div>
-            </div>
-          </div>
-          <div className="px-10 pt-2 pb-10">
-            <h2 className="text-xl font-bold text-gray-900 mb-3">"Assigned Successfully"</h2>
-            <p className="text-sm text-gray-500 leading-relaxed mb-8">
-              The Candidate Has Been Successfully Assigned<br />To A Verifier For The Verification Process.
-            </p>
-            <button onClick={onClose} className="border border-green-500 text-green-600 hover:bg-green-50 px-14 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer">
-              Okay
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
-      <div className="bg-white rounded-3xl w-100 overflow-hidden shadow-2xl text-center">
-        <div className="relative bg-blue-500" style={{ height:"180px" }}>
-          <div style={{ position:"absolute", bottom:"-1px", left:"-10%", width:"120%", height:"60px", backgroundColor:"white", borderRadius:"50% 50% 0 0 / 100% 100% 0 0" }} />
-          <div className="absolute inset-0 flex items-center justify-center" style={{ paddingBottom:"30px" }}>
-            <div className="flex items-center justify-center" style={{ width:"72px", height:"72px", backgroundColor:"rgba(255,255,255,0.25)", borderRadius:"18px" }}>
-              <svg width="40" height="44" viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="20" cy="9" r="7" fill="white" />
-                <path d="M5 28c0-8.284 6.716-13 15-13s15 4.716 15 13" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-                <circle cx="20" cy="35" r="4" fill="white" />
-                <path d="M20 39 L20 44" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
-              </svg>
-            </div>
-          </div>
-        </div>
-        <div className="px-10 pt-2 pb-10">
-          <h2 className="text-xl font-bold text-gray-900 mb-3">"Assign For Verification"</h2>
-          <p className="text-sm text-gray-500 leading-relaxed mb-8">
-            Assign This Candidate To A Verifier To Initiate<br />The Verification Process.
-          </p>
-          <button onClick={handleAssign} className="border border-blue-500 text-blue-600 hover:bg-blue-50 px-14 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer">
-            Assign
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ── CANDIDATE TABLE ────────────────────────────────────────────────────────────
 // onTotalPagesChange → parent ko totalPages batao
@@ -114,9 +52,12 @@ function CandidateTable({
   const [showEmailModal, setShowEmailModal]                         = useState(false);
   const [showOnHoldModal, setShowOnHoldModal]                       = useState(false);
   const [onHoldCandidate, setOnHoldCandidate]                       = useState(null);
+  const [showRemoveHoldModal, setShowRemoveHoldModal]               = useState(false);
+  const [removeHoldCandidate, setRemoveHoldCandidate]               = useState(null);
   const [selectedRows, setSelectedRows]                             = useState([]);
-  const [showAssignVerificationModal, setShowAssignVerificationModal] = useState(false);
-  const [assignVerificationCandidate, setAssignVerificationCandidate] = useState(null);
+  const [showAssignHRModal, setShowAssignHRModal]                   = useState(false);
+  const [assignHRCandidate, setAssignHRCandidate]                   = useState(null);
+  const [showBulkAssignHRModal, setShowBulkAssignHRModal]           = useState(false);
 
   const menuRefs = useRef([]);
 
@@ -212,12 +153,34 @@ function CandidateTable({
         />
       )}
 
-      {/* ── ASSIGN VERIFICATION MODAL ── */}
-      {showAssignVerificationModal && (
-        <AssignVerificationModal
-          candidate={assignVerificationCandidate}
-          onClose={() => { setShowAssignVerificationModal(false); setAssignVerificationCandidate(null); }}
-          onAssign={(c) => console.log("Assigned:", c)}
+      {/* ── REMOVE HOLD MODAL ── */}
+      {showRemoveHoldModal && (
+        <RemoveHoldModal
+          candidate={removeHoldCandidate}
+          onClose={() => { setShowRemoveHoldModal(false); setRemoveHoldCandidate(null); }}
+          onSuccess={() => fetchCandidates()}
+        />
+      )}
+
+      {/* ── ASSIGN HR MODAL ── */}
+      {showAssignHRModal && (
+        <AssignHRModal
+          candidate={assignHRCandidate}
+          onClose={() => { setShowAssignHRModal(false); setAssignHRCandidate(null); }}
+          onSuccess={() => fetchCandidates()}
+        />
+      )}
+
+      {/* ── BULK ASSIGN HR MODAL ── */}
+      {showBulkAssignHRModal && (
+        <BulkAssignHRModal
+          candidateIds={selectedRows}
+          onClose={() => setShowBulkAssignHRModal(false)}
+          onSuccess={() => {
+            setShowBulkAssignHRModal(false);
+            setSelectedRows([]);
+            fetchCandidates();
+          }}
         />
       )}
 
@@ -257,9 +220,7 @@ function CandidateTable({
             </div>
           </div>
           <button
-            onClick={() => navigate("/super-admin/bulk-assign", {
-              state: { selectedCandidates: candidates.filter((item) => selectedRows.includes(item.id)) }
-            })}
+            onClick={() => setShowBulkAssignHRModal(true)}
             className="bg-white text-[#02027A] hover:bg-indigo-50 px-5 py-2.5 rounded-xl font-semibold transition"
           >
             Bulk Assign
@@ -403,13 +364,14 @@ function CandidateTable({
                       {openMenu === index && (
                         <div className={`absolute right-12 w-56 z-[9999] ${index >= candidates.length - 3 ? "bottom-10" : "top-10"}`}>
                           <ActionDropdown
+                            candidateStatus={item.status}
                             onView={() => { navigate(`/super-admin/view/${item.id}`); setOpenMenu(null); }}
                             onEdit={() => { navigate(`/super-admin/edit-candidate/${item.id}`); setOpenMenu(null); }}
                             onEmail={() => { setShowEmailModal(true); setOpenMenu(null); }}
-                            onAssignHr={() => { navigate("/super-admin/assign-verification"); setOpenMenu(null); }}
+                            onAssignHr={() => { setAssignHRCandidate(item); setShowAssignHRModal(true); setOpenMenu(null); }}
                             onAuditLog={() => { navigate("/super-admin/audit"); setOpenMenu(null); }}
-                            onAssignVerification={() => { setAssignVerificationCandidate(item); setShowAssignVerificationModal(true); setOpenMenu(null); }}
                             onHold={() => { setOnHoldCandidate(item); setShowOnHoldModal(true); setOpenMenu(null); }}
+                            onRemoveHold={() => { setRemoveHoldCandidate(item); setShowRemoveHoldModal(true); setOpenMenu(null); }}
                             onReject={() => { setSelectedCandidate(item); setShowRejectModal(true); setOpenMenu(null); }}
                           />
                         </div>

@@ -105,6 +105,7 @@ export default function EditClientPage() {
           contactEmail: c.contactEmail || "",
           contactPhone: c.contactPhone?.replace(/^\+91/, "") || "",
           isActive:     c.is_active    ?? 1,
+          isSuspend:    c.is_suspend   ?? 0,
         });
       } else {
         setFetchError("Client not found.");
@@ -188,8 +189,8 @@ export default function EditClientPage() {
   }
 
   const statusLabel =
-    form.isActive === 1 ? "Active" :
-    form.isActive === 2 ? "Inactive" : "Suspended";
+    form.isSuspend === 1 ? "Suspended" :
+    form.isActive === 1 ? "Active" : "Inactive";
 
   return (
     <div className="min-h-screen bg-[#fafafa] px-6 py-4">

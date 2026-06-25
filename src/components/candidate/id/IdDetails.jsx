@@ -26,10 +26,8 @@ const docFields = {
   // "PAN card": {
   //   pan_number: "ABCDE1234F",
   //   date_of_birth: "25/05/1997",
-  //   first_name: "Ramesh",
-  //   last_name: "Mishra",
-  //   father_first_name: "Narayan",
-  //   father_last_name: "Mishra",
+  //   full_name: "Ramesh Mishra",
+  //   father_name: "Narayan Mishra",
   // },
 
   "Driving license": {
