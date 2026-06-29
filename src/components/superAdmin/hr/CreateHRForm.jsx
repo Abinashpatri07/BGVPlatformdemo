@@ -91,7 +91,7 @@ function CreateHRForm() {
 
     // API REQUEST
     const response = await axios.post(
-      "http://localhost:5000/api/hr/create",
+      `${import.meta.env.VITE_API_URL}/api/hr/create`,
       formData
     );
 

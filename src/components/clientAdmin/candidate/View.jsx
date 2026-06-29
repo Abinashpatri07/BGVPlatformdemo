@@ -38,7 +38,7 @@ function View() {
   useEffect(() => {
     const fetchCandidate = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/client-admin/candidate/get-candidate/${id}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/client-admin/candidate/get-candidate/${id}`);
         if (response.data.success) {
           setCandidateData(response.data.data);
         }

@@ -9,7 +9,7 @@ function TerminateModal({ candidateId = "EMP-008", hrId, onCancel, onSuccess }) 
   const handleTerminate = async () => {
     try {
       setLoading(true);
-      const res = await axios.patch(`http://localhost:5000/api/hr/terminate/${hrId}`, { reason });
+      const res = await axios.patch(`${import.meta.env.VITE_API_URL}/api/hr/terminate/${hrId}`, { reason });
       if (res.data.success) {
         setStep("success");
       }

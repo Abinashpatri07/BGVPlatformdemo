@@ -46,7 +46,7 @@ const Candidates = () => {
     setExportState({ status: "loading", message: `Preparing ${type} export...` });
     try {
       const { data: res } = await axios.get(
-        "http://localhost:5000/api/client-admin/candidate/list?limit=100000"
+        `${import.meta.env.VITE_API_URL}/api/client-admin/candidate/list?limit=100000`
       );
 
       if (!res.success || !res.data || res.data.length === 0) {

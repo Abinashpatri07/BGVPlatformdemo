@@ -32,7 +32,7 @@ function CreateCandidateForm() {
     try {
       const createdById = 2; // mock admin ID
       const response = await axios.post(
-        "http://localhost:5000/api/client-admin/candidate/create",
+        `${import.meta.env.VITE_API_URL}/api/client-admin/candidate/create`,
         {
           firstName:     data.firstName,
           lastName:      data.lastName,

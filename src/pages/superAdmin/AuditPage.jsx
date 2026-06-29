@@ -26,7 +26,7 @@ export default function AuditPage() {
   const fetchAuditLogs = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/api/audit", {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/audit`, {
         params: {
           page,
           limit: rowsPerPage,
@@ -51,7 +51,7 @@ export default function AuditPage() {
   const handleExport = async () => {
     setExportState({ status: "loading", message: "Preparing CSV export..." });
     try {
-      const res = await axios.get("http://localhost:5000/api/audit", {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/audit`, {
         params: { page: 1, limit: 100000, search, module, dateFilter }
       });
       if (res.data.success && res.data.data.length > 0) {

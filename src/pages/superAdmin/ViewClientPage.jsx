@@ -27,7 +27,7 @@ export default function ViewClientPage() {
     try {
       setIsLoading(true);
       setError(null);
-      const res = await axios.get(`http://localhost:5000/api/client/get-client/${id}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/client/get-client/${id}`);
       if (res.data.success) {
         setClient(res.data.data);
       } else {

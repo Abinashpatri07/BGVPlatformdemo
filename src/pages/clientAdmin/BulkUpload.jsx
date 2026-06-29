@@ -84,7 +84,7 @@ const BulkUpload = () => {
       formData.append("clientAdminId", 2);
 
       const res = await axios.post(
-        "http://localhost:5000/api/client-admin/candidate/bulk-create",
+        `${import.meta.env.VITE_API_URL}/api/client-admin/candidate/bulk-create`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

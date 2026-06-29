@@ -24,7 +24,7 @@ import AssignHRModal  from "../candidate/AssignHRModal";
 import BulkAssignHRModal from "../candidate/BulkAssignHRModal";
 import Pagination     from "../../clientAdmin/home/Pagination";
 
-const API = "http://localhost:5000/api/client-admin/candidate";
+const API = `${import.meta.env.VITE_API_URL}/api/client-admin/candidate`;
 
 // ── CANDIDATE TABLE ────────────────────────────────────────────────────────────
 // onTotalPagesChange → parent ko totalPages batao

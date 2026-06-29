@@ -142,7 +142,7 @@ const BulkUpload = () => {
       formData.append("createdById", 15); // Send HR's user ID
 
       const res = await axios.post(
-        "http://localhost:5000/api/candidates/multiple_candidate_add",
+        `${import.meta.env.VITE_API_URL}/api/candidates/multiple_candidate_add`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

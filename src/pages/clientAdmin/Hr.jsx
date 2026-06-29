@@ -23,7 +23,7 @@ const Hr = () => {
     setLoading(true);
     try {
       const hrRes = await axios.get(
-        `http://localhost:5000/api/client-admin/hr/get-all?page=${currentPage}&limit=10`
+        `${import.meta.env.VITE_API_URL}/api/client-admin/hr/get-all?page=${currentPage}&limit=10`
       );
       if (hrRes.data.success) {
         setHrs(hrRes.data.data);

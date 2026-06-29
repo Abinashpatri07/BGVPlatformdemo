@@ -72,7 +72,7 @@ function TableToolbar({
   /* ── Fetch latest candidates for export ── */
   const fetchForExport = async () => {
     const res = await axios.get(
-      "http://localhost:5000/api/candidates/get_all_candidates"
+      `${import.meta.env.VITE_API_URL}/api/candidates/get_all_candidates`
     );
     return res.data.success ? res.data.candidates : [];
   };

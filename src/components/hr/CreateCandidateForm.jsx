@@ -35,7 +35,7 @@ function CreateCandidateForm() {
       const createdById = 1; // logged-in HR ka users_id
 
       const response = await axios.post(
-        "http://localhost:5000/api/candidates/single_candidate_add",
+        `${import.meta.env.VITE_API_URL}/api/candidates/single_candidate_add`,
         {
           ...data,
           createdByRole: "hr",   // ← HR create kar raha hai

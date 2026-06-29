@@ -13,7 +13,7 @@ function BulkAssignHRModal({ candidateIds, onClose, onSuccess }) {
   useEffect(() => {
     const fetchHRs = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/hr/get-all?limit=1000");
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/hr/get-all?limit=1000`);
         if (res.data.success) {
           setHrs(res.data.data || []);
         }
@@ -35,7 +35,7 @@ function BulkAssignHRModal({ candidateIds, onClose, onSuccess }) {
 
     try {
       const res = await axios.patch(
-        `http://localhost:5000/api/candidate/bulk-assign-hr`,
+        `${import.meta.env.VITE_API_URL}/api/candidate/bulk-assign-hr`,
         { candidateIds, hrId: selectedHrId }
       );
 

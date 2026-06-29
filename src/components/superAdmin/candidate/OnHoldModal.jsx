@@ -16,7 +16,7 @@ function OnHoldModal({ candidate, onClose, onSuccess }) {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/candidate/on-hold/${candidate?.id}`,
+        `${import.meta.env.VITE_API_URL}/api/candidate/on-hold/${candidate?.id}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

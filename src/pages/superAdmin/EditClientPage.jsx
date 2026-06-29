@@ -84,7 +84,7 @@ export default function EditClientPage() {
     try {
       setIsLoading(true);
       setFetchError(null);
-      const res = await axios.get(`http://localhost:5000/api/client/get-client/${id}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/client/get-client/${id}`);
       if (res.data.success) {
         const c = res.data.data;
         setForm({
@@ -144,7 +144,7 @@ export default function EditClientPage() {
       };
 
       const res = await axios.patch(
-        `http://localhost:5000/api/client/update-client/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/client/update-client/${id}`,
         payload
       );
 

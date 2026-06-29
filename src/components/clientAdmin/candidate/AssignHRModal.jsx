@@ -13,7 +13,7 @@ function AssignHRModal({ candidate, onClose, onSuccess }) {
   useEffect(() => {
     const fetchHRs = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/hr/get-all?limit=1000");
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/hr/get-all?limit=1000`);
         if (res.data.success) {
           setHrs(res.data.data || []);
         }
@@ -35,7 +35,7 @@ function AssignHRModal({ candidate, onClose, onSuccess }) {
 
     try {
       const res = await axios.patch(
-        `http://localhost:5000/api/client-admin/candidate/assign-hr/${candidate?.id}`,
+        `${import.meta.env.VITE_API_URL}/api/client-admin/candidate/assign-hr/${candidate?.id}`,
         { hrId: selectedHrId }
       );
 

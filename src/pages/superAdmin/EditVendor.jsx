@@ -138,7 +138,7 @@ export default function EditVendor() {
     const fetchVendor = async () => {
       try {
         setIsLoading(true);
-        const res = await axios.get(`http://localhost:5000/api/vendor/${id}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/vendor/${id}`);
         if (res.data.success) {
           const v = res.data.data;
           setForm({
@@ -222,7 +222,7 @@ export default function EditVendor() {
         services: selectedServices
       };
       
-      const res = await axios.patch(`http://localhost:5000/api/vendor/update/${id}`, payload);
+      const res = await axios.patch(`${import.meta.env.VITE_API_URL}/api/vendor/update/${id}`, payload);
       if (res.data.success) {
         setSubmitted(true);
       }

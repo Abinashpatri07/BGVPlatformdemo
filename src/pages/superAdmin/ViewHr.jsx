@@ -54,7 +54,7 @@ export default function ViewHr() {
   useEffect(() => {
     const fetchHR = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:5000/api/hr/get/${id}`);
+        const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/hr/get/${id}`);
         if (data.success) {
           const hr = data.data;
           

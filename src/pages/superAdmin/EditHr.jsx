@@ -70,7 +70,7 @@ export default function EditHr() {
   useEffect(() => {
     const fetchHR = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:5000/api/hr/get/${id}`);
+        const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/hr/get/${id}`);
         if (data.success) {
           const hr = data.data;
           
@@ -142,7 +142,7 @@ export default function EditHr() {
 
     try {
       const response = await axios.patch(
-        `http://localhost:5000/api/hr/update/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/hr/update/${id}`,
         form
       );
       if (response.data.success) {

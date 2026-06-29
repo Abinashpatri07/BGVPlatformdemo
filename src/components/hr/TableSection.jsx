@@ -182,7 +182,7 @@ function TableSection({ searchTerm = "", sortBy = "all", page = 1, onTotalPagesC
       setLoading(true);
       setFetchError("");
       const response = await axios.get(
-        `http://localhost:5000/api/candidates/get_all_candidates?page=${page}&limit=10`
+        `${import.meta.env.VITE_API_URL}/api/candidates/get_all_candidates?page=${page}&limit=10`
       );
       if (response.data.success) {
         setCandidates(response.data.candidates);

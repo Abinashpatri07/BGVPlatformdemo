@@ -83,7 +83,7 @@ const CandidateDetails = () => {
       try {
         setLoading(true);
         const res = await axios.get(
-          `http://localhost:5000/api/candidates/get_candidate/${id}`
+          `${import.meta.env.VITE_API_URL}/api/candidates/get_candidate/${id}`
         );
         if (res.data.success) {
           setCandidate(res.data.candidate);

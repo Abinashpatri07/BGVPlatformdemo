@@ -81,7 +81,7 @@ const handleSubmit = async () => {
   try {
 
     const response = await axios.post(
-      "http://localhost:5000/api/client/create-client",
+      `${import.meta.env.VITE_API_URL}/api/client/create-client`,
       form
     );
 

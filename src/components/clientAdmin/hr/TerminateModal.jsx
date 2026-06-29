@@ -13,7 +13,7 @@ function TerminateModal({ hrId, candidateId = "this HR", onCancel, onSuccess }) 
     setError("");
     try {
       const res = await axios.patch(
-        `http://localhost:5000/api/client-admin/hr/terminate/${hrId}`,
+        `${import.meta.env.VITE_API_URL}/api/client-admin/hr/terminate/${hrId}`,
         { reason: reason.trim() }
       );
       if (res.data.success) {

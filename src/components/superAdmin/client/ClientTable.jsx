@@ -96,7 +96,7 @@ export default function ClientTable({
       setIsSuspending(true);
       setSuspendError("");
       await axios.patch(
-        `http://localhost:5000/api/client/suspend-client/${selectedClientId}`,
+        `${import.meta.env.VITE_API_URL}/api/client/suspend-client/${selectedClientId}`,
         { reason: suspendReason.trim() }
       );
       setShowSuspendModal(false);

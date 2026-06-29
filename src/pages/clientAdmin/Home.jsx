@@ -14,7 +14,7 @@ function Home() {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/client-admin/dashboard/metrics");
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/client-admin/dashboard/metrics`);
         if (res.data.success) {
           setHrStats(res.data.data.hrStats);
           setCandidateStats(res.data.data.candidateStats);

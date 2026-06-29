@@ -135,7 +135,7 @@ export default function ViewVendor() {
     const fetchVendor = async () => {
       try {
         setIsLoading(true);
-        const res = await axios.get(`http://localhost:5000/api/vendor/${id}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/vendor/${id}`);
         if (res.data.success) {
           setVendor(res.data.data);
         } else {

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import HRActionDropdown from "../hr/HRActionDropdown";
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = `${import.meta.env.VITE_API_URL}`;
 
 function TableSection({ page = 1, limit = 10, onDataLoaded }) {
   const [data, setData]           = useState([]);

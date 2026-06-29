@@ -259,7 +259,7 @@ export default function CreateVendor() {
       };
 
       const response = await axios.post(
-        "http://localhost:5000/api/vendor/create",
+        `${import.meta.env.VITE_API_URL}/api/vendor/create`,
         finalData
       );
 

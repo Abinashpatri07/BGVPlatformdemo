@@ -103,7 +103,7 @@ const CardSection = () => {
       try {
         setLoading(true);
         const res = await axios.get(
-          "http://localhost:5000/api/candidates/get_all_candidates"
+          `${import.meta.env.VITE_API_URL}/api/candidates/get_all_candidates`
         );
 
         if (res.data.success) {

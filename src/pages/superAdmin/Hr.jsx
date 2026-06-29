@@ -32,7 +32,7 @@ const Hr = () => {
 
     try {
       // Fetch all records for export by sending a very large limit
-      const { data: res } = await axios.get("http://localhost:5000/api/hr/get-all?limit=100000");
+      const { data: res } = await axios.get(`${import.meta.env.VITE_API_URL}/api/hr/get-all?limit=100000`);
       
       if (!res.success || !res.data || res.data.length === 0) {
         setExportState({ status: "error", message: "No data available to export." });

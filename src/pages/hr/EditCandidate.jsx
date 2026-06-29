@@ -6,7 +6,7 @@ import {
   ShieldCheck, Users, CheckCircle, Eye, Trash2, Pencil, Loader2
 } from "lucide-react";
 
-const BASE = "http://localhost:5000/api/candidates";
+const BASE = `${import.meta.env.VITE_API_URL}/api/candidates`;
 
 /* ─── helpers ─── */
 const statusBadge = (s) => {
@@ -264,7 +264,7 @@ function EducationTab({ candId }) {
           <div className="bg-white p-4 rounded-xl shadow border text-center">
             <p className="text-sm text-[#01026E] mb-3 font-medium">Preview</p>
             {viewItem.doc_file_path
-              ? <img src={`http://localhost:5000/${viewItem.doc_file_path}`} alt="cert" className="rounded-lg shadow-sm mx-auto h-64 object-cover" />
+              ? <img src={`${import.meta.env.VITE_API_URL}/${viewItem.doc_file_path}`} alt="cert" className="rounded-lg shadow-sm mx-auto h-64 object-cover" />
               : <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 text-sm">No document uploaded</div>
             }
           </div>
@@ -350,7 +350,7 @@ function EmploymentTab({ candId }) {
           <div className="bg-white p-4 rounded-xl shadow border text-center">
             <p className="text-sm text-[#01026E] mb-3 font-medium">Preview</p>
             {viewItem.doc_file_path
-              ? <img src={`http://localhost:5000/${viewItem.doc_file_path}`} alt="doc" className="rounded-lg shadow-sm mx-auto h-64 object-cover" />
+              ? <img src={`${import.meta.env.VITE_API_URL}/${viewItem.doc_file_path}`} alt="doc" className="rounded-lg shadow-sm mx-auto h-64 object-cover" />
               : <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 text-sm">No document uploaded</div>
             }
           </div>
@@ -438,7 +438,7 @@ function BackgroundTab({ candId }) {
           <div className="bg-white p-4 rounded-xl shadow border text-center">
             <p className="text-sm text-[#01026E] mb-3 font-medium">Preview</p>
             {viewItem.data.doc_file_path
-              ? <img src={`http://localhost:5000/${viewItem.data.doc_file_path}`} className="rounded-lg shadow-sm mx-auto h-64 object-cover" />
+              ? <img src={`${import.meta.env.VITE_API_URL}/${viewItem.data.doc_file_path}`} className="rounded-lg shadow-sm mx-auto h-64 object-cover" />
               : <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 text-sm">No document uploaded</div>
             }
           </div>

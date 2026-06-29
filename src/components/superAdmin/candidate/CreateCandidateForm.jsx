@@ -31,7 +31,7 @@ function CreateCandidateForm() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/candidate/create",
+        `${import.meta.env.VITE_API_URL}/api/candidate/create`,
         {
           ...data,
           createdByRole: "super_admin",

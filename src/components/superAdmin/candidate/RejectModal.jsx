@@ -16,7 +16,7 @@ function RejectModal({ candidate, onClose, onSuccess }) {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/candidate/reject/${candidate?.id}`,
+        `${import.meta.env.VITE_API_URL}/api/candidate/reject/${candidate?.id}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

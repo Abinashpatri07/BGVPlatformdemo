@@ -11,7 +11,7 @@ function Home() {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/dashboard/metrics");
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/dashboard/metrics`);
         if (res.data.success) {
           setMetrics(res.data.data);
         }
