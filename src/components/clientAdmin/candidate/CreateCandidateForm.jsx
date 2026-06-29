@@ -32,7 +32,7 @@ function CreateCandidateForm() {
     try {
       const createdById = 2; // mock admin ID
       const response = await axios.post(
-        "http://localhost:5000/api/candidates/single_candidate_add",
+        "http://localhost:5000/api/client-admin/candidate/create",
         {
           firstName:     data.firstName,
           lastName:      data.lastName,
@@ -41,7 +41,8 @@ function CreateCandidateForm() {
           jobFunction:   data.jobFunction || "",
           tag:           data.tag || "",
           createdByRole: "client_admin",
-          createdById,
+          clientAdminId: createdById,
+          cmId: 1,
         }
       );
 

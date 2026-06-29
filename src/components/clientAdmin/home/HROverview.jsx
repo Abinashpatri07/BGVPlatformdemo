@@ -5,12 +5,12 @@ import {
   Ban,
 } from "lucide-react";
 
-function HROverview() {
+function HROverview({ data }) {
 
   const hrStats = [
     {
       title: "Total (HR)",
-      value: "20",
+      value: data ? String(data.total).padStart(2, '0') : "00",
       icon: <UsersRound size={18} className="text-[#4F46E5]" strokeWidth={2} />,
       bg: "bg-[#F3F2FF]",
       border: "bg-[#4338CA]",
@@ -18,7 +18,7 @@ function HROverview() {
     },
     {
       title: "Active",
-      value: "10",
+      value: data ? String(data.active).padStart(2, '0') : "00",
       icon: <UserCheck size={18} className="text-[#16A34A]" strokeWidth={2} />,
       bg: "bg-[#EAF9EB]",
       border: "bg-[#22C55E]",
@@ -26,7 +26,7 @@ function HROverview() {
     },
     {
       title: "Inactive",
-      value: "09",
+      value: data ? String(data.inactive).padStart(2, '0') : "00",
       icon: <UserX size={18} className="text-[#EA580C]" strokeWidth={2} />,
       bg: "bg-[#FFF1E8]",
       border: "bg-[#F97316]",
@@ -34,7 +34,7 @@ function HROverview() {
     },
     {
       title: "Terminated",
-      value: "18",
+      value: data ? String(data.terminated).padStart(2, '0') : "00",
       icon: <Ban size={18} className="text-[#EF4444]" strokeWidth={2} />,
       bg: "bg-[#FFECEC]",
       border: "bg-[#FF3B30]",

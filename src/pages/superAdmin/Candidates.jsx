@@ -84,7 +84,7 @@ const Candidates = () => {
         doc.save(`Candidates_Export_${new Date().toISOString().slice(0,10)}.pdf`);
       }
 
-      setExportState({ status:"success", message:`${type} file has been downloaded successfully.` });
+      setExportState({ status:"idle", message:"" });
     } catch (error) {
       console.error("Export error:", error);
       setExportState({ status:"error", message:"Failed to export data. Please try again." });

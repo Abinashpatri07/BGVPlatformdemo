@@ -1,21 +1,23 @@
-const profiles = [
-  { name: "Deepak Mukherji",  role: "Candidate", time: "2 day ago", img: 10 },
-  { name: "Devika Banaji",    role: "Candidate", time: "4 day ago", img: 11 },
-  { name: "Rena Biswal",      role: "HR",        time: "4 day ago", img: 12 },
-  { name: "Arjun Malhotra",   role: "HR",        time: "4 day ago", img: 13 },
-  { name: "Ananya Banerjee",  role: "Candidate", time: "4 day ago", img: 14 },
-  { name: "Kyra Pillai",      role: "HR",        time: "4 day ago", img: 15 },
-  { name: "Dhruv Verma",      role: "Candidate", time: "4 day ago", img: 16 },
-  { name: "Aryan Mehra",      role: "HR",        time: "5 day ago", img: 17 },
-  { name: "Rohan Das",        role: "Candidate", time: "4 day ago", img: 18 },
-  { name: "Arav Sharma",      role: "Candidate", time: "4 day ago", img: 19 },
-  { name: "Navya Sharma",     role: "Candidate", time: "6 day ago", img: 20 },
-  { name: "Aavya Hegde",      role: "HR",        time: "6 day ago", img: 21 },
-  { name: "Diya Kapoor",      role: "HR",        time: "4 day ago", img: 22 },
-  { name: "Diya Kapoor",      role: "HR",        time: "4 day ago", img: 23 },
-];
+function timeAgo(dateString) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - date) / 1000);
+  
+  if (diffInSeconds < 60) return "Just now";
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) return `${diffInMinutes} min ago`;
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours} hr ago`;
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 30) return `${diffInDays} day ago`;
+  return date.toLocaleDateString();
+}
 
-function RecentProfiles() {
+function RecentProfiles({ data = [] }) {
+  // Use dynamic data if available, otherwise fallback to empty array
+  const displayProfiles = data && data.length > 0 ? data : [];
+
   return (
     <div className="bg-[#09004D] rounded-3xl p-4 h-full flex flex-col border border-indigo-900 shadow-xl">
 
@@ -26,7 +28,7 @@ function RecentProfiles() {
 
       {/* LIST */}
       <div className="flex-1 overflow-y-auto pr-1 space-y-2.5" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.2) transparent" }}>
-        {profiles.map((item, index) => (
+        {displayProfiles.map((item, index) => (
           <div
             key={index}
             className="flex items-start justify-between gap-3"
@@ -36,7 +38,7 @@ function RecentProfiles() {
 
               {/* IMAGE */}
               <img
-                src={`https://i.pravatar.cc/150?img=${item.img}`}
+                src={`https://i.pravatar.cc/150?img=${item.img || 10}`}
                 alt=""
                 className="w-8 h-8 rounded-full object-cover shrink-0 border border-white/10"
               />
@@ -63,11 +65,14 @@ function RecentProfiles() {
 
             {/* TIME */}
             <span className="text-[9px] text-gray-400 whitespace-nowrap mt-0.5">
-              {item.time}
+              {timeAgo(item.time)}
             </span>
 
           </div>
         ))}
+        {displayProfiles.length === 0 && (
+          <div className="text-[12px] text-gray-400 text-center py-4">No recent profiles</div>
+        )}
       </div>
 
     </div>

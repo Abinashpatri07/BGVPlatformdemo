@@ -10,7 +10,7 @@ import Pagination from "../../components/clientAdmin/home/Pagination";
 export default function AuditPage() {
   const [search, setSearch] = useState("");
   const [module, setModule] = useState("All Modules");
-  const [dateFilter, setDateFilter] = useState("Today");
+  const [dateFilter, setDateFilter] = useState("All Time");
   const [page, setPage] = useState(1);
   const [logs, setLogs] = useState([]);
   const [totalPages, setTotalPages] = useState(1);

@@ -72,7 +72,7 @@ const clientCards = [
     iconBg: "bg-[#D7F1FF]", borderColor: "bg-[#2AA8F2]", cardBg: "bg-[#E5F6FF]",
   },
   {
-    label: "Active Cases", value: "10",
+    label: "Active", value: "10",
     icon: <Activity size={16} className="text-[#36C95F]" />,
     iconBg: "bg-[#D9F8E2]", borderColor: "bg-[#36C95F]", cardBg: "bg-[#E8F9ED]",
   },
@@ -127,12 +127,47 @@ const vendorCards = [
   },
 ];
 
-// ── Main Export ────────────────────────────────────────
-export default function ClientVendorOverview() {
+// ── Main Component ───────────────────────────────────────
+export default function ClientVendorOverview({ data }) {
+  // If data is provided, override the mock values
+  const currentClientCards = clientCards.map(c => {
+    if (data?.clients) {
+      if (c.label === "Total Client") return { ...c, value: data.clients.total || 0 };
+      if (c.label === "Verified") return { ...c, value: data.clients.verified || 0 };
+      if (c.label === "Active") return { ...c, value: data.clients.active || 0 };
+      if (c.label === "On Hold") return { ...c, value: data.clients.onHold || 0 };
+      if (c.label === "Awaiting Input") return { ...c, value: data.clients.awaitingInput || 0 };
+      if (c.label === "Rejected") return { ...c, value: data.clients.rejected || 0 };
+    }
+    return c;
+  });
+
+  const currentVendorCards = vendorCards.map(v => {
+    if (data?.vendors) {
+      if (v.label === "Total Vendor") return { ...v, value: data.vendors.total || 0 };
+      if (v.label === "Verified") return { ...v, value: data.vendors.verified || 0 };
+      if (v.label === "Total Case") return { ...v, value: data.vendors.totalCases || 0 };
+      if (v.label === "On Hold") return { ...v, value: data.vendors.onHold || 0 };
+      if (v.label === "Pending\nVerification") return { ...v, value: data.vendors.pendingVerification || 0 };
+      if (v.label === "Suspended") return { ...v, value: data.vendors.suspended || 0 };
+    }
+    return v;
+  });
+
   return (
-    <div className="flex gap-4 ">
-      <Panel title="Client" total="140" totalLabel="Total Clients" cards={clientCards} />
-      <Panel title="Vendor" total="40"  totalLabel="Total Vendors"  cards={vendorCards} />
+    <div className="flex gap-4 p-4 pl-0">
+      <Panel 
+        title="Client" 
+        total={data?.clients?.total || 20} 
+        totalLabel="Total Client" 
+        cards={currentClientCards} 
+      />
+      <Panel 
+        title="Vendor" 
+        total={data?.vendors?.total || 20} 
+        totalLabel="Total Vendor" 
+        cards={currentVendorCards} 
+      />
     </div>
   );
 }

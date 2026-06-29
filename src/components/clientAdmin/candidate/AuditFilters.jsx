@@ -4,10 +4,10 @@ import { Search, SlidersHorizontal, Calendar, ChevronDown } from "lucide-react";
 export default function AuditFilters({ onSearch, onModuleChange, onDateChange }) {
   const [search, setSearch] = useState("");
   const [module, setModule] = useState("All Modules");
-  const [date, setDate] = useState("Today");
+  const [date, setDate] = useState("All Time");
 
   const modules = ["All Modules", "Verifications", "Billing", "Security", "Settings"];
-  const dates = ["Today", "Yesterday", "Last 7 Days", "Last 30 Days", "Custom Range"];
+  const dates = ["All Time", "Today", "Yesterday", "Last 7 Days", "Last 30 Days", "Custom Range"];
 
   return (
     <div className="flex items-center justify-between bg-gray-100  gap-3 mb-0">

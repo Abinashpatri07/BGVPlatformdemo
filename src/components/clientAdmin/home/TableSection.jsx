@@ -15,17 +15,11 @@ import TableToolbar from "./TableToolbar";
 import { tableData } from "../data/tableData";
 import HRActionDropdown from "../hr/HRActionDropdown";
 
-function TableSection({ isToolBarRequired }) {
-  const [data, setData] = useState([]);
+function TableSection({ isToolBarRequired, data, onAction }) {
   const [openMenu, setOpenMenu] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
 
   const navigate = useNavigate();
-
-  // LOAD DUMMY DATA
-  useEffect(() => {
-    setData(tableData);
-  }, []);
 
   // CLOSE DROPDOWN ON OUTSIDE CLICK
   useEffect(() => {
@@ -106,6 +100,10 @@ function TableSection({ isToolBarRequired }) {
             </th>
 
             <th className="px-4 py-4 text-left font-semibold">
+              Role
+            </th>
+
+            <th className="px-4 py-4 text-left font-semibold">
               Status
             </th>
 
@@ -117,135 +115,94 @@ function TableSection({ isToolBarRequired }) {
 
         {/* BODY */}
         <tbody>
-          {data.map((item, index) => (
-            <tr
-              key={index}
-              className="border-b border-gray-200 hover:bg-gray-50 transition"
-            >
-
-              {/* CHECKBOX */}
-              <td className="px-4 py-5">
-                <input
-                  type="checkbox"
-                  checked={selectedRows.includes(
-                    item.cand_id
-                  )}
-                  onChange={() =>
-                    handleSelectRow(item.cand_id)
-                  }
-                />
-              </td>
-
-              {/* EMPLOYEE ID */}
-              <td className="px-4 py-5 text-gray-700">
-                {item.cand_id}
-              </td>
-
-              {/* NAME */}
-              <td className="px-4 py-5 font-semibold text-gray-900">
-                {item.first_name} {item.last_name}
-              </td>
-
-              {/* EMAIL */}
-              <td className="px-4 py-5 text-gray-600">
-                {item.Email}
-              </td>
-
-              {/* PHONE */}
-              <td className="px-4 py-5 text-gray-700">
-                {item.Phone}
-              </td>
-              
-              {/* STATUS */}
-            <td className="px-4 py-4">
-
-              <span
-                className={`px-4 py-1 rounded-full text-xs font-medium ${
-                  item.status === "Active"
-                    ? "bg-green-100 text-green-600"
-
-                    : item.status === "Inactive"
-                    ? "bg-orange-100 text-orange-500"
-
-                    : item.status === "Terminated"
-                    ? "bg-red-100 text-red-500"
-
-                    : "bg-gray-100 text-gray-500"
+          {data && data.length > 0 ? (
+            data.map((row, index) => (
+              <tr
+                key={row.id}
+                className={`border-b border-gray-100 hover:bg-gray-50 transition ${
+                  index % 2 === 0 ? "bg-white" : "bg-[#F4F4F4]/30"
                 }`}
               >
-                {item.status}
-              </span>
+                <td className="px-4 py-4 w-10">
+                  <input
+                    type="checkbox"
+                    checked={selectedRows.includes(row.id)}
+                    onChange={() => handleSelectRow(row.id)}
+                  />
+                </td>
 
-            </td>
+                <td className="px-4 py-4 font-medium text-gray-900">
+                  {row.empId}
+                </td>
 
+                <td className="px-4 py-4">
+                  <div className="flex items-center">
+                    <span className="font-semibold text-gray-800">
+                      {row.firstName} {row.lastName}
+                    </span>
+                  </div>
+                </td>
 
-              {/* ACTION */}
-              <td className="px-4 py-5 text-center relative overflow-visible">
+                <td className="px-4 py-4 text-gray-600">{row.email}</td>
+                <td className="px-4 py-4 text-gray-600">{row.phone}</td>
+                
+                <td className="px-4 py-4">
+                  <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                    {row.role}
+                  </span>
+                </td>
 
-                <div
-                  className="relative inline-block"
-                  onClick={(e) =>
-                    e.stopPropagation()
-                  }
-                >
-
-                  {/* 3 DOT MENU */}
-                  <button
-                    onClick={() =>
-                      setOpenMenu(
-                        openMenu === index
-                          ? null
-                          : index
-                      )
-                    }
-                    className="text-gray-500 hover:text-black transition"
+                <td className="px-4 py-4">
+                  <div
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                      row.isActive === 3
+                        ? "bg-red-50 text-red-600"
+                        : "bg-[#E6F9EE] text-[#00A843]"
+                    }`}
                   >
-                    <MoreVertical size={20} />
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        row.isActive === 3 ? "bg-red-500" : "bg-[#00A843]"
+                      }`}
+                    ></span>
+                    {row.isActive === 3 ? "Suspended" : "Active"}
+                  </div>
+                </td>
+
+                {/* ACTIONS */}
+                <td className="px-4 py-4 text-center relative">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenMenu(openMenu === row.id ? null : row.id);
+                    }}
+                    className="p-1.5 rounded-full hover:bg-gray-100 transition text-gray-500"
+                  >
+                    <MoreVertical size={18} />
                   </button>
 
-                  {/* DROPDOWN */}
-                 {openMenu === index && (
-
-                    <div className="absolute right-10 top-0 z-9999">
-
+                  {/* ACTION DROPDOWN */}
+                  {openMenu === row.id && (
+                    <div className="absolute right-10 top-0 z-10">
                       <HRActionDropdown
-
-                        onView={() => {
-
-                          setOpenMenu(null);
-
-                          navigate("/admin/view-hr");
-                        }}
-
-                        onEdit={() => {
-
-                          setOpenMenu(null);
-
-                          navigate("/admin/edit-hr");
-                        }}
-
-                        onEmail={() => {
-
-                          console.log("Send Email");
-
-                          setOpenMenu(null);
-                        }}
-
-                        onTerminate={() => {
-
-                          console.log("Terminate");
-
-                          setOpenMenu(null);
-                        }}
-
+                        hrId={row.id}
+                        hrName={`${row.firstName} ${row.lastName}`}
+                        onView={() => { navigate(`/admin/view-hr/${row.id}`); setOpenMenu(null); }}
+                        onEdit={() => { navigate(`/admin/edit-hr/${row.id}`); setOpenMenu(null); }}
+                        onTerminate={() => { onAction && onAction("terminate", row.id); setOpenMenu(null); }}
                       />
-
                     </div>
                   )}
-                </div>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="8" className="text-center py-10 text-gray-500">
+                No HRs found.
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>

@@ -8,6 +8,7 @@ const ProfileHeader = ({
   showExport = true,
   showCreateHR = false,
   showCreateCandidate = false,
+  onExport,
 }) => {
   const [showExportModal, setShowExportModal] = useState(false);
   const [showCandidateDropdown, setShowCandidateDropdown] = useState(false);
@@ -157,7 +158,7 @@ const ProfileHeader = ({
                 <div className="flex justify-end">
                   <button
                     onClick={() => {
-                      console.log("Download:", selectedType);
+                      if (onExport) onExport(selectedType);
                       setShowExportModal(false);
                     }}
                     className="bg-[#01026E] hover:bg-[#00005E] text-white px-5 py-2 rounded-xl text-sm font-medium transition-all"

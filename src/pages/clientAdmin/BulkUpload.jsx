@@ -1,6 +1,8 @@
 import { CheckCircle, XCircle, Download, FileText } from "lucide-react";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import * as XLSX from "xlsx";
 
 const BulkUpload = () => {
   const fileRef = useRef();
@@ -14,36 +16,7 @@ const BulkUpload = () => {
   const [uploadResult, setUploadResult] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  const [previewData, setPreviewData] = useState([
-    {
-      name: "Padmini Gupta",
-      phone: "+91 9854713254",
-      email: "padmini457@gmail.com",
-      function: "IT",
-      tag: "May Batch",
-    },
-    {
-      name: "Kamlesh Desai",
-      phone: "+91 9854713254",
-      email: "kamesh54@gmail.com",
-      function: "IT",
-      tag: "May Batch",
-    },
-    {
-      name: "Puja Rani",
-      phone: "+91 9854713254",
-      email: "puja475@gmail.com",
-      function: "Marketing",
-      tag: "May Batch",
-    },
-    {
-      name: "Deepak Nath",
-      phone: "+91 9854713254",
-      email: "deepak54@gmail.com",
-      function: "Sales",
-      tag: "June Batch",
-    },
-  ]);
+  const [previewData, setPreviewData] = useState([]);
 
   const handleClick = () => fileRef.current.click();
 
@@ -105,12 +78,13 @@ const BulkUpload = () => {
 
   const handleUpload = async () => {
     setUploading(true);
-    /* === FOR DEMO: BACKEND BYPASSED ===
+    try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("clientAdminId", 2);
 
       const res = await axios.post(
-        "http://localhost:5000/api/candidates/multiple_candidate_add",
+        "http://localhost:5000/api/client-admin/candidate/bulk-create",
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
@@ -123,25 +97,41 @@ const BulkUpload = () => {
           skippedList: res.data.skippedList || [],
         });
       }
-      */
-
-      // Mocking a successful response
-      setTimeout(() => {
-        setUploadResult({
-          created: previewData.length,
-          skipped: 0,
-          total: previewData.length,
-          skippedList: [],
-        });
-        setUploading(false);
-      }, 800);
+    } catch (err) {
+      console.error(err);
+      setUploadResult({
+        created: 0,
+        skipped: previewData.length,
+        total: previewData.length,
+        skippedList: [],
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleNext = () => {
     if (!file) return;
 
-    setShowTable(true);
-    setShowDuplicateModal(true);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      const json = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+      
+      const parsedData = json.map(item => ({
+        name: `${item["First Name"] || item.firstName || item.name || ""} ${item["Last Name"] || item.lastName || ""}`.trim(),
+        phone: item["Phone"] || item.phone || "",
+        email: item["Email"] || item.email || "",
+        function: item["Function"] || item.function || "",
+        tag: item["Tag"] || item.tag || "",
+      }));
+      setPreviewData(parsedData);
+      setShowTable(true);
+      setShowDuplicateModal(false);
+    };
+    reader.readAsArrayBuffer(file);
   };
 
   return (

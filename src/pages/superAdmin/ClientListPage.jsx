@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 
 import ClientPageHeader from "../../components/superAdmin/client/ClientPageHeader";
 import ClientStatCards from "../../components/superAdmin/client/ClientStatCards";
@@ -102,8 +102,6 @@ export default function ClientListPage() {
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Clients");
       XLSX.writeFile(workbook, "ClientsData.csv");
-      setPopupMessage({ type: "success", text: "CSV Exported Successfully!" });
-      setTimeout(() => setPopupMessage(null), 3000);
     } else if (type === "PDF") {
       const doc = new jsPDF();
       doc.text("Clients Data", 14, 10);
@@ -111,7 +109,7 @@ export default function ClientListPage() {
       const tableColumn = Object.keys(exportData[0]);
       const tableRows = exportData.map(obj => Object.values(obj));
 
-      doc.autoTable({
+      autoTable(doc, {
         head: [tableColumn],
         body: tableRows,
         startY: 15,
@@ -119,8 +117,6 @@ export default function ClientListPage() {
       });
 
       doc.save("ClientsData.pdf");
-      setPopupMessage({ type: "success", text: "PDF Exported Successfully!" });
-      setTimeout(() => setPopupMessage(null), 3000);
     }
   };
 

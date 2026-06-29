@@ -13,10 +13,6 @@ import { Download } from "lucide-react";
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 /* ── Data ─────────────────────────────────────────────── */
-const monthlyData   = [600000, 98674, 660000, 720000, 680000, 820000, 740000, 490000, 580000, 650000, 610000, 790000];
-const quarterlyData = [1865674, 1990000, 2070000, 2230000];
-const yearlyData    = [18000000, 19500000, 20900000];
-
 const monthLabels    = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sept","Oct","Nov","Dec"];
 const quarterLabels  = ["Q1","Q2","Q3","Q4"];
 const yearLabels     = ["2022","2023","2024"];
@@ -36,8 +32,12 @@ const gradientPlugin = {
 };
 
 /* ── Component ────────────────────────────────────────── */
-export default function RevenueGrowth() {
+export default function RevenueGrowth({ metricsData }) {
   const [view, setView] = useState("Monthly");
+
+  const monthlyData = metricsData?.monthly || [0,0,0,0,0,0,0,0,0,0,0,0];
+  const quarterlyData = metricsData?.quarterly || [0,0,0,0];
+  const yearlyData = metricsData?.yearly || [0,0,0];
 
   const labels = view === "Monthly" ? monthLabels : view === "Quarterly" ? quarterLabels : yearLabels;
   const values = view === "Monthly" ? monthlyData  : view === "Quarterly" ? quarterlyData  : yearlyData;

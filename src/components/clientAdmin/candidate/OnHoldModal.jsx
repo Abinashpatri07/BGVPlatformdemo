@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Square } from "lucide-react";
+import axios from "axios";
 
 function OnHoldModal({ candidate, onClose, onSuccess }) {
   const [reason, setReason] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // ── Candidate name — HR data (first_name/last_name) ya Client Admin data (name) dono handle karo
   const candidateName =
@@ -11,10 +13,26 @@ function OnHoldModal({ candidate, onClose, onSuccess }) {
       ? `${candidate.first_name} ${candidate.last_name}`
       : candidate?.name || "";
 
-  const handleOnHold = () => {
+  const handleOnHold = async () => {
     if (!reason.trim()) return;
-    setIsSuccess(true);
-    if (onSuccess) onSuccess();
+    try {
+      setIsLoading(true);
+      const res = await axios.patch(
+        `http://localhost:5000/api/client-admin/candidate/on-hold/${candidate?.id}`,
+        { reason }
+      );
+      if (res.data.success) {
+        setIsSuccess(true);
+        if (onSuccess) onSuccess();
+      } else {
+        alert(res.data.message || "Failed to put candidate on hold.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Something went wrong!");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // ── SUCCESS SCREEN ─────────────────────────────────
@@ -95,15 +113,15 @@ function OnHoldModal({ candidate, onClose, onSuccess }) {
             Cancel
           </button>
           <button
-            disabled={!reason.trim()}
+            disabled={!reason.trim() || isLoading}
             onClick={handleOnHold}
             className={`px-8 py-2.5 border rounded-xl text-sm font-medium transition ${
-              reason.trim()
+              reason.trim() && !isLoading
                 ? "border-orange-400 text-orange-500 hover:bg-orange-50"
                 : "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
             }`}
           >
-            Place On Hold
+            {isLoading ? "Processing..." : "Place On Hold"}
           </button>
         </div>
 

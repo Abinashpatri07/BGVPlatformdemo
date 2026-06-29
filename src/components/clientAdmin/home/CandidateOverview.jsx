@@ -7,12 +7,12 @@ import {
   Ban,
 } from "lucide-react";
 
-function CandidateOverview() {
+function CandidateOverview({ data }) {
 
   const candidateStats = [
     {
       title: "In Progress",
-      value: "20",
+      value: data ? String(data.inProgress).padStart(2, '0') : "00",
       icon: <ClipboardList size={18} className="text-[#4F46E5]" strokeWidth={2} />,
       bg: "bg-[#F3F2FF]",
       border: "bg-[#4338CA]",
@@ -20,7 +20,7 @@ function CandidateOverview() {
     },
     {
       title: "Complete",
-      value: "10",
+      value: data ? String(data.complete).padStart(2, '0') : "00",
       icon: <CheckCircle2 size={18} className="text-[#16A34A]" strokeWidth={2} />,
       bg: "bg-[#EAF9EB]",
       border: "bg-[#22C55E]",
@@ -28,7 +28,7 @@ function CandidateOverview() {
     },
     {
       title: "On Hold",
-      value: "10",
+      value: data ? String(data.onHold).padStart(2, '0') : "00",
       icon: <PauseCircle size={18} className="text-[#B7791F]" strokeWidth={2} />,
       bg: "bg-[#FFF8E7]",
       border: "bg-[#D4A017]",
@@ -36,7 +36,7 @@ function CandidateOverview() {
     },
     {
       title: "Verification In Progress",
-      value: "09",
+      value: data ? String(data.verificationInProgress).padStart(2, '0') : "00",
       icon: <RefreshCcw size={18} className="text-[#EA580C]" strokeWidth={2} />,
       bg: "bg-[#FFF1E8]",
       border: "bg-[#F97316]",
@@ -44,7 +44,7 @@ function CandidateOverview() {
     },
     {
       title: "Verified",
-      value: "18",
+      value: data ? String(data.verified).padStart(2, '0') : "00",
       icon: <BadgeCheck size={18} className="text-[#0F766E]" strokeWidth={2} />,
       bg: "bg-[#ECF8F6]",
       border: "bg-[#14B8A6]",
@@ -52,7 +52,7 @@ function CandidateOverview() {
     },
     {
       title: "Reject",
-      value: "18",
+      value: data ? String(data.rejected).padStart(2, '0') : "00",
       icon: <Ban size={18} className="text-[#EF4444]" strokeWidth={2} />,
       bg: "bg-[#FFECEC]",
       border: "bg-[#FF3B30]",

@@ -1,12 +1,29 @@
 import { useState } from "react";
+import axios from "axios";
 
-function TerminateModal({ candidateId = "EMP-008", onCancel, onSuccess }) {
+function TerminateModal({ hrId, candidateId = "this HR", onCancel, onSuccess }) {
   const [step, setStep] = useState("confirm"); // "confirm" | "success"
   const [reason, setReason] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleTerminate = () => {
-    // your API call here with `reason`
-    setStep("success");
+  const handleTerminate = async () => {
+    if (!reason.trim()) return;
+    setLoading(true);
+    setError("");
+    try {
+      const res = await axios.patch(
+        `http://localhost:5000/api/client-admin/hr/terminate/${hrId}`,
+        { reason: reason.trim() }
+      );
+      if (res.data.success) {
+        setStep("success");
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to terminate HR");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleOkay = () => {
@@ -14,64 +31,74 @@ function TerminateModal({ candidateId = "EMP-008", onCancel, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div 
+      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+      onClick={(e) => {
+        e.stopPropagation();
+        onCancel?.();
+      }}
+    >
 
-      {/* ── STEP 1: CONFIRM ─────────────────────────── */}
+      {/* STEP 1: CONFIRM */}
       {step === "confirm" && (
-        <div className="bg-white rounded-2xl w-130 px-10 py-8 shadow-xl">
+        <div 
+          className="bg-white rounded-2xl w-130 px-10 py-8 shadow-xl"
+          onClick={(e) => e.stopPropagation()}
+        >
 
           {/* TITLE */}
           <h2 className="text-2xl font-bold text-gray-900 text-center leading-9">
-  Are You Sure You Want To{" "}
-  
-  <span className="text-red-700">
-    Terminate
-  </span>{" "}
-  
-  "{candidateId}"?
-</h2>
+            Are You Sure You Want To{" "}
+            <span className="text-red-700">Terminate</span>{" "}
+            "{candidateId}"?
+          </h2>
 
           {/* REASON FIELD */}
           <div className="mt-6">
             <label className="text-sm font-medium text-gray-800 mb-1.5 block">
-              "Reason For Terminating The HR" <span className="text-red-500">*</span>
+              Reason For Terminating The HR <span className="text-red-500">*</span>
             </label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Please describe the reason for terminate this candidate."
+              placeholder="Please describe the reason for terminating this HR."
               rows={5}
               className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-700 placeholder:text-gray-400 outline-none resize-none focus:border-gray-400 transition"
             />
+            {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
           </div>
 
           {/* BUTTONS */}
           <div className="flex justify-center gap-4 mt-6">
             <button
               onClick={onCancel}
+              disabled={loading}
               className="bg-red-800 hover:bg-red-900 text-white px-8 py-2.5 rounded-xl text-sm font-medium transition"
             >
               Cancel
             </button>
             <button
-                onClick={handleTerminate}
-                disabled={!reason.trim()}
-                className={`px-8 py-2.5 rounded-xl text-sm font-medium transition border ${
-                    reason.trim()
-                    ? "border-red-800 text-red-800 hover:bg-red-50 cursor-pointer"
-                    : "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
-                }`}
-                >
-                Terminate HR
-                </button>
+              onClick={handleTerminate}
+              disabled={!reason.trim() || loading}
+              className={`px-8 py-2.5 rounded-xl text-sm font-medium transition border ${
+                reason.trim() && !loading
+                  ? "border-red-800 text-red-800 hover:bg-red-50 cursor-pointer"
+                  : "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
+              }`}
+            >
+              {loading ? "Terminating..." : "Terminate HR"}
+            </button>
           </div>
 
         </div>
       )}
 
-      {/* ── STEP 2: SUCCESS ─────────────────────────── */}
+      {/* STEP 2: SUCCESS */}
       {step === "success" && (
-        <div className="bg-white rounded-2xl w-105 overflow-hidden shadow-xl text-center">
+        <div 
+          className="bg-white rounded-2xl w-105 overflow-hidden shadow-xl text-center"
+          onClick={(e) => e.stopPropagation()}
+        >
 
           {/* RED WAVE TOP */}
           <div className="relative bg-red-900 h-36 flex items-center justify-center">

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
@@ -50,9 +51,23 @@ function CreateHRForm() {
   };
 
   // SUBMIT
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateForm()) return;
-    setShowSuccessModal(true);
+    try {
+      // Default to clientId 1 for development as mentioned in the plan
+      const payload = { ...formData, clientId: 1 };
+      const res = await axios.post("http://localhost:5000/api/client-admin/hr/create", payload);
+      if (res.data.success) {
+        setShowSuccessModal(true);
+      }
+    } catch (err) {
+      console.error(err);
+      if (err.response?.data?.errors) {
+        setErrors({ ...errors, ...err.response.data.errors });
+      } else {
+        alert(err.response?.data?.message || "Failed to create HR");
+      }
+    }
   };
 
   // INPUT CLASS

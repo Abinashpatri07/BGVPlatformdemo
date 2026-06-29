@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 
 // ── Success Modal ───────────────────────────────────────
 function SuccessModal({ onDone }) {
@@ -84,35 +85,85 @@ function ConfirmModal({ onBack, onSubmit }) {
 // ── Main Form ───────────────────────────────────────────
 function HRForm({ mode = "view" }) {
   const navigate = useNavigate();
+  const { id } = useParams();
   const isView = mode === "view";
 
   const [showSuccess, setShowSuccess] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    empId: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    role: "HR",
+    isActive: true,
+  });
 
-  // VIEW — Done button
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (id) {
+      fetchHrDetails();
+    }
+  }, [id]);
+
+  const fetchHrDetails = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/client-admin/hr/get-all?clientId=1");
+      if (res.data.success) {
+        const hr = res.data.data.find((item) => item.id === parseInt(id));
+        if (hr) {
+          setFormData({
+            empId: hr.empId || "",
+            firstName: hr.firstName || "",
+            lastName: hr.lastName || "",
+            email: hr.email || "",
+            phone: hr.phone ? hr.phone.replace(/^\+91/, '') : "",
+            role: hr.role || "HR",
+            isActive: hr.isActive === 1,
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch HR details", err);
+    }
+  };
+
+  const handleChange = (e) => {
+    if (isView) return;
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleDoneClick = () => navigate("/admin/hr");
-
-  // VIEW — Done inside success modal
   const handleSuccessDone = () => navigate("/admin/hr");
-
-  // EDIT — Submit button → show confirm
   const handleSubmitClick = () => setShowConfirm(true);
-
-  // EDIT — Back inside confirm modal
   const handleConfirmBack = () => setShowConfirm(false);
 
-  // EDIT — Submit inside confirm → show success
-  const handleConfirmSubmit = () => {
+  const handleConfirmSubmit = async () => {
     setShowConfirm(false);
-    setShowSuccess(true);
+    setLoading(true);
+    try {
+      const res = await axios.patch(`http://localhost:5000/api/client-admin/hr/update/${id}`, formData);
+      if (res.data.success) {
+        setShowSuccess(true);
+      }
+    } catch (err) {
+      console.error("Failed to update HR", err);
+      alert(err.response?.data?.message || "Failed to update HR");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const inputCls = "w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none disabled:bg-gray-50";
 
   return (
     <>
-      {/* SUCCESS MODAL */}
       {showSuccess && <SuccessModal onDone={handleSuccessDone} />}
 
-      {/* CONFIRM MODAL */}
       {showConfirm && (
         <ConfirmModal
           onBack={handleConfirmBack}
@@ -129,8 +180,9 @@ function HRForm({ mode = "view" }) {
           </label>
           <input
             type="text"
-            value="KJUUA-15424185"
-            disabled
+            name="empId"
+            value={formData.empId}
+            readOnly={true}
             className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-gray-50 outline-none"
           />
         </div>
@@ -143,9 +195,11 @@ function HRForm({ mode = "view" }) {
             </label>
             <input
               type="text"
-              defaultValue="Deepti"
-              disabled={isView}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none disabled:bg-gray-50"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              readOnly={isView}
+              className={inputCls}
             />
           </div>
           <div>
@@ -154,9 +208,11 @@ function HRForm({ mode = "view" }) {
             </label>
             <input
               type="text"
-              defaultValue="Thakur"
-              disabled={isView}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none disabled:bg-gray-50"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              readOnly={isView}
+              className={inputCls}
             />
           </div>
         </div>
@@ -168,9 +224,10 @@ function HRForm({ mode = "view" }) {
           </label>
           <input
             type="email"
-            defaultValue="Deepti481@gmail.com"
-            disabled={isView}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none disabled:bg-gray-50"
+            name="email"
+            value={formData.email}
+            readOnly={true}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-gray-50 outline-none"
           />
         </div>
 
@@ -183,8 +240,10 @@ function HRForm({ mode = "view" }) {
             <div className="px-3 py-2.5 bg-gray-100 text-sm border-r">+91</div>
             <input
               type="text"
-              defaultValue="5487601549"
-              disabled={isView}
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              readOnly={isView}
               className="w-full px-3 py-2.5 text-sm outline-none disabled:bg-gray-50"
             />
           </div>
@@ -195,12 +254,24 @@ function HRForm({ mode = "view" }) {
           <label className="block text-sm font-medium mb-1.5">
             Role <span className="text-red-500">*</span>
           </label>
-          <input
-            type="text"
-            defaultValue="Recruiter"
-            disabled={isView}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none disabled:bg-gray-50"
-          />
+          {isView ? (
+            <input
+              type="text"
+              value={formData.role}
+              readOnly={true}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-gray-50 outline-none"
+            />
+          ) : (
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none bg-white"
+            >
+              <option value="HR">HR</option>
+              <option value="HR Manager">HR Manager</option>
+            </select>
+          )}
         </div>
 
         {/* BUTTONS */}

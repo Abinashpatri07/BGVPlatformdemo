@@ -1,21 +1,23 @@
 import { useParams, useNavigate } from "react-router-dom";
-
-import { CheckCircle, ArrowLeft } from "lucide-react";
-
-const SectionCard = ({ title, children }) => (
-  <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-    <h3 className="text-[#02027A] text-lg font-semibold mb-5 flex items-center gap-2">
-      {title}
-    </h3>
-
-    {children}
-  </div>
-);
+import { useState, useEffect } from "react";
+import axios from "axios";
+import {
+  User,
+  MapPin,
+  IdCard,
+  GraduationCap,
+  Briefcase,
+  ShieldAlert,
+  Activity,
+  Users,
+  CheckCircle,
+  Eye,
+  ArrowLeft,
+} from "lucide-react";
 
 const Label = ({ label, value }) => (
   <div>
     <p className="text-xs text-gray-400 mb-1">{label}</p>
-
     <p className="text-sm font-medium text-gray-700">{value}</p>
   </div>
 );
@@ -23,9 +25,61 @@ const Label = ({ label, value }) => (
 function View() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("Personal");
+  const [showEducationView, setShowEducationView] = useState(null);
+  const [showEmploymentView, setShowEmploymentView] = useState(null);
+  const [criminalView, setCriminalView] = useState(null);
+  const [drugView, setDrugView] = useState(null);
+  const [identityView, setIdentityView] = useState(null);
+
+  const [candidateData, setCandidateData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCandidate = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/client-admin/candidate/get-candidate/${id}`);
+        if (response.data.success) {
+          setCandidateData(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching candidate:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCandidate();
+  }, [id]);
+
+  const tabs = [
+    { name: "Personal", icon: User },
+    { name: "Address", icon: MapPin },
+    { name: "Identity", icon: IdCard },
+    { name: "Education", icon: GraduationCap },
+    { name: "Employment", icon: Briefcase },
+    { name: "Criminal", icon: ShieldAlert },
+    { name: "Drug", icon: Activity },
+    { name: "Reference", icon: Users },
+  ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#F4F7FE]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#02027A]"></div>
+      </div>
+    );
+  }
+
+  if (!candidateData) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#F4F7FE]">
+        <div className="text-xl text-gray-500 font-medium">Candidate Not Found</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#F4F7FE] p-6">
+    <div className="p-6 max-w-6xl mx-auto bg-[#F4F7FE] min-h-screen">
       {/* TOP */}
       <div className="mb-6">
         <button
@@ -37,7 +91,6 @@ function View() {
         </button>
       </div>
 
-      {/* TITLE */}
       {/* TITLE + STATUS BADGE */}
       <div className="flex justify-between items-start mb-6">
         <div>
@@ -50,24 +103,33 @@ function View() {
         </div>
 
         {/* ACCOUNT STATUS - RIGHT SIDE */}
-        <div className="flex items-center gap-3 bg-[#e8fce8] border border-green-200 rounded-2xl px-5 py-3">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#00cc00"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M12 2L3 6v6c0 5.55 4.18 10.74 9 12 4.82-1.26 9-6.45 9-12V6L12 2z" />
-            <polyline points="9 12 11 14 15 10" />
-          </svg>
-          <span className="text-[#00cc00] text-base font-bold tracking-wide">
-            Account Status: Veryfied
-          </span>
+        <div className={`flex items-center gap-3 border rounded-2xl px-5 py-3 ${
+          candidateData.verification_status === 1 ? 'bg-[#e8fce8] border-green-200' : 
+          candidateData.verification_status === 3 ? 'bg-red-50 border-red-200' : 
+          'bg-yellow-50 border-yellow-200'
+        }`}>
+          {candidateData.verification_status === 1 ? (
+            <>
+              <CheckCircle size={20} className="text-green-500" />
+              <span className="text-[#00cc00] text-base font-bold tracking-wide">
+                Account Status: Verified
+              </span>
+            </>
+          ) : candidateData.verification_status === 3 ? (
+            <>
+              <ShieldAlert size={20} className="text-red-500" />
+              <span className="text-red-600 text-base font-bold tracking-wide">
+                Account Status: Rejected
+              </span>
+            </>
+          ) : (
+            <>
+              <Activity size={20} className="text-yellow-600" />
+              <span className="text-yellow-700 text-base font-bold tracking-wide">
+                Account Status: Pending
+              </span>
+            </>
+          )}
         </div>
       </div>
 
@@ -78,235 +140,498 @@ function View() {
         </span>
       </div>
 
-      {/* PERSONAL + ADDRESS */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* PERSONAL */}
-        <SectionCard title="👤 Personal Details">
-          <div className="grid grid-cols-2 gap-5">
-            <Label label="Full Name" value="Ramesh Kumar" />
+      {/* Card */}
+      <div className="bg-white rounded-xl shadow-md border">
+        {/* Tabs */}
+        <div className="flex items-center gap-6 px-6 py-4 border-b text-sm overflow-x-auto">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.name;
 
-            <Label label="Phone Number" value="+91 2584369401" />
-
-            <Label label="Email ID" value="ramesh43@gmail.com" />
-
-            <Label label="Date Of Birth" value="25/06/1998" />
-
-            <Label label="Tag" value="May Batch" />
-          </div>
-        </SectionCard>
-
-        {/* ADDRESS */}
-        <SectionCard title="📍 Address Details">
-          <div className="space-y-5">
-            <div>
-              <p className="text-xs text-gray-400 mb-1">Current Address</p>
-
-              <p className="text-sm text-gray-700 leading-6">
-                Suite 404, Magar Layout, Blankie Road, Bangalore, Karnataka
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs text-gray-400 mb-1">Permanent Address</p>
-
-              <p className="text-sm text-gray-700 leading-6">
-                14 Krishna Avenue, Model Town, New Delhi
-              </p>
-            </div>
-          </div>
-        </SectionCard>
-      </div>
-
-      {/* DOCUMENTS */}
-      <SectionCard title="🪪 Identity Verification">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {["Aadhaar Card", "PAN Card", "Driving License", "Voter ID"].map(
-            (doc) => (
-              <div
-                key={doc}
-                className="border border-gray-200 rounded-xl p-4 flex items-center justify-between hover:shadow-sm transition"
+            return (
+              <button
+                key={tab.name}
+                onClick={() => {
+                  setActiveTab(tab.name);
+                  setShowEducationView(null);
+                  setShowEmploymentView(null);
+                  setCriminalView(null);
+                  setDrugView(null);
+                  setIdentityView(null);
+                }}
+                className={`flex items-center gap-2 px-4 py-1.5 rounded-full whitespace-nowrap transition ${
+                  isActive
+                    ? "bg-[#01026E] text-white"
+                    : "text-gray-600 hover:text-black"
+                }`}
               >
-                <div>
-                  <p className="font-medium text-gray-800">{doc}</p>
+                <Icon size={16} />
+                {tab.name}
+              </button>
+            );
+          })}
+        </div>
 
-                  <p className="text-xs text-gray-400 mt-1">XXXX-XXXX-0000</p>
-                </div>
+        {/* Content */}
+        <div className="p-6">
+          {activeTab === "Personal" && (
+            <>
+              <h3 className="text-lg font-semibold text-gray-800">
+                Personal Information
+              </h3>
+              <p className="text-sm text-gray-500 mb-6">
+                General Profile Details And Contact Information.
+              </p>
 
-                <CheckCircle className="text-green-500" size={20} />
+              <div className="grid grid-cols-2 gap-8 mt-6">
+                <Label label="Name" value={`${candidateData.candidate_first_name} ${candidateData.candidate_last_name || ""}`} />
+                <Label label="Phone no" value={candidateData.candidate_mobile || "Not Available"} />
+                <Label label="Email" value={candidateData.candidate_email || "Not Available"} />
+                <Label label="Date Of Birth" value="Not Available" />
+                <Label label="Function" value={candidateData.candidate_function || "Not Available"} />
+                <Label label="Tag" value={candidateData.candidate_tag || "Not Available"} />
               </div>
-            ),
+            </>
+          )}
+
+          {activeTab === "Address" && (
+            <>
+              <h3 className="text-lg font-semibold text-gray-800">
+                Present Address
+              </h3>
+              <p className="text-sm text-gray-500 mb-6">
+                Current Residential Address Details.
+              </p>
+
+              <div className="grid grid-cols-2 gap-5 mb-8">
+                <Label label="Address Line 1" value={candidateData.address?.cand_curr_add_line1 || "Not Available"} />
+                <Label label="Address Line 2" value={candidateData.address?.cand_curr_add_line2 || "Not Available"} />
+                <Label label="City" value={candidateData.address?.cand_curr_city || "Not Available"} />
+                <Label label="State" value={candidateData.address?.cand_curr_state || "Not Available"} />
+                <Label label="Pin Code" value={candidateData.address?.cand_curr_pincode || "Not Available"} />
+              </div>
+
+              <h3 className="text-lg font-semibold text-gray-800">
+                Permanent Address
+              </h3>
+
+              <div className="grid grid-cols-2 gap-5 mt-6">
+                <Label label="Address Line 1" value={candidateData.address?.cand_perm_add_line1 || "Not Available"} />
+                <Label label="Address Line 2" value={candidateData.address?.cand_perm_add_line2 || "Not Available"} />
+                <Label label="City" value={candidateData.address?.cand_perm_city || "Not Available"} />
+                <Label label="State" value={candidateData.address?.cand_perm_state || "Not Available"} />
+                <Label label="Pin Code" value={candidateData.address?.cand_perm_pincode || "Not Available"} />
+              </div>
+            </>
+          )}
+
+          {activeTab === "Identity" && (
+            <>
+              {!identityView ? (
+                <>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Identity Information
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-6">
+                    Verification Details For National ID Cards.
+                  </p>
+
+                  {candidateData.identity && candidateData.identity.length > 0 ? (
+                    <div className="space-y-5">
+                      {candidateData.identity.map((item, idx) => (
+                        <div key={idx} className="border rounded-xl p-4 shadow-sm flex items-center justify-between">
+                          <div>
+                            <h4 className="font-medium text-[#01026E] mb-1">{item.cand_ident_type || `Identity Document ${idx + 1}`}</h4>
+                            <Label label="ID Number" value={item.cand_ident_number || "N/A"} />
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <span className="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full flex items-center gap-1">
+                              <CheckCircle size={12} /> Verified
+                            </span>
+                            <div 
+                              onClick={() => setIdentityView(item)}
+                              className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
+                            >
+                              <Eye size={16} />
+                              <span className="text-sm font-medium">View</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm">No identity records found.</p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Identity Details
+                    </h3>
+                    <button 
+                      onClick={() => setIdentityView(null)}
+                      className="text-sm text-[#01026E] border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
+                    >
+                      Back to List
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-6">
+                    <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
+                      <div className="grid grid-cols-2 gap-5">
+                        <Label label="Name" value={`${candidateData.candidate_first_name} ${candidateData.candidate_last_name || ""}`} />
+                        <Label label="Document Type" value={identityView.cand_ident_type || "N/A"} />
+                        <Label label="ID Number" value={identityView.cand_ident_number || "N/A"} />
+                        <Label label="Issue Date" value={identityView.cand_ident_issue_date ? new Date(identityView.cand_ident_issue_date).toLocaleDateString() : "N/A"} />
+                        <Label label="Expiry Date" value={identityView.cand_ident_expiry_date ? new Date(identityView.cand_ident_expiry_date).toLocaleDateString() : "N/A"} />
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-xl shadow border text-center">
+                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
+                      <img
+                        src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
+                        alt="document preview"
+                        className="rounded-lg shadow-sm mx-auto h-64 object-cover"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {activeTab === "Education" && (
+            <>
+              {!showEducationView ? (
+                <>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Education Details
+                  </h3>
+
+                  <div className="space-y-4 mt-4">
+                    {candidateData.education && candidateData.education.length > 0 ? (
+                      candidateData.education.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between border rounded-xl px-4 py-3 shadow-sm hover:shadow-md"
+                        >
+                          <div className="flex items-center gap-3">
+                            <CheckCircle size={18} className="text-green-500" />
+                            <span className="text-sm font-medium text-[#01026E]">
+                              {item.cand_edu_type || `Education Record ${idx + 1}`}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-4 text-gray-500">
+                            <div 
+                              className="flex items-center gap-1 cursor-pointer hover:text-black text-sm"
+                              onClick={() => setShowEducationView(item)}
+                            >
+                              <Eye size={16} /> View
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 text-sm">No education records found.</p>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Education Details
+                    </h3>
+                    <button 
+                      onClick={() => setShowEducationView(null)}
+                      className="text-sm text-[#01026E] border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
+                    >
+                      Back to List
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-6">
+                    <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
+                      <div className="grid grid-cols-2 gap-5">
+                        <Label label="Institute Name" value={showEducationView.cand_edu_institute || "N/A"} />
+                        <Label label="Degree" value={showEducationView.cand_edu_type || "N/A"} />
+                        <Label label="Start Date" value={showEducationView.cand_edu_from_date ? new Date(showEducationView.cand_edu_from_date).toLocaleDateString() : "N/A"} />
+                        <Label label="End Date" value={showEducationView.cand_edu_to_date ? new Date(showEducationView.cand_edu_to_date).toLocaleDateString() : "N/A"} />
+                        <Label label="Course" value={showEducationView.cand_edu_course || "N/A"} />
+                        <Label label="Percentage/CGPA" value={showEducationView.cand_edu_grade || "N/A"} />
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-xl shadow border text-center">
+                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
+                      <img
+                        src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
+                        alt="certificate"
+                        className="rounded-lg shadow-sm mx-auto h-64 object-cover"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {activeTab === "Employment" && (
+            <>
+              {!showEmploymentView ? (
+                <>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Employment Details
+                  </h3>
+
+                  <div className="mt-5 space-y-4">
+                    {candidateData.employment && candidateData.employment.length > 0 ? (
+                      candidateData.employment.map((item, idx) => (
+                        <div key={idx} className="bg-white border rounded-xl shadow-sm p-5 flex justify-between items-start">
+                          <div>
+                            <div className="flex items-center gap-3">
+                              <h4 className="text-base font-semibold text-gray-800">
+                                {item.cand_emp_designation || "Designation Not Available"}
+                              </h4>
+                            </div>
+                            <p className="text-sm text-gray-600 mt-1">{item.cand_emp_company || "Company Not Available"}</p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              {item.cand_emp_from_date ? new Date(item.cand_emp_from_date).toLocaleDateString() : "N/A"} - {item.cand_emp_to_date ? new Date(item.cand_emp_to_date).toLocaleDateString() : "Present"}
+                            </p>
+                          </div>
+
+                          <div
+                            onClick={() => setShowEmploymentView(item)}
+                            className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg"
+                          >
+                            <Eye size={16} />
+                            <span className="text-sm font-medium">View</span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 text-sm">No employment records found.</p>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Employment Details
+                    </h3>
+                    <button 
+                      onClick={() => setShowEmploymentView(null)}
+                      className="text-sm text-[#01026E] border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
+                    >
+                      Back to List
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-6">
+                    <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
+                      <div className="grid grid-cols-2 gap-5">
+                        <Label label="Employee ID" value={showEmploymentView.cand_emp_empid || "N/A"} />
+                        <Label label="Company Name" value={showEmploymentView.cand_emp_company || "N/A"} />
+                        <Label label="From Date" value={showEmploymentView.cand_emp_from_date ? new Date(showEmploymentView.cand_emp_from_date).toLocaleDateString() : "N/A"} />
+                        <Label label="To Date" value={showEmploymentView.cand_emp_to_date ? new Date(showEmploymentView.cand_emp_to_date).toLocaleDateString() : "Present"} />
+                        <Label label="Designation" value={showEmploymentView.cand_emp_designation || "N/A"} />
+                        <Label label="Drawn CTC" value="N/A" />
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-xl shadow border text-center">
+                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
+                      <img
+                        src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
+                        className="rounded-lg shadow-sm mx-auto h-64 object-cover"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {activeTab === "Criminal" && (
+            <>
+              {!criminalView ? (
+                <>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Criminal Record
+                  </h3>
+
+                  <div className="mt-4 mb-6 space-y-4">
+                    {candidateData.criminal && candidateData.criminal.length > 0 ? (
+                      candidateData.criminal.map((item, idx) => (
+                        <div key={idx} className="bg-white border rounded-xl shadow-sm p-5 flex justify-between items-center">
+                          <div>
+                            <p className="text-sm font-medium text-gray-800">Criminal Record Exist</p>
+                            <p className="text-xs text-gray-400 mt-1">Case Number: {item.cand_crim_record || "N/A"}</p>
+                          </div>
+
+                          <div
+                            onClick={() => setCriminalView(item)}
+                            className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
+                          >
+                            <Eye size={16} />
+                            <span className="text-sm font-medium">View</span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 text-sm">No criminal records found.</p>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Criminal Details
+                    </h3>
+                    <button 
+                      onClick={() => setCriminalView(null)}
+                      className="text-sm text-[#01026E] border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
+                    >
+                      Back to List
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-6">
+                    <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
+                      <div className="grid grid-cols-2 gap-5">
+                        <Label label="Name" value={`${candidateData.candidate_first_name} ${candidateData.candidate_last_name || ""}`} />
+                        <Label label="Case No" value={criminalView.cand_crim_record || "N/A"} />
+                        <Label label="Date" value={criminalView.cand_crim_date ? new Date(criminalView.cand_crim_date).toLocaleDateString() : "N/A"} />
+                        <div className="col-span-2">
+                          <Label 
+                            label="Case Details/Remarks" 
+                            value={criminalView.cand_crim_remarks || "N/A"}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-xl shadow border text-center">
+                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
+                      <img
+                        src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
+                        alt="document preview"
+                        className="rounded-lg shadow-sm mx-auto h-64 object-cover"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {activeTab === "Drug" && (
+            <>
+              {!drugView ? (
+                <>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Drug Test Report
+                  </h3>
+
+                  <div className="mt-4 space-y-4">
+                    {candidateData.drug && candidateData.drug.length > 0 ? (
+                      candidateData.drug.map((item, idx) => (
+                        <div key={idx} className="bg-white border rounded-xl shadow-sm p-5 flex justify-between items-center">
+                          <div>
+                            <p className="text-sm font-medium text-gray-800">Drug Test Report</p>
+                            <p className="text-xs text-gray-400 mt-1">Report Number: {item.cand_drug_test || "N/A"}</p>
+                          </div>
+
+                          <div
+                            onClick={() => setDrugView(item)}
+                            className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
+                          >
+                            <Eye size={16} />
+                            <span className="text-sm font-medium">View</span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 text-sm">No drug test records found.</p>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Drug Details
+                    </h3>
+                    <button 
+                      onClick={() => setDrugView(null)}
+                      className="text-sm text-[#01026E] border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
+                    >
+                      Back to List
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-6">
+                    <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
+                      <div className="grid grid-cols-2 gap-5">
+                        <Label label="Name" value={`${candidateData.candidate_first_name} ${candidateData.candidate_last_name || ""}`} />
+                        <Label label="Test Id" value={drugView.cand_drug_test || "N/A"} />
+                        <Label label="Date" value={drugView.cand_drug_date ? new Date(drugView.cand_drug_date).toLocaleDateString() : "N/A"} />
+                        <div className="col-span-2">
+                          <Label 
+                            label="Test Details/Remarks" 
+                            value={drugView.cand_drug_remarks || "N/A"}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-xl shadow border text-center">
+                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
+                      <img
+                        src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
+                        alt="document preview"
+                        className="rounded-lg shadow-sm mx-auto h-64 object-cover"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {activeTab === "Reference" && (
+            <>
+              <h3 className="text-lg font-semibold text-[#01026E] mb-2">
+                Reference Details
+              </h3>
+
+              {candidateData.reference && candidateData.reference.length > 0 ? (
+                <div className="space-y-6 mb-6">
+                  {candidateData.reference.map((item, idx) => (
+                    <div key={idx} className="border rounded-xl p-5">
+                      <h4 className="font-medium text-[#01026E] mb-4">Reference {idx + 1}</h4>
+                      <div className="grid grid-cols-2 gap-5">
+                        <Label label="Name" value={item.cand_ref_name || "N/A"} />
+                        <Label label="Phone no" value={item.cand_ref_contact || "N/A"} />
+                        <Label label="Email" value={item.cand_ref_email || "N/A"} />
+                        <Label label="Gender" value={item.cand_ref_gender || "N/A"} />
+                        <Label label="Institute/Company Name" value={item.cand_ref_institute || "N/A"} />
+                        <Label label="Designation" value={item.cand_ref_designation || "N/A"} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm">No reference records found.</p>
+              )}
+            </>
           )}
         </div>
-      </SectionCard>
-
-      {/* EDUCATION */}
-      <div className="mt-6">
-        <SectionCard title="🎓 Education Details">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left px-4 py-3 text-sm font-semibold text-gray-600">
-                    Qualification
-                  </th>
-
-                  <th className="text-left px-4 py-3 text-sm font-semibold text-gray-600">
-                    Institute
-                  </th>
-
-                  <th className="px-4 py-3 text-sm font-semibold text-gray-600">
-                    Year
-                  </th>
-
-                  <th className="px-4 py-3 text-sm font-semibold text-gray-600">
-                    Grade
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                <tr className="border-b border-gray-100">
-                  <td className="px-4 py-4 text-sm">Post Graduate</td>
-
-                  <td className="px-4 py-4 text-sm">
-                    University of Strategic Planning
-                  </td>
-
-                  <td className="px-4 py-4 text-sm text-center">2021</td>
-
-                  <td className="px-4 py-4 text-sm text-center">8.95</td>
-                </tr>
-
-                <tr>
-                  <td className="px-4 py-4 text-sm">Graduate</td>
-
-                  <td className="px-4 py-4 text-sm">
-                    National Technical Institute
-                  </td>
-
-                  <td className="px-4 py-4 text-sm text-center">2015</td>
-
-                  <td className="px-4 py-4 text-sm text-center">8.68</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </SectionCard>
-      </div>
-
-      {/* EMPLOYMENT */}
-      <div className="mt-6">
-        <SectionCard title="💼 Employment Details">
-          <div className="space-y-5">
-            {[
-              {
-                company: "Dnqex Consulted",
-                role: "UI/UX Designer",
-                desc: "Lead Specialist for Crisis Management",
-                duration: "2025 - Present",
-              },
-
-              {
-                company: "Global Logistics Ltd.",
-                role: "UI/UX Designer",
-                desc: "Product Design Specialist",
-                duration: "2022 - 2025",
-              },
-            ].map((job, index) => (
-              <div
-                key={index}
-                className="border-l-4 border-[#02027A] pl-4 flex justify-between"
-              >
-                <div>
-                  <h4 className="font-semibold text-gray-800">{job.company}</h4>
-
-                  <p className="text-sm text-gray-500 mt-1">{job.role}</p>
-
-                  <p className="text-xs text-gray-400 mt-1">{job.desc}</p>
-                </div>
-
-                <span className="text-xs bg-gray-100 h-fit px-3 py-1 rounded-full">
-                  {job.duration}
-                </span>
-              </div>
-            ))}
-          </div>
-        </SectionCard>
-      </div>
-
-      {/* DRUG + CRIMINAL */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        <SectionCard title="🧪 Drug Test">
-          <p className="text-sm text-gray-500">Test Date</p>
-
-          <p className="text-lg font-semibold mt-1">26-02-2026</p>
-
-          <button className="mt-4 text-[#02027A] text-sm font-medium hover:underline">
-            View Lab Report
-          </button>
-        </SectionCard>
-
-        <SectionCard title="🚔 Criminal Record">
-          <p className="text-green-600 font-semibold">No Record Found</p>
-
-          <p className="text-sm text-gray-400 mt-2">
-            No prior criminal records found.
-          </p>
-        </SectionCard>
-      </div>
-
-      {/* LOCATION */}
-      <div className="mt-6">
-        <SectionCard title="📍 Location Verification">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* PHOTO */}
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-3">
-                On-Site Photo
-              </p>
-
-              <img
-                src="https://images.unsplash.com/photo-1505691938895-1758d7feb511"
-                alt=""
-                className="rounded-xl w-full h-48 object-cover border"
-              />
-            </div>
-
-            {/* SELFIE */}
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-3">
-                Identity Selfie
-              </p>
-
-              <img
-                src="https://randomuser.me/api/portraits/men/32.jpg"
-                alt=""
-                className="rounded-xl w-full h-48 object-cover border"
-              />
-            </div>
-
-            {/* STATUS */}
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-3">Status</p>
-
-              <div className="space-y-3">
-                <p className="flex items-center gap-2 text-sm">
-                  <CheckCircle size={16} className="text-green-500" />
-                  On-Site Photo Uploaded
-                </p>
-
-                <p className="flex items-center gap-2 text-sm">
-                  <CheckCircle size={16} className="text-green-500" />
-                  Identity Selfie Uploaded
-                </p>
-
-                <p className="text-green-600 text-sm font-medium mt-4">
-                  All Files Uploaded
-                </p>
-              </div>
-            </div>
-          </div>
-        </SectionCard>
       </div>
     </div>
   );

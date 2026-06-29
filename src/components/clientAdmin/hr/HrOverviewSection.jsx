@@ -1,34 +1,34 @@
 import { Maximize2 } from "lucide-react";
 import { Users, UserCheck, UserMinus, UserX } from "lucide-react";
 
-const cards = [
-  {
-    title: "Total (HR)",
-    value: "20",
-    icon: <Users size={18} className="text-indigo-600" />,
-    color: "bg-indigo-100",
-  },
-  {
-    title: "Active",
-    value: "10",
-    icon: <UserCheck size={18} className="text-green-600" />,
-    color: "bg-green-100",
-  },
-  {
-    title: "Inactive",
-    value: "09",
-    icon: <UserMinus size={18} className="text-orange-500" />,
-    color: "bg-orange-100",
-  },
-  {
-    title: "Terminated",
-    value: "18",
-    icon: <UserX size={18} className="text-red-500" />,
-    color: "bg-red-100",
-  },
-];
+function HrOverviewSection({ overview = {} }) {
+  const cards = [
+    {
+      title: "Total (HR)",
+      value: overview.total ?? 0,
+      icon: <Users size={18} className="text-indigo-600" />,
+      color: "bg-indigo-100",
+    },
+    {
+      title: "Active",
+      value: overview.active ?? 0,
+      icon: <UserCheck size={18} className="text-green-600" />,
+      color: "bg-green-100",
+    },
+    {
+      title: "Inactive",
+      value: overview.inactive ?? 0,
+      icon: <UserMinus size={18} className="text-orange-500" />,
+      color: "bg-orange-100",
+    },
+    {
+      title: "Terminated",
+      value: overview.terminated ?? 0,
+      icon: <UserX size={18} className="text-red-500" />,
+      color: "bg-red-100",
+    },
+  ];
 
-function HrOverviewSection() {
   return (
     <div className="grid grid-cols-4 gap-4">
       {cards.map((card, index) => (

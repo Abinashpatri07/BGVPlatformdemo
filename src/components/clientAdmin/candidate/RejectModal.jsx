@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { X } from "lucide-react";
+import axios from "axios";
 
 function RejectModal({ candidate, onClose, onSuccess }) {
   const [reason, setReason] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // ── Candidate name — HR data (first_name/last_name) ya Client Admin data (name) dono handle karo
   const candidateName =
@@ -11,10 +13,26 @@ function RejectModal({ candidate, onClose, onSuccess }) {
       ? `${candidate.first_name} ${candidate.last_name}`
       : candidate?.name || "";
 
-  const handleReject = () => {
+  const handleReject = async () => {
     if (!reason.trim()) return;
-    setIsSuccess(true);
-    if (onSuccess) onSuccess();
+    try {
+      setIsLoading(true);
+      const res = await axios.patch(
+        `http://localhost:5000/api/client-admin/candidate/reject/${candidate?.id}`,
+        { reason }
+      );
+      if (res.data.success) {
+        setIsSuccess(true);
+        if (onSuccess) onSuccess();
+      } else {
+        alert(res.data.message || "Failed to reject candidate.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Something went wrong!");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // ── SUCCESS SCREEN ─────────────────────────────────
@@ -91,15 +109,15 @@ function RejectModal({ candidate, onClose, onSuccess }) {
             Cancel
           </button>
           <button
-            disabled={!reason.trim()}
+            disabled={!reason.trim() || isLoading}
             onClick={handleReject}
             className={`px-8 py-2.5 border rounded-lg transition ${
-              reason.trim()
+              reason.trim() && !isLoading
                 ? "border-red-400 text-red-500 hover:bg-red-50"
                 : "border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
             }`}
           >
-            Reject Application
+            {isLoading ? "Processing..." : "Reject Application"}
           </button>
         </div>
 
