@@ -137,9 +137,9 @@ const BulkUpload = () => {
     setUploading(true);
 
     try {
-      /* === FOR DEMO: BACKEND BYPASSED ===
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("createdById", 15); // Send HR's user ID
 
       const res = await axios.post(
         "http://localhost:5000/api/candidates/multiple_candidate_add",
@@ -156,18 +156,7 @@ const BulkUpload = () => {
         });
         setShowTable(false);
       }
-      */
-
-      // Mocking a successful response
-      setTimeout(() => {
-        setUploadResult({
-          created: previewData.length,
-          skipped: 0,
-          total: previewData.length,
-          skippedList: [],
-        });
-        setUploading(false);
-      }, 800);
+      setUploading(false);
     } catch (err) {
       const msg = err.response?.data?.message || "Upload failed. Please try again.";
       alert(msg);

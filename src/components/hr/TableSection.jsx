@@ -20,6 +20,7 @@ import axios from "axios";
 import ActionDropdown from "../../components/hr/ActionDropdown";
 import RejectModal from "../clientAdmin/candidate/RejectModal";
 import OnHoldModal from "../clientAdmin/candidate/OnHoldModal";
+import RemoveHoldModal from "../clientAdmin/candidate/RemoveHoldModal";
 
 // ── ASSIGN VERIFICATION MODAL ─────────────────────────────────────────────────
 function AssignVerificationModal({ candidate, onClose, onAssign }) {
@@ -167,6 +168,8 @@ function TableSection({ searchTerm = "", sortBy = "all", page = 1, onTotalPagesC
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showOnHoldModal, setShowOnHoldModal] = useState(false);
   const [onHoldCandidate, setOnHoldCandidate] = useState(null);
+  const [showRemoveHoldModal, setShowRemoveHoldModal] = useState(false);
+  const [removeHoldCandidate, setRemoveHoldCandidate] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
   const [showAssignVerificationModal, setShowAssignVerificationModal] = useState(false);
   const [assignVerificationCandidate, setAssignVerificationCandidate] = useState(null);
@@ -213,12 +216,12 @@ function TableSection({ searchTerm = "", sortBy = "all", page = 1, onTotalPagesC
   // ── STATUS LABEL from case_status number ──
   const getStatusLabel = (status) => {
     switch (Number(status)) {
-      case 1: return "In Progress";
+      case 0: return "In Progress";
+      case 1: return "Verified";
       case 2: return "Verify";
-      case 3: return "Verified";
+      case 3: return "Rejected";
       case 4: return "Complete";
       case 5: return "On Hold";
-      case 6: return "Rejected";
       default: return "In Progress";
     }
   };
@@ -304,6 +307,20 @@ function TableSection({ searchTerm = "", sortBy = "all", page = 1, onTotalPagesC
         />
       )}
 
+      {/* ── REMOVE HOLD MODAL ── */}
+      {showRemoveHoldModal && (
+        <RemoveHoldModal
+          candidate={removeHoldCandidate}
+          onClose={() => {
+            setShowRemoveHoldModal(false);
+            setRemoveHoldCandidate(null);
+          }}
+          onSuccess={() => {
+            fetchCandidates();
+          }}
+        />
+      )}
+
 
       {/* ── EMAIL SUCCESS MODAL ── */}
       {showEmailModal && (
@@ -356,7 +373,6 @@ function TableSection({ searchTerm = "", sortBy = "all", page = 1, onTotalPagesC
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Date</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Name</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Phone</th>
-              <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Assigned HR</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Function / Tag</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Status</th>
               <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-center w-20">Action</th>
@@ -366,7 +382,7 @@ function TableSection({ searchTerm = "", sortBy = "all", page = 1, onTotalPagesC
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="9">
+                <td colSpan="8">
                   <div className="flex flex-col items-center justify-center py-20 gap-3">
                     <Loader2 size={36} className="text-[#4338CA] animate-spin" />
                     <p className="text-sm text-gray-400">Loading candidates...</p>
@@ -375,7 +391,7 @@ function TableSection({ searchTerm = "", sortBy = "all", page = 1, onTotalPagesC
               </tr>
             ) : fetchError ? (
               <tr>
-                <td colSpan="9">
+                <td colSpan="8">
                   <div className="flex flex-col items-center justify-center py-20 gap-3">
                     <p className="text-sm text-red-500">{fetchError}</p>
                   </div>
@@ -383,7 +399,7 @@ function TableSection({ searchTerm = "", sortBy = "all", page = 1, onTotalPagesC
               </tr>
             ) : filteredCandidates.length === 0 ? (
               <tr>
-                <td colSpan="9">
+                <td colSpan="8">
                   <div className="flex flex-col items-center justify-center py-20 gap-3">
                     <Users size={40} className="text-gray-300" />
                     <p className="text-sm text-gray-400">
@@ -434,15 +450,6 @@ function TableSection({ searchTerm = "", sortBy = "all", page = 1, onTotalPagesC
 
                 <td className="px-5 py-2.5">
                   <div className="text-sm text-gray-800 font-medium">
-                    {item.created_by_name && item.created_by_name !== '-' ? item.created_by_name : '—'}
-                  </div>
-                  <div className="text-xs text-gray-400 mt-0.5">
-                    {item.created_by_role && item.created_by_role !== 'Unknown' ? item.created_by_role : ''}
-                  </div>
-                </td>
-
-                <td className="px-5 py-2.5">
-                  <div className="text-sm text-gray-800 font-medium">
                     {item.job_function || <span className="text-gray-300">—</span>}
                   </div>
                   {item.tag && (
@@ -480,6 +487,7 @@ function TableSection({ searchTerm = "", sortBy = "all", page = 1, onTotalPagesC
                         }`}
                       >
                         <ActionDropdown
+                          candidateStatus={statusLabel}
                           onView={() => {
                             navigate(`/hr/view/${item.cand_id}`);
                             setOpenMenu(null);
@@ -495,6 +503,11 @@ function TableSection({ searchTerm = "", sortBy = "all", page = 1, onTotalPagesC
                           onHold={() => {
                             setOnHoldCandidate(item);
                             setShowOnHoldModal(true);
+                            setOpenMenu(null);
+                          }}
+                          onRemoveHold={() => {
+                            setRemoveHoldCandidate(item);
+                            setShowRemoveHoldModal(true);
                             setOpenMenu(null);
                           }}
                           onReject={() => {

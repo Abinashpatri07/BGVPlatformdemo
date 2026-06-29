@@ -17,8 +17,9 @@ function RejectModal({ candidate, onClose, onSuccess }) {
     if (!reason.trim()) return;
     try {
       setIsLoading(true);
+      const candId = candidate?.id || candidate?.cand_id;
       const res = await axios.patch(
-        `http://localhost:5000/api/client-admin/candidate/reject/${candidate?.id}`,
+        `http://localhost:5000/api/client-admin/candidate/reject/${candId}`,
         { reason }
       );
       if (res.data.success) {

@@ -17,8 +17,9 @@ function OnHoldModal({ candidate, onClose, onSuccess }) {
     if (!reason.trim()) return;
     try {
       setIsLoading(true);
+      const candId = candidate?.id || candidate?.cand_id;
       const res = await axios.patch(
-        `http://localhost:5000/api/client-admin/candidate/on-hold/${candidate?.id}`,
+        `http://localhost:5000/api/client-admin/candidate/on-hold/${candId}`,
         { reason }
       );
       if (res.data.success) {

@@ -81,7 +81,7 @@ const BulkUpload = () => {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("clientAdminId", 2);
+      formData.append("clientAdminId", 1);
 
       const res = await axios.post(
         "http://localhost:5000/api/client-admin/candidate/bulk-create",

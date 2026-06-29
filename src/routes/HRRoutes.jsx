@@ -11,7 +11,7 @@ import HRLayout from "../layouts/HRLayout";
 import Home from "../pages/hr/Home";
 import BulkUpload from "../pages/hr/BulkUpload";
 import EditCandidate from "../pages/hr/EditCandidate";
-import CandidateDetails from "../pages/hr/CandidateDetails";
+import View from "../components/clientAdmin/candidate/View";
 import DashBoard from "../pages/hr/DashBoard";
 
 import CreateCandidateForm from "../components/hr/CreateCandidateForm";
@@ -79,7 +79,7 @@ function HRRoutes() {
         {/* VIEW */}
         <Route
           path="view/:id"
-          element={<CandidateDetails />}
+          element={<View />}
         />
 
         {/* EDIT */}

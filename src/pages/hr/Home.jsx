@@ -7,8 +7,14 @@ import TableToolbar from "../../components/hr/TableToolbar";
 
 const Home = () => {
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("all");
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleRefresh = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
 
   return (
     <div className="p-4 flex flex-col gap-5">
@@ -16,21 +22,27 @@ const Home = () => {
       <CardSection />
       <TableToolbar
         searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
+        onSearchChange={(val) => { setSearchTerm(val); setPage(1); }}
         sortBy={sortBy}
-        onSortChange={setSortBy}
+        onSortChange={(val) => { setSortBy(val); setPage(1); }}
+        onRefresh={handleRefresh}
       />
       <TableSection
+        key={refreshKey}
         searchTerm={searchTerm}
         sortBy={sortBy}
+        page={page}
+        onTotalPagesChange={setTotalPages}
+        totalPages={totalPages}
+        onPageChange={setPage}
       />
       <Pagination
         currentPage={page}
-        totalPages={9}
+        totalPages={totalPages}
         onPageChange={setPage}
       />
     </div>
   );
 };
 
-export default Home;
+export default Home;

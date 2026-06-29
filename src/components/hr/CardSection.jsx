@@ -111,10 +111,10 @@ const CardSection = () => {
 
           setCounts({
             total:      candidates.length,
-            inProgress: candidates.filter((c) => [1, 2, 3].includes(Number(c.case_status))).length,
-            verified:   candidates.filter((c) => Number(c.case_status) === 4).length,
+            inProgress: candidates.filter((c) => Number(c.case_status) === 0).length,
+            verified:   candidates.filter((c) => Number(c.case_status) === 1).length,
             onHold:     candidates.filter((c) => Number(c.case_status) === 5).length,
-            rejected:   candidates.filter((c) => Number(c.case_status) === 6).length,
+            rejected:   candidates.filter((c) => Number(c.case_status) === 3).length,
           });
         }
       } catch (err) {

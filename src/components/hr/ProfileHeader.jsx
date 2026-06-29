@@ -123,7 +123,7 @@ const ProfileHeader = ({ showExport, showAddCandidate }) => {
       if (selectedType === "csv") exportCSV(candidates);
       else exportPDF(candidates);
       setOpenExport(false);
-      setPopup({ type: "success", message: `Successfully exported ${candidates.length} candidates.` });
+      // Removed success popup as per user request
     } catch (err) {
       setPopup({ type: "error", message: "Export failed. Please try again." });
     } finally {
