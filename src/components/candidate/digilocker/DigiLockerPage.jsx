@@ -27,7 +27,11 @@ export default function DigiLockerPage() {
 
         {/* Manual entry option */}
         <ManualEntryCard
-          onStart={() => navigate("/verification", { state: { step: 1 } })}
+          onStart={() => {
+            sessionStorage.setItem("candidate_currentStep", "1");
+            sessionStorage.setItem("candidate_highestStep", "1");
+            navigate("/verification");
+          }}
         />
       </div>
 
