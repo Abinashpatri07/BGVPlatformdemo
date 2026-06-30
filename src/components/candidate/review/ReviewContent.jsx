@@ -39,7 +39,6 @@ function ReviewContent() {
     <div>
       {/* Permanent Address */}
       <Section title="Permanent Address">
-        <Field label="Aadhar Number" value="2521 5879 5684" verified />
         <Field label="House Number" value="G-501" />
         <Field label="Address Line 1" value="Kula Layout, Sanjib Nagar 3rd Phase" />
         <Field label="Address Line 2" value="Jaynagar Layout, Bangalore" />
@@ -117,33 +116,52 @@ function ReviewContent() {
 
       {/* Education */}
       <Section title="Education Details">
-        <Field label="10th Institute" value="Sakalsubha Vidya Pitha, Laxminagar" />
-        <Field label="10th Degree" value="10th" />
-        <Field label="10th Start Date" value="25/05/2002" />
-        <Field label="10th End Date" value="06/04/2012" />
-        <Field label="10th Course" value="Odia, English, Hindi" />
-        <Field label="10th Percentage" value="83%" />
+        <h4 className="col-span-1 md:col-span-2 font-medium text-[#101A78] mt-2 mb-1 border-b pb-2">
+          Matriculation (10th)
+        </h4>
+        <Field label="Institute Name" value="Sakalsubha Vidya Pitha, Laxminagar" />
+        <Field label="Degree" value="10th" />
+        <Field label="Start Date" value="25/05/2002" />
+        <Field label="End Date" value="06/04/2012" />
+        <Field label="Course" value="Odia, English, Hindi" />
+        <Field label="Percentage" value="83%" />
 
-        <Field label="12th Institute" value="Mindgap Junior Science College" />
-        <Field label="12th Degree" value="12th" />
-        <Field label="12th Start Date" value="25/05/2012" />
-        <Field label="12th End Date" value="06/04/2014" />
-        <Field label="12th Course" value="Science" />
-        <Field label="12th Percentage" value="76%" />
+        <h4 className="col-span-1 md:col-span-2 font-medium text-[#101A78] mt-6 mb-1 border-b pb-2">
+          Intermediate (12th)
+        </h4>
+        <Field label="Institute Name" value="Mindgap Junior Science College" />
+        <Field label="Degree" value="12th" />
+        <Field label="Start Date" value="25/05/2012" />
+        <Field label="End Date" value="06/04/2014" />
+        <Field label="Course" value="Science" />
+        <Field label="Percentage" value="76%" />
 
-        <Field label="Graduation Institute" value="Nolend Group Of Institutions" />
-        <Field label="Graduation Degree" value="B Tech" />
-        <Field label="Graduation Start Date" value="25/05/2014" />
-        <Field label="Graduation End Date" value="06/04/2018" />
-        <Field label="Graduation Course" value="Computer Science Engineering" />
-        <Field label="Graduation CGPA" value="9.2 CGPA" />
+        <h4 className="col-span-1 md:col-span-2 font-medium text-[#101A78] mt-6 mb-1 border-b pb-2">
+          Graduation
+        </h4>
+        <Field label="Institute Name" value="Nolend Group Of Institutions" />
+        <Field label="Degree" value="B Tech" />
+        <Field label="Start Date" value="25/05/2014" />
+        <Field label="End Date" value="06/04/2018" />
+        <Field label="Course" value="Computer Science Engineering" />
+        <Field label="CGPA" value="9.2 CGPA" />
 
-        <Field label="Post Graduation Institute" value="Nolend Group Of Institutions" />
-        <Field label="Post Graduation Degree" value="M Tech" />
-        <Field label="Post Graduation Start Date" value="25/05/2018" />
-        <Field label="Post Graduation End Date" value="06/04/2022" />
-        <Field label="Post Graduation Course" value="Computer Science Engineering" />
-        <Field label="Post Graduation CGPA" value="8.9 CGPA" />
+        <h4 className="col-span-1 md:col-span-2 font-medium text-[#101A78] mt-6 mb-1 border-b pb-2">
+          Post Graduation
+        </h4>
+        <Field label="Institute Name" value="Nolend Group Of Institutions" />
+        <Field label="Degree" value="M Tech" />
+        <Field label="Start Date" value="25/05/2018" />
+        <Field label="End Date" value="06/04/2022" />
+        <Field label="Course" value="Computer Science Engineering" />
+        <Field label="CGPA" value="8.9 CGPA" />
+      </Section>
+
+      {/* Drug Test */}
+      <Section title="Drug Test Details">
+        <Field label="Status" value="Yes, I Have Taken The Drug Test" />
+        <Field label="Date of Test" value="15/10/2023" />
+        <Field label="Test Result" value="Tested Negative (Clear)" />
       </Section>
 
       {/* Criminal */}
@@ -157,19 +175,22 @@ function ReviewContent() {
 
       {/* Reference */}
       <Section title="Reference Check">
+        <h4 className="col-span-1 md:col-span-2 font-medium text-[#101A78] mt-2 mb-1 border-b pb-2">
+          1. Professional / Academic Reference
+        </h4>
         <Field label="Name" value="Varun Kummel" />
-        <Field label="Phone No" value="+91 1234567890" />
-        <Field label="Email" value="abcsdew67@mail.com" />
-        <Field label="Gender" value="Male" />
-        <Field label="Institute Name" value="Brindavan College of Engineering" />
-        <Field label="Designation" value="Director" />
+        <Field label="Relationship" value="Manager" />
+        <Field label="Organization / College Name" value="Brindavan College of Engineering" />
+        <Field label="Contact Number" value="+91 1234567890" />
+        <Field label="Email Address" value="varun@brindavan.edu" />
 
+        <h4 className="col-span-1 md:col-span-2 font-medium text-[#101A78] mt-6 mb-1 border-b pb-2">
+          2. Personal / Family Reference
+        </h4>
         <Field label="Name" value="Manisha Tewari" />
-        <Field label="Phone No" value="+91 1234567890" />
-        <Field label="Email" value="abcsdew67@mail.com" />
-        <Field label="Gender" value="Male" />
-        <Field label="Institute Name" value="Brindavan College of Engineering" />
-        <Field label="Designation" value="Manager" />
+        <Field label="Relationship" value="Friend" />
+        <Field label="Contact Number" value="+91 9876543210" />
+        <Field label="Email Address" value="manisha@mail.com" />
       </Section>
     </div>
   );

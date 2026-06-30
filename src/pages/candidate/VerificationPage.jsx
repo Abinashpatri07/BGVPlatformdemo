@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "../../components/common/Header";
 import SidebarStepper from "../../components/candidate/candsidebar/SidebarStepper";
 import VerificationList from "../../components/candidate/concent/VerificationList";
@@ -16,13 +16,33 @@ import { useLocation } from "react-router-dom";
 export default function VerificationPage() {
   const location = useLocation();
 
-const [currentStep, setCurrentStep] = useState(
-  location.state?.step ?? 0
-);
+  const [currentStep, setCurrentStep] = useState(() => {
+    const saved = sessionStorage.getItem("candidate_currentStep");
+    if (saved !== null) return parseInt(saved, 10);
+    return location.state?.step ?? 0;
+  });
+
+  const [highestStep, setHighestStep] = useState(() => {
+    const saved = sessionStorage.getItem("candidate_highestStep");
+    if (saved !== null) return parseInt(saved, 10);
+    return location.state?.step ?? 0;
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem("candidate_currentStep", currentStep);
+  }, [currentStep]);
+
+  useEffect(() => {
+    sessionStorage.setItem("candidate_highestStep", highestStep);
+  }, [highestStep]);
 
   const handleNext = () => {
     if (currentStep < 8) {
-      setCurrentStep((prev) => prev + 1);
+      setCurrentStep((prev) => {
+        const nextStep = prev + 1;
+        setHighestStep((h) => Math.max(h, nextStep));
+        return nextStep;
+      });
     }
   };
 
@@ -41,6 +61,7 @@ const [currentStep, setCurrentStep] = useState(
         {/* Sidebar */}
         <SidebarStepper
           currentStep={currentStep}
+          highestStep={highestStep}
           onStepBack={handleBack}
           onStepClick={setCurrentStep}   // ✅ THIS FIXES EVERYTHING
         />

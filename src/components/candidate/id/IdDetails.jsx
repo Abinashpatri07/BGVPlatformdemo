@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import UploadCard from "./UploadCard";
 import DocumentFields from "./DocumentFields";
-import { uploadPanCardOCR } from "../../../API/ocrApi";
+import { uploadOCR } from "../../../API/ocrApi";
 
 const docs = [
   "Passport",
@@ -23,12 +23,12 @@ const docFields = {
     gender: "Male",
   },
 
-  // "PAN card": {
-  //   pan_number: "ABCDE1234F",
-  //   date_of_birth: "25/05/1997",
-  //   full_name: "Ramesh Mishra",
-  //   father_name: "Narayan Mishra",
-  // },
+  "PAN card": {
+    pan_number: "ABCDE1234F",
+    date_of_birth: "25/05/1997",
+    full_name: "Ramesh Mishra",
+    father_name: "Narayan Mishra",
+  },
 
   "Driving license": {
     driving_licence_number: "OD05201254895545",
@@ -77,20 +77,65 @@ export default function IdDetails({ onNext }) {
   }
 
   try {
-
     let extractedFields = {};
 
-    // OCR for PAN card
-    if (docType === "PAN card") {
-
-      const response = await uploadPanCardOCR(file);
-
-      extractedFields = response;
-
-    } else {
-
-      // static data for other docs
+    const response = await uploadOCR(file, docType);
+    
+    if (response.message || response.error) {
+      alert("OCR API Error: " + (response.message || response.error) + ".\nFalling back to dummy data.");
       extractedFields = docFields[docType];
+    } else {
+      let ocrData = {};
+      if (Array.isArray(response) && response.length > 0) {
+        ocrData = response[0]?.result?.extraction_output || {};
+      } else if (response?.result?.extraction_output) {
+        ocrData = response.result.extraction_output;
+      } else {
+        ocrData = response;
+      }
+
+      if (docType === "PAN card") {
+        extractedFields = {
+          pan_number: ocrData.id_number || "",
+          date_of_birth: ocrData.date_of_birth || "",
+          full_name: ocrData.name_on_card || "",
+          father_name: ocrData.fathers_name || "",
+        };
+      } else if (docType === "Voter ID") {
+        extractedFields = {
+          voter_id_number: ocrData.id_number || "",
+          full_name: ocrData.name_on_card || "",
+          date_of_birth: ocrData.date_of_birth || "",
+          date_of_issue: ocrData.date_of_issue || "",
+          nationality: "INDIAN",
+          gender: ocrData.gender || "Male",
+        };
+      } else if (docType === "Driving license") {
+        extractedFields = {
+          driving_licence_number: ocrData.id_number || "",
+          full_name: ocrData.name_on_card || "",
+          date_of_birth: ocrData.date_of_birth || "",
+          address: ocrData.address || "",
+          issued_date: ocrData.date_of_issue || "",
+          expire_date: ocrData.date_of_expiry || "",
+          vehicle_class: "LMV",
+          blood_group: ocrData.blood_group || "O+",
+        };
+      } else if (docType === "Passport") {
+        extractedFields = {
+          passport_number: ocrData.id_number || "",
+          date_of_birth: ocrData.date_of_birth || "",
+          first_name: ocrData.name_on_card || "",
+          last_name: "",
+          place_of_birth: ocrData.place_of_birth || "",
+          date_of_issue: ocrData.date_of_issue || "",
+          date_of_expiry: ocrData.date_of_expiry || "",
+          nationality: "INDIAN",
+          gender: ocrData.gender || "Male",
+        };
+      } else {
+        extractedFields = docFields[docType];
+      }
     }
 
     setData((prev) => ({
@@ -176,6 +221,7 @@ export default function IdDetails({ onNext }) {
               size={data[doc].size}
               fields={data[doc].fields}
               onRemove={() => removeFile(doc)}
+              onOk={() => setOpenCard(null)}
             />
           )}
         </div>

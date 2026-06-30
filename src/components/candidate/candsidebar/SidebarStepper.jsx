@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function SidebarStepper({
   currentStep,
+  highestStep,
   onStepBack,
   onStepClick,
 }) {
@@ -34,14 +35,14 @@ export default function SidebarStepper({
                 className={`w-3.5 h-3.5 rounded-full ${
                   index === currentStep
                     ? "bg-blue-600"
-                    : index < currentStep
+                    : index <= highestStep
                     ? "bg-green-500"
                     : "bg-gray-300"
                 }`}
               />
 
               {index !== steps.length - 1 && (
-                <div className="w-px h-10 bg-gray-300" />
+                <div className={`w-px h-10 ${index < highestStep ? "bg-green-500" : "bg-gray-300"}`} />
               )}
             </div>
 
@@ -50,7 +51,7 @@ export default function SidebarStepper({
               className={`text-sm ${
                 index === currentStep
                   ? "text-blue-700 font-medium"
-                  : index < currentStep
+                  : index <= highestStep
                   ? "text-green-600 font-medium"
                   : "text-gray-400"
               }`}

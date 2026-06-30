@@ -5,6 +5,8 @@ import {
   GraduationCap,
   ShieldCheck,
 } from "lucide-react";
+import { useState } from "react";
+import ConsentModal from "./ConsentModal";
 
 const verificationItems = [
   {
@@ -40,6 +42,8 @@ const verificationItems = [
 ];
 
 export default function VerificationList() {
+  const [showConsentModal, setShowConsentModal] = useState(false);
+
   return (
     <div className="mt-6 space-y-6">
 
@@ -69,50 +73,17 @@ export default function VerificationList() {
       {/* CONSENT FORM ROW */}
       <div className="flex items-center justify-between border rounded-lg px-4 py-2 max-w-md">
         <span className="text-sm text-gray-700">Consent form</span>
-        <button className="text-indigo-600 text-sm font-medium hover:underline">
+        <button 
+          onClick={() => setShowConsentModal(true)}
+          className="text-indigo-600 text-sm font-medium hover:underline"
+        >
           View
         </button>
       </div>
 
-      {/* FORM FIELDS */}
-      <div className="space-y-4 max-w-md">
-
-        {/* Full Name */}
-        <div>
-          <label className="text-sm text-gray-800">
-            Full Name<span className="text-red-700">*</span>
-          </label>
-          <input
-            type="text"
-            className="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          />
-        </div>
-
-        {/* Country + City */}
-        <div className="flex gap-4">
-          
-          <div className="w-full">
-            <label className="text-sm text-gray-800">
-              Enter country<span className="text-red-700">*</span>
-            </label>
-            <input
-              type="text"
-              className="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-
-          <div className="w-full">
-            <label className="text-sm text-gray-800">
-              Enter City<span className="text-red-700">*</span>
-            </label>
-            <input
-              type="text"
-              className="mt-1 w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-
-        </div>
-      </div>
+      {showConsentModal && (
+        <ConsentModal onClose={() => setShowConsentModal(false)} />
+      )}
 
     </div>
   );

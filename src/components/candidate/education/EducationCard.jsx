@@ -31,6 +31,7 @@ function EducationCard({
   onUpload,
   inputRef,
   onOpenFile,
+  onOk,
 }) {
   return (
     <div>
@@ -96,6 +97,18 @@ function EducationCard({
             <Input label="Course" value={item.fields.course} />
             <Input label="Percentage/CGPA" value={item.fields.percentage} />
           </div>
+
+          {/* OK Button */}
+          {onOk && (
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={onOk}
+                className="w-28 h-10 rounded-xl bg-[#05058D] text-white text-sm hover:bg-blue-800 transition"
+              >
+                OK
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -14,25 +14,54 @@ function Employment({ onNext }) {
       </h2>
 
       {step === "initial" && (
-        <>
-          <h1 className="text-center text-5xl font-light mt-14">
-            Add Your Work Experience
+        <div className="flex flex-col items-center justify-center mt-14">
+          <h1 className="text-3xl font-medium text-[#101A78] mb-10">
+            Are you a Fresher or Experienced?
           </h1>
 
-          <div className="flex justify-center mt-20">
+          <div className="flex gap-8">
+            <button
+              onClick={() => setStep("fresher_check")}
+              className="px-10 py-4 border-2 border-[#6E72E8] rounded-xl hover:bg-[#EEF0FF] transition font-medium text-lg text-[#101A78] w-48"
+            >
+              Fresher
+            </button>
             <button
               onClick={() => setStep("form")}
-              className="flex items-center gap-2 border border-blue-700 text-blue-700 px-6 py-3 rounded-xl"
+              className="px-10 py-4 bg-[#05058D] text-white rounded-xl hover:bg-blue-900 transition font-medium text-lg w-48"
             >
-              <Plus size={18} />
-              Add Employment
+              Experienced
             </button>
           </div>
-        </>
+        </div>
       )}
 
-      {step === "form" && (
+      {step === "fresher_check" && (
+        <div className="flex flex-col items-center justify-center mt-14">
+          <h1 className="text-3xl font-medium text-[#101A78] mb-10 text-center">
+            Do you have any Internship experience?
+          </h1>
+
+          <div className="flex gap-8">
+            <button
+              onClick={() => setStep("internship_form")}
+              className="px-10 py-4 border-2 border-[#6E72E8] text-[#101A78] rounded-xl hover:bg-[#EEF0FF] transition font-medium text-lg"
+            >
+              Yes, I have
+            </button>
+            <button
+              onClick={onNext}
+              className="px-10 py-4 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition font-medium text-lg"
+            >
+              No, skip this step
+            </button>
+          </div>
+        </div>
+      )}
+
+      {(step === "form" || step === "internship_form") && (
         <EmploymentForm
+          isInternship={step === "internship_form"}
           onSubmit={(data) => {
             setFormData(data);
             setStep("submitted");

@@ -113,6 +113,7 @@ function Education({ onNext }) {
             onUpload={(e) => handleUpload(e, doc)}
             inputRef={(el) => (fileRefs.current[doc] = el)}
             onOpenFile={() => fileRefs.current[doc]?.click()}
+            onOk={() => setOpenCard(null)}
           />
         ))}
       </div>

@@ -67,18 +67,13 @@ const validateField = (field, value) => {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return "Enter a valid email address";
       return "";
 
-    case "gender":
-      if (!val) return "Please select a gender";
+    case "relationship":
+      if (!val) return "Please select a relationship";
       return "";
 
-    case "institute":
-      if (!val) return "Institute name is required";
-      if (val.length < 2) return "Institute name must be at least 2 characters";
-      return "";
-
-    case "designation":
-      if (!val) return "Designation is required";
-      if (val.length < 2) return "Designation must be at least 2 characters";
+    case "organization":
+      if (!val) return "Organization/College name is required";
+      if (val.length < 2) return "Must be at least 2 characters";
       return "";
 
     default:
@@ -86,7 +81,7 @@ const validateField = (field, value) => {
   }
 };
 
-function ReferenceForm({ index, data, total, onChange, onDelete }) {
+function ReferenceForm({ index, data, type, onChange }) {
   // Track which fields have been touched (blurred)
   const [touched, setTouched] = useState({});
 
@@ -111,18 +106,10 @@ function ReferenceForm({ index, data, total, onChange, onDelete }) {
       {/* Header */}
       <div className="flex justify-between items-center mb-5">
         <h3 className="text-2xl font-semibold text-[#05058D]">
-          Reference {index + 1}
+          {type === "professional" ? "1. Professional / Academic Reference" : "2. Personal / Family Reference"}
         </h3>
-        {total > 1 && (
-          <button
-            type="button"
-            onClick={() => onDelete(index)}
-            className="text-red-400 hover:text-red-600 transition"
-          >
-            <Trash2 size={20} />
-          </button>
-        )}
       </div>
+
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -138,14 +125,43 @@ function ReferenceForm({ index, data, total, onChange, onDelete }) {
           />
         </div>
 
+        <div onBlur={() => handleBlur("relationship")}>
+          <Select
+            label="Relationship"
+            field="relationship"
+            index={index}
+            value={data.relationship}
+            options={type === "professional" 
+              ? ["Manager", "Supervisor", "HR", "Professor", "HOD", "Principal", "Other"]
+              : ["Friend", "Relative", "Neighbor", "Other"]
+            }
+            onChange={handleChange}
+            error={getError("relationship")}
+          />
+        </div>
+
+        {type === "professional" && (
+          <div onBlur={() => handleBlur("organization")}>
+            <Input
+              label="Organization / College Name"
+              field="organization"
+              index={index}
+              value={data.organization}
+              placeholder="Enter name"
+              onChange={handleChange}
+              error={getError("organization")}
+            />
+          </div>
+        )}
+
         <div onBlur={() => handleBlur("phone")}>
           <Input
-            label="Phone No"
+            label="Contact Number"
             field="phone"
             index={index}
             value={data.phone}
             type="tel"
-            placeholder="Enter 10-digit phone number"
+            placeholder="Enter 10-digit number"
             onChange={handleChange}
             error={getError("phone")}
           />
@@ -153,50 +169,14 @@ function ReferenceForm({ index, data, total, onChange, onDelete }) {
 
         <div onBlur={() => handleBlur("email")}>
           <Input
-            label="Email"
+            label={type === "professional" ? "Email Address" : "Email Address (Optional)"}
             field="email"
             index={index}
             value={data.email}
             type="email"
             placeholder="Enter email address"
             onChange={handleChange}
-            error={getError("email")}
-          />
-        </div>
-
-        <div onBlur={() => handleBlur("gender")}>
-          <Select
-            label="Gender"
-            field="gender"
-            index={index}
-            value={data.gender}
-            options={["Male", "Female", "Other"]}
-            onChange={handleChange}
-            error={getError("gender")}
-          />
-        </div>
-
-        <div onBlur={() => handleBlur("institute")}>
-          <Input
-            label="Institute Name"
-            field="institute"
-            index={index}
-            value={data.institute}
-            placeholder="Enter institute or company name"
-            onChange={handleChange}
-            error={getError("institute")}
-          />
-        </div>
-
-        <div onBlur={() => handleBlur("designation")}>
-          <Input
-            label="Designation"
-            field="designation"
-            index={index}
-            value={data.designation}
-            placeholder="e.g. Manager, Director, HR..."
-            onChange={handleChange}
-            error={getError("designation")}
+            error={type === "professional" ? getError("email") : (data.email && getError("email"))}
           />
         </div>
       </div>

@@ -1,13 +1,13 @@
 import axios from "axios";
 
-export const uploadPanCardOCR = async (file) => {
+export const uploadOCR = async (file, docType) => {
   const formData = new FormData();
-
   formData.append("file", file);
+  formData.append("docType", docType);
 
   try {
     const response = await axios.post(
-      "https://eve.idfy.com/v3/tasks/sync/extract/ind_pan",
+      "http://localhost:5000/api/ocr/extract",
       formData,
       {
         headers: {
@@ -15,10 +15,10 @@ export const uploadPanCardOCR = async (file) => {
         },
       }
     );
-
     return response.data;
   } catch (error) {
-    console.error("OCR API Error:", error);
+    console.error("OCR Universal API Error:", error);
     throw error;
   }
 };
+

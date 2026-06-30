@@ -5,6 +5,7 @@ import DrugQuestion from "./DrugQuestion";
 
 function DrugTestStep({ onNext }) {
   const [selected, setSelected] = useState("");
+  const [testDate, setTestDate] = useState("");
   const [details, setDetails] = useState("");
   const [file, setFile] = useState(null);
   const [error, setError] = useState(false);
@@ -21,6 +22,7 @@ function DrugTestStep({ onNext }) {
 
   const handleSelect = (value) => {
     setSelected(value);
+    setTestDate("");
     setDetails("");
     setFile(null);
     setError(false);
@@ -58,6 +60,11 @@ function DrugTestStep({ onNext }) {
     }
 
     if (selected === "yes") {
+      if (!testDate) {
+        setError(true);
+        return;
+      }
+
       if (!details.trim()) {
         setError(true);
         return;
@@ -87,8 +94,25 @@ function DrugTestStep({ onNext }) {
       {/* YES Selected */}
       {selected === "yes" && (
         <>
-          {/* Details */}
-          <div className="mt-8">
+          {/* Date and Details */}
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Date of Test <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="date"
+                value={testDate}
+                onChange={(e) => {
+                  setTestDate(e.target.value);
+                  setError(false);
+                }}
+                className="w-full h-11 border border-gray-300 rounded-lg px-4 text-sm outline-none focus:ring-2 focus:ring-[#05058D]"
+              />
+            </div>
+          </div>
+
+          <div className="mt-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Please Provide Test Details{" "}
               <span className="text-red-500">*</span>

@@ -6,6 +6,7 @@ export default function DocumentFields({
   size,
   fields,
   onRemove,
+  onOk,
 }) {
   return (
     <div className="mt-4 border border-[#D8D8F8] rounded-2xl px-6 py-6">
@@ -47,6 +48,18 @@ export default function DocumentFields({
           </div>
         ))}
       </div>
+
+      {/* OK Button */}
+      {onOk && (
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={onOk}
+            className="w-28 h-10 rounded-xl bg-[#05058D] text-white text-sm hover:bg-blue-800 transition"
+          >
+            OK
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import PermanentAddressSection from "./PermanentAddressSection";
 
 export default function AddressStep({ onNext }) {
   const [aadhaar, setAadhaar] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [verified, setVerified] = useState(false);
 
@@ -24,11 +25,11 @@ export default function AddressStep({ onNext }) {
 
   
 
- const handleSubmit = () => {
+  const handleSubmit = () => {
   // First click = open OTP
   if (!verified) {
-    if (aadhaar.trim().length < 12) {
-      alert("Please enter valid Aadhaar Number");
+    if (aadhaar.trim().length !== 12) {
+      alert("Please enter a valid 12-digit Aadhaar Number");
       return;
     }
 
@@ -88,6 +89,12 @@ export default function AddressStep({ onNext }) {
   setUploaded(true);
 };
 
+const getMaskedAadhaar = (val) => {
+  if (val.length <= 4) return val;
+  const maskedLength = val.length - 4;
+  return "*".repeat(maskedLength) + val.slice(-4);
+};
+
   return (
     <>
       <main className="bg-white rounded-2xl shadow-sm w-190 min-h-140 px-6 py-5">
@@ -113,8 +120,13 @@ export default function AddressStep({ onNext }) {
         </label>
         <input
           type="text"
-          value={aadhaar}
-          onChange={(e) => setAadhaar(e.target.value)}
+          value={isFocused ? aadhaar : getMaskedAadhaar(aadhaar)}
+          onChange={(e) => {
+            const val = e.target.value.replace(/\D/g, "").slice(0, 12);
+            setAadhaar(val);
+          }}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           placeholder="2521 5879 5684"
           className="mt-1 w-full h-9 rounded border border-gray-300 px-3 text-sm"
         />

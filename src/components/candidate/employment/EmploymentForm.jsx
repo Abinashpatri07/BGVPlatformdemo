@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { Check, X } from "lucide-react";
 
-function EmploymentForm({ onSubmit }) {
+function EmploymentForm({ onSubmit, isInternship }) {
   const fileInputRef = useRef(null);
   const [uploaded, setUploaded] = useState(false);
   const [fileName, setFileName] = useState("");
@@ -60,7 +60,9 @@ function EmploymentForm({ onSubmit }) {
   return (
     <>
       <p className="text-gray-600 mt-2 text-sm">
-        Include Your Employment To Create A Stronger Profile
+        {isInternship 
+          ? "Include Your Internship To Create A Stronger Profile" 
+          : "Include Your Employment To Create A Stronger Profile"}
       </p>
 
       {/* Upload Area */}
@@ -111,16 +113,16 @@ function EmploymentForm({ onSubmit }) {
 
       {uploaded && (
         <>
-          <div className="grid grid-cols-2 gap-5 mt-8">
-            <InputBox label="Employee ID" value={formData.employeeId} verified />
-            <InputBox label="Company Name" value={formData.companyName} verified />
-            <InputBox label="First Name" value={formData.firstName} />
-            <InputBox label="Last Name" value={formData.lastName} />
-            <InputBox label="From Date" value={formData.fromDate} type="date" />
-            <InputBox label="To Date" value={formData.toDate} type="date" />
-            <InputBox label="Designation" value={formData.designation} />
-            <InputBox label="Drawn CTC" value={formData.drawnCTC} />
-          </div>
+          <div className="grid grid-cols-2 gap-x-8 gap-y-4 px-6 mb-6">
+          <InputBox label="Employee ID" value={formData.employeeId} />
+          <InputBox label={isInternship ? "Company/Organization Name" : "Company Name"} value={formData.companyName} verified />
+          <InputBox label="First Name" value={formData.firstName} verified />
+          <InputBox label="Last Name" value={formData.lastName} verified />
+          <InputBox label="From Date" value={formData.fromDate} verified type="date" />
+          <InputBox label="To Date" value={formData.toDate} verified type="date" />
+          <InputBox label={isInternship ? "Internship Role" : "Designation"} value={formData.designation} verified />
+          <InputBox label={isInternship ? "Stipend (Optional)" : "Drawn CTC"} value={formData.drawnCTC} />
+        </div>
 
           <div className="flex justify-center mt-8">
             <button
