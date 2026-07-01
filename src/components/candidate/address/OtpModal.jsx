@@ -1,12 +1,17 @@
 import { useState, useRef } from "react";
+import { verifyAadhaarOtp, pollTaskStatus } from "../../../API/ocrApi";
 
 export default function OtpModal({
   open,
   onClose,
   onVerify,
+  taskId,
+  aadhaar
 }) {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const inputRefs = useRef([]);
 
@@ -32,14 +37,83 @@ export default function OtpModal({
     }
   };
 
-  const submitOtp = () => {
+  const submitOtp = async () => {
     const finalOtp = otp.join("");
-
-    if (finalOtp === "123456") {
-      setError(false);
-      onVerify();
-    } else {
+    
+    if (finalOtp.length !== 6) {
       setError(true);
+      setErrorMessage("Please enter a 6-digit OTP");
+      return;
+    }
+
+    try {
+      setIsVerifying(true);
+      setError(false);
+      setErrorMessage("");
+
+      const verifyRes = await verifyAadhaarOtp(finalOtp, taskId);
+      
+      if (verifyRes.error) {
+        setError(true);
+        setErrorMessage(verifyRes.error);
+        setIsVerifying(false);
+        return;
+      }
+
+      const verifyRequestId = verifyRes[0]?.request_id;
+      if (!verifyRequestId) {
+        setError(true);
+        setErrorMessage("Failed to initiate verification.");
+        setIsVerifying(false);
+        return;
+      }
+
+      // Poll up to 6 times
+      let isCompleted = false;
+      let pollingData = null;
+
+      for (let i = 0; i < 6; i++) {
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        const statusRes = await pollTaskStatus(verifyRequestId);
+        
+        const taskInfo = statusRes[0];
+        if (taskInfo && taskInfo.status === "completed") {
+          isCompleted = true;
+          pollingData = taskInfo.result?.extraction_output || {};
+          break;
+        } else if (taskInfo && taskInfo.status === "failed") {
+          setError(true);
+          setErrorMessage("Verification failed: " + taskInfo.message);
+          setIsVerifying(false);
+          return;
+        }
+      }
+
+      if (isCompleted && pollingData) {
+        // IDfy typically returns fields like name_on_card, date_of_birth, gender, and address object
+        // Map the address object for the UI
+        const addressObj = pollingData.address || {};
+        const formattedAddress = {
+          house_number: addressObj.house_number || "",
+          street_address: addressObj.street_address || "",
+          locality: addressObj.locality || "",
+          city: addressObj.city || addressObj.district || "",
+          state: addressObj.state || "",
+          pincode: addressObj.pincode || ""
+        };
+
+        onVerify(formattedAddress);
+      } else {
+        setError(true);
+        setErrorMessage("Verification timed out. Please try again.");
+      }
+
+    } catch (err) {
+      console.error(err);
+      setError(true);
+      setErrorMessage("Error verifying OTP.");
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -57,7 +131,7 @@ export default function OtpModal({
         </p>
 
         <p className="text-center text-indigo-800 font-medium mt-1">
-          +91 124*****54
+          {aadhaar ? `Aadhaar ending in ${aadhaar.slice(-4)}` : ""}
         </p>
 
         {/* OTP Boxes */}
@@ -85,7 +159,7 @@ export default function OtpModal({
 
         {error && (
           <p className="text-center text-red-500 mt-5">
-            The OTP you entered is invalid
+            {errorMessage || "The OTP you entered is invalid"}
           </p>
         )}
 
@@ -100,9 +174,10 @@ export default function OtpModal({
         <div className="flex justify-center mt-6">
           <button
             onClick={submitOtp}
-            className="px-8 h-11 bg-indigo-900 text-white rounded-xl"
+            disabled={isVerifying}
+            className={`px-8 h-11 bg-indigo-900 text-white rounded-xl ${isVerifying ? 'opacity-70' : 'hover:bg-indigo-800'}`}
           >
-            Submit otp
+            {isVerifying ? "Verifying..." : "Submit otp"}
           </button>
         </div>
       </div>

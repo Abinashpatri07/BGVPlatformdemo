@@ -2,7 +2,7 @@ import React from "react";
 
 const PACKAGES = [
   {
-    name: "Starter Identity",
+    name: "Pro",
     description: "Perfect for small businesses starting with identity verification.",
     price: "₹5,000",
     units: "100 Verification Units",
@@ -10,7 +10,7 @@ const PACKAGES = [
     popular: false,
   },
   {
-    name: "Standard Employment",
+    name: "Premium",
     description: "Our most popular tier for growing companies and HR teams.",
     price: "₹16,000",
     units: "500 Verification Units",
@@ -18,7 +18,7 @@ const PACKAGES = [
     popular: true,
   },
   {
-    name: "Premium Screen",
+    name: "Enterprise",
     description: "Comprehensive screening suite for enterprise compliance.",
     price: "₹60,000",
     units: "1500 Verification Units",

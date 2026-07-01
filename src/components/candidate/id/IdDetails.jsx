@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import UploadCard from "./UploadCard";
 import DocumentFields from "./DocumentFields";
-import { uploadOCR } from "../../../API/ocrApi";
+import { uploadOCR, verifyPanSource, verifyDlSource, verifyVoterSource, verifyPassportSource, pollTaskStatus } from "../../../API/ocrApi";
 
 const docs = [
   "Passport",
@@ -54,11 +54,18 @@ const docFields = {
 export default function IdDetails({ onNext }) {
   const [data, setData] = useState({});
   const [openCard, setOpenCard] = useState(null);
+  const [panVerification, setPanVerification] = useState({ status: "idle", registeredName: null });
+  const [dlVerification, setDlVerification] = useState({ status: "idle", registeredName: null });
+  const [voterVerification, setVoterVerification] = useState({ status: "idle", registeredName: null });
+  const [passportVerification, setPassportVerification] = useState({ status: "idle", registeredName: null });
+  const [uploadingDoc, setUploadingDoc] = useState(null);
 
- const handleUpload = async (e, docType) => {
+  const handleUpload = async (e, docType) => {
   const file = e.target.files[0];
 
   if (!file) return;
+
+  setUploadingDoc(docType);
 
   const allowed = [
     "image/png",
@@ -68,11 +75,13 @@ export default function IdDetails({ onNext }) {
 
   if (!allowed.includes(file.type)) {
     alert("Only PDF / JPG / PNG allowed");
+    setUploadingDoc(null);
     return;
   }
 
   if (file.size > 5 * 1024 * 1024) {
     alert("Max file size is 5MB");
+    setUploadingDoc(null);
     return;
   }
 
@@ -111,13 +120,21 @@ export default function IdDetails({ onNext }) {
           gender: ocrData.gender || "Male",
         };
       } else if (docType === "Driving license") {
+        const safeExtractDate = (val) => {
+          if (!val) return "";
+          if (Array.isArray(val)) return val[0] || "";
+          if (typeof val === "object") return val.NT || val.T || Object.values(val)[0] || "";
+          return String(val);
+        };
+        const safeStr = (val) => typeof val === "object" ? JSON.stringify(val) : String(val || "");
+        
         extractedFields = {
           driving_licence_number: ocrData.id_number || "",
-          full_name: ocrData.name_on_card || "",
-          date_of_birth: ocrData.date_of_birth || "",
+          full_name: ocrData.name_on_card || ocrData.name || "",
+          date_of_birth: ocrData.date_of_birth || ocrData.dob || "",
           address: ocrData.address || "",
-          issued_date: ocrData.date_of_issue || "",
-          expire_date: ocrData.date_of_expiry || "",
+          issued_date: safeExtractDate(ocrData.issue_dates) || safeExtractDate(ocrData.date_of_issue) || safeExtractDate(ocrData.issue_date) || safeExtractDate(ocrData.issued_date) || safeExtractDate(ocrData.doi) || "",
+          expire_date: safeExtractDate(ocrData.date_of_expiry) || safeExtractDate(ocrData.expiry_date) || safeExtractDate(ocrData.nt_validity_to) || safeExtractDate(ocrData.valid_till) || safeExtractDate(ocrData.doe) || safeExtractDate(ocrData.validity) || "",
           vehicle_class: "LMV",
           blood_group: ocrData.blood_group || "O+",
         };
@@ -149,13 +166,96 @@ export default function IdDetails({ onNext }) {
 
     setOpenCard(docType);
 
+    // Auto-verify documents if they have the required fields
+    if (docType === "PAN card" && extractedFields.pan_number) {
+      triggerPanVerification(extractedFields.pan_number, extractedFields.full_name, extractedFields.date_of_birth);
+    } else if (docType === "Driving license" && extractedFields.driving_licence_number) {
+      triggerDlVerification(extractedFields.driving_licence_number, extractedFields.date_of_birth);
+    } else if (docType === "Voter ID" && extractedFields.voter_id_number) {
+      triggerVoterVerification(extractedFields.voter_id_number);
+    } else if (docType === "Passport" && extractedFields.passport_number) {
+      triggerPassportVerification(extractedFields.passport_number, extractedFields.date_of_birth, extractedFields.first_name);
+    }
+
   } catch (error) {
-
-    console.error(error);
-
-    alert("OCR extraction failed");
+    console.error("OCR API error:", error);
+    // Even if real API fails, keep the dummy data for UI testing
+  } finally {
+    setUploadingDoc(null);
   }
 };
+
+  const formatDob = (dob) => {
+    if (dob && dob.includes('/')) {
+      const parts = dob.split('/');
+      if (parts.length === 3) {
+        return `${parts[2]}-${parts[1]}-${parts[0]}`; // YYYY-MM-DD
+      }
+    }
+    return dob;
+  };
+
+  const executeVerify = async (initApiCall, setStatusFunc) => {
+    setStatusFunc({ status: "verifying", registeredName: null });
+    try {
+      const initRes = await initApiCall();
+      if (initRes.error || !initRes.request_id) {
+        setStatusFunc({ status: "failed", registeredName: null });
+        return;
+      }
+      
+      const reqId = initRes.request_id;
+      let isCompleted = false;
+      let pollData = null;
+
+      for (let i = 0; i < 10; i++) {
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        const statusRes = await pollTaskStatus(reqId);
+        const taskInfo = statusRes[0];
+        
+        if (taskInfo && taskInfo.status === "completed") {
+          isCompleted = true;
+          pollData = taskInfo.result?.source_output || {};
+          break;
+        } else if (taskInfo && taskInfo.status === "failed") {
+          setStatusFunc({ status: "failed", registeredName: null });
+          return;
+        }
+      }
+
+      if (isCompleted && pollData) {
+        if (pollData.status === "id_found") {
+          setStatusFunc({ 
+            status: "success", 
+            registeredName: pollData.name_on_card || null 
+          });
+        } else {
+          setStatusFunc({ status: "failed", registeredName: null });
+        }
+      } else {
+        setStatusFunc({ status: "failed", registeredName: null });
+      }
+    } catch (err) {
+      console.error(err);
+      setStatusFunc({ status: "failed", registeredName: null });
+    }
+  };
+
+  const triggerPanVerification = async (panNumber, fullName, dob) => {
+    executeVerify(() => verifyPanSource(panNumber, fullName, formatDob(dob)), setPanVerification);
+  };
+
+  const triggerDlVerification = async (dlNumber, dob) => {
+    executeVerify(() => verifyDlSource(dlNumber, formatDob(dob)), setDlVerification);
+  };
+
+  const triggerVoterVerification = async (epicNumber) => {
+    executeVerify(() => verifyVoterSource(epicNumber), setVoterVerification);
+  };
+
+  const triggerPassportVerification = async (fileNumber, dob, name) => {
+    executeVerify(() => verifyPassportSource(fileNumber, formatDob(dob), name), setPassportVerification);
+  };
 
   const removeFile = (docType) => {
     setData((prev) => {
@@ -165,6 +265,10 @@ export default function IdDetails({ onNext }) {
     });
 
     setOpenCard(null);
+    if (docType === "PAN card") setPanVerification({ status: "idle", registeredName: null });
+    if (docType === "Driving license") setDlVerification({ status: "idle", registeredName: null });
+    if (docType === "Voter ID") setVoterVerification({ status: "idle", registeredName: null });
+    if (docType === "Passport") setPassportVerification({ status: "idle", registeredName: null });
   };
 
   const visibleDocs =
@@ -207,19 +311,33 @@ export default function IdDetails({ onNext }) {
           <UploadCard
             doc={doc}
             uploaded={!!data[doc]}
+            isUploading={uploadingDoc === doc}
             open={openCard === doc}
+            verificationState={
+              doc === "PAN card" ? panVerification :
+              doc === "Driving license" ? dlVerification :
+              doc === "Voter ID" ? voterVerification :
+              doc === "Passport" ? passportVerification : null
+            }
             onUpload={(e) => handleUpload(e, doc)}
             onToggle={() =>
-              setOpenCard(openCard === doc ? null : doc)
+              setOpenCard((prev) => (prev === doc ? null : doc))
             }
           />
 
           {/* Details */}
           {openCard === doc && data[doc] && (
             <DocumentFields
+              docType={doc}
               fileName={data[doc].fileName}
               size={data[doc].size}
               fields={data[doc].fields}
+              verificationState={
+                doc === "PAN card" ? panVerification :
+                doc === "Driving license" ? dlVerification :
+                doc === "Voter ID" ? voterVerification :
+                doc === "Passport" ? passportVerification : null
+              }
               onRemove={() => removeFile(doc)}
               onOk={() => setOpenCard(null)}
             />

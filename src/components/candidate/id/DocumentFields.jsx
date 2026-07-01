@@ -2,9 +2,11 @@ import React from "react";
 import { X } from "lucide-react";
 
 export default function DocumentFields({
+  docType,
   fileName,
   size,
   fields,
+  verificationState,
   onRemove,
   onOk,
 }) {
@@ -38,16 +40,36 @@ export default function DocumentFields({
               <input
                 value={value}
                 readOnly
-                className="w-full h-10 border rounded px-3 text-sm"
+                className="w-full h-10 border rounded px-3 text-sm bg-gray-50"
               />
 
-              <span className="absolute right-2 top-3 text-[10px] text-green-600">
-                Verified
-              </span>
+              {(
+                (docType === "PAN card" && key === "pan_number") ||
+                (docType === "Driving license" && key === "driving_licence_number") ||
+                (docType === "Voter ID" && key === "voter_id_number") ||
+                (docType === "Passport" && key === "passport_number")
+              ) ? (
+                <span className="absolute right-2 top-3 text-[10px] font-medium">
+                  {verificationState?.status === "verifying" && <span className="text-blue-500 animate-pulse">Verifying...</span>}
+                  {verificationState?.status === "success" && <span className="text-green-600">✔ Verified</span>}
+                  {verificationState?.status === "failed" && <span className="text-red-500">❌ Failed</span>}
+                </span>
+              ) : (
+                <span className="absolute right-2 top-3 text-[10px] text-green-600">
+                  ✔ Verified
+                </span>
+              )}
             </div>
           </div>
         ))}
       </div>
+      
+      {/* Show registered name if verify success and name exists */}
+      {verificationState?.status === "success" && verificationState?.registeredName && (
+        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
+          <strong>Govt Registered Name:</strong> {verificationState.registeredName}
+        </div>
+      )}
 
       {/* OK Button */}
       {onOk && (

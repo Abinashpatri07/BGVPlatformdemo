@@ -9,10 +9,10 @@ import UsageLogTable from "../../components/clientAdmin/billing/UsageLogTable";
 const TABS = ["Purchase History", "Usage Log", "Purchase Credits"];
 
 const STAT_CARDS = [
-  { title: "Total Spend",   value: "58.78L", icon: "🪙", iconBg: "bg-orange-50", iconColor: "text-orange-500" },
-  { title: "Total Credit",  value: "2.50L",  icon: "💳", iconBg: "bg-orange-50", iconColor: "text-orange-500" },
-  { title: "Total Invoice", value: "80",     icon: "🗒️", iconBg: "bg-blue-50",   iconColor: "text-blue-500"   },
-  { title: "Next Renewal",  value: "10 Aug", icon: "📅", iconBg: "bg-indigo-50", iconColor: "text-indigo-500" },
+  { title: "Total Credits",     value: "58.78", icon: "🪙", iconBg: "bg-orange-50", iconColor: "text-orange-500" },
+  { title: "Consume Credits",   value: "42.78", icon: "📉", iconBg: "bg-red-50",    iconColor: "text-red-500" },
+  { title: "Available Credits", value: "16.00", icon: "💳", iconBg: "bg-green-50",  iconColor: "text-green-500" },
+  { title: "Total Invoice",     value: "80",    icon: "🗒️", iconBg: "bg-blue-50",   iconColor: "text-blue-500" },
 ];
 
 const USAGE_LOG_CARDS = [

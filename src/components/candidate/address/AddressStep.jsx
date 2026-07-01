@@ -3,14 +3,16 @@ import OtpModal from "./OtpModal";
 import UploadBox from "./UploadBox";
 import UploadSuccess from "./UploadSuccess";
 import PermanentAddressSection from "./PermanentAddressSection";
-
+import { generateAadhaarOtp } from "../../../API/ocrApi";
 
 export default function AddressStep({ onNext }) {
   const [aadhaar, setAadhaar] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [showOtp, setShowOtp] = useState(false);
   const [verified, setVerified] = useState(false);
-
+  const [taskId, setTaskId] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [extractedAddress, setExtractedAddress] = useState(null);
   const [addressType, setAddressType] = useState("");
   const [radioError, setRadioError] = useState(false);
 
@@ -25,7 +27,7 @@ export default function AddressStep({ onNext }) {
 
   
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
   // First click = open OTP
   if (!verified) {
     if (aadhaar.trim().length !== 12) {
@@ -33,7 +35,21 @@ export default function AddressStep({ onNext }) {
       return;
     }
 
-    setShowOtp(true);
+    try {
+      setIsGenerating(true);
+      const res = await generateAadhaarOtp(aadhaar);
+      if (res.error) {
+        alert("Failed to generate OTP: " + res.error);
+        setIsGenerating(false);
+        return;
+      }
+      setTaskId(res.task_id);
+      setIsGenerating(false);
+      setShowOtp(true);
+    } catch (err) {
+      alert("Error initiating Aadhaar verification.");
+      setIsGenerating(false);
+    }
     return;
   }
 
@@ -62,9 +78,10 @@ export default function AddressStep({ onNext }) {
   onNext();
 };
 
-  const handleOtpSuccess = () => {
+  const handleOtpSuccess = (data) => {
     setShowOtp(false);
     setVerified(true);
+    setExtractedAddress(data);
   };
 
   const handleFileUpload = (e) => {
@@ -102,13 +119,16 @@ const getMaskedAadhaar = (val) => {
         <h1 className="text-[22px] font-bold text-[#101A78]">Address Details</h1>
 
         {/* Top Info */}
-        <div className="mt-5 rounded-xl border border-[#6E72E8] bg-[#EEF0FF] px-5 py-4">
-          <p className="text-sm">
-            <b>Step 1:</b> Enter Your Aadhaar Number To Receive An OTP
-          </p>
-          <p className="text-sm mt-1">
-            <b>Step 2:</b> Verify The OTP To Fetch Your Address Details
-          </p>
+        <div className="mt-5 rounded-xl border border-[#6E72E8] bg-[#EEF0FF] px-5 py-4 flex justify-between items-center">
+          <div>
+            <p className="text-sm">
+              <b>Step 1:</b> Enter Your Aadhaar Number To Receive An OTP
+            </p>
+            <p className="text-sm mt-1">
+              <b>Step 2:</b> Verify The OTP To Fetch Your Address Details
+            </p>
+          </div>
+          {isGenerating && <span className="text-[#101A78] text-sm font-semibold animate-pulse">Generating OTP...</span>}
         </div>
 
         {/* Heading */}
@@ -120,15 +140,35 @@ const getMaskedAadhaar = (val) => {
         </label>
         <input
           type="text"
-          value={isFocused ? aadhaar : getMaskedAadhaar(aadhaar)}
+          value={getMaskedAadhaar(aadhaar)}
           onChange={(e) => {
-            const val = e.target.value.replace(/\D/g, "").slice(0, 12);
-            setAadhaar(val);
+            const val = e.target.value;
+            
+            if (val === "") {
+              setAadhaar("");
+              return;
+            }
+
+            // If string has no asterisks (e.g. typing first 4 digits or pasting a full number)
+            if (!val.includes('*')) {
+              setAadhaar(val.replace(/\D/g, "").slice(0, 12));
+              return;
+            }
+
+            // If deleting characters
+            if (val.length < aadhaar.length) {
+              setAadhaar(aadhaar.slice(0, val.length));
+            } 
+            // If adding characters
+            else if (val.length > aadhaar.length) {
+              const lastChar = val.slice(-1);
+              if (/\d/.test(lastChar)) {
+                setAadhaar((aadhaar + lastChar).slice(0, 12));
+              }
+            }
           }}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
           placeholder="2521 5879 5684"
-          className="mt-1 w-full h-9 rounded border border-gray-300 px-3 text-sm"
+          className="mt-1 w-full h-9 rounded border border-gray-300 px-3 text-sm tracking-widest"
         />
 
         {/* NOTE = before verify only */}
@@ -151,36 +191,36 @@ const getMaskedAadhaar = (val) => {
               House and Apartment Number <span className="text-red-500">*</span>
             </label>
             <input
-              value="G-501"
+              value={extractedAddress?.house_number || ""}
               readOnly
-              className="mt-1 w-full h-9 rounded border px-3 text-sm"
+              className="mt-1 w-full h-9 rounded border px-3 text-sm bg-gray-50"
             />
 
             <label className="block mt-2 text-sm">
               Address Line 1 <span className="text-red-500">*</span>
             </label>
             <input
-              value="Kula Layout, Sanjib Nagar 3 Rd Phase"
+              value={extractedAddress?.street_address || ""}
               readOnly
-              className="mt-1 w-full h-9 rounded border px-3 text-sm"
+              className="mt-1 w-full h-9 rounded border px-3 text-sm bg-gray-50"
             />
 
             <label className="block mt-2 text-sm">
-              Address Line 2 <span className="text-red-500">*</span>
+              Address Line 2
             </label>
             <input
-              value="Jaynagar Layout, 3rd Phase, Kulugate, Bangalore"
+              value={extractedAddress?.locality || ""}
               readOnly
-              className="mt-1 w-full h-9 rounded border px-3 text-sm"
+              className="mt-1 w-full h-9 rounded border px-3 text-sm bg-gray-50"
             />
 
             <label className="block mt-2 text-sm">
               Pin Code <span className="text-red-500">*</span>
             </label>
             <input
-              value="562214"
+              value={extractedAddress?.pincode || ""}
               readOnly
-              className="mt-1 w-full h-9 rounded border px-3 text-sm"
+              className="mt-1 w-full h-9 rounded border px-3 text-sm bg-gray-50"
             />
 
             <div className="grid grid-cols-2 gap-4 mt-2">
@@ -189,9 +229,9 @@ const getMaskedAadhaar = (val) => {
                   City <span className="text-red-500">*</span>
                 </label>
                 <input
-                  value="Bangalore"
+                  value={extractedAddress?.city || ""}
                   readOnly
-                  className="mt-1 w-full h-9 rounded border px-3 text-sm"
+                  className="mt-1 w-full h-9 rounded border px-3 text-sm bg-gray-50"
                 />
               </div>
               <div>
@@ -199,9 +239,9 @@ const getMaskedAadhaar = (val) => {
                   State <span className="text-red-500">*</span>
                 </label>
                 <input
-                  value="Karnataka"
+                  value={extractedAddress?.state || ""}
                   readOnly
-                  className="mt-1 w-full h-9 rounded border px-3 text-sm"
+                  className="mt-1 w-full h-9 rounded border px-3 text-sm bg-gray-50"
                 />
               </div>
             </div>
@@ -336,6 +376,8 @@ const getMaskedAadhaar = (val) => {
         open={showOtp}
         onClose={() => setShowOtp(false)}
         onVerify={handleOtpSuccess}
+        taskId={taskId}
+        aadhaar={aadhaar}
       />
     </>
   );
