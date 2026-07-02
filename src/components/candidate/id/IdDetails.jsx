@@ -139,11 +139,16 @@ export default function IdDetails({ onNext }) {
           blood_group: ocrData.blood_group || "O+",
         };
       } else if (docType === "Passport") {
+        const passportFullName = ocrData.name_on_card || ocrData.name || "";
+        const nameParts = passportFullName.trim().split(" ");
+        const fName = nameParts.length > 0 ? nameParts[0] : "";
+        const lName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
+
         extractedFields = {
           passport_number: ocrData.id_number || "",
           date_of_birth: ocrData.date_of_birth || "",
-          first_name: ocrData.name_on_card || "",
-          last_name: "",
+          first_name: fName,
+          last_name: lName,
           place_of_birth: ocrData.place_of_birth || "",
           date_of_issue: ocrData.date_of_issue || "",
           date_of_expiry: ocrData.date_of_expiry || "",

@@ -55,8 +55,9 @@ export default function DocumentFields({
                   {verificationState?.status === "failed" && <span className="text-red-500">❌ Failed</span>}
                 </span>
               ) : (
-                <span className="absolute right-2 top-3 text-[10px] text-green-600">
-                  ✔ Verified
+                <span className="absolute right-2 top-3 text-[10px] font-medium">
+                  {verificationState?.status === "success" && <span className="text-green-600">✔ Verified</span>}
+                  {verificationState?.status === "failed" && <span className="text-red-500">❌ Failed</span>}
                 </span>
               )}
             </div>
