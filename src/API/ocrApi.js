@@ -60,6 +60,20 @@ export const pollTaskStatus = async (request_id) => {
   }
 };
 
+// ============================================
+// CANDIDATE SUBMISSION APIs
+// ============================================
+
+export const submitCandidateIdDocuments = async (payload) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/candidate/submit/id-documents`, payload);
+    return response.data;
+  } catch (error) {
+    console.error("Submit ID docs error:", error);
+    throw error.response?.data || { error: "Failed to submit documents" };
+  }
+};
+
 export const verifyPanSource = async (panNumber, fullName, dob) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/api/ocr/verify-pan`, {

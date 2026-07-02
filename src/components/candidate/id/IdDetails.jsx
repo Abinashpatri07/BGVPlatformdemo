@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import UploadCard from "./UploadCard";
 import DocumentFields from "./DocumentFields";
-import { uploadOCR, verifyPanSource, verifyDlSource, verifyVoterSource, verifyPassportSource, pollTaskStatus } from "../../../API/ocrApi";
+import { uploadOCR, verifyPanSource, verifyDlSource, verifyVoterSource, verifyPassportSource, pollTaskStatus, submitCandidateIdDocuments } from "../../../API/ocrApi";
+import { Loader2 } from "lucide-react";
 
 const docs = [
   "Passport",
@@ -59,6 +60,8 @@ export default function IdDetails({ onNext }) {
   const [voterVerification, setVoterVerification] = useState({ status: "idle", registeredName: null });
   const [passportVerification, setPassportVerification] = useState({ status: "idle", registeredName: null });
   const [uploadingDoc, setUploadingDoc] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const handleUpload = async (e, docType) => {
   const file = e.target.files[0];
@@ -276,6 +279,56 @@ export default function IdDetails({ onNext }) {
     if (docType === "Passport") setPassportVerification({ status: "idle", registeredName: null });
   };
 
+  const handleSubmit = async () => {
+    const keys = Object.keys(data);
+    if (keys.length === 0) return;
+
+    setIsSubmitting(true);
+    try {
+      const documentsPayload = keys.map(docType => {
+        const item = data[docType];
+        
+        let status = "success";
+        let docNumber = "";
+        
+        if (docType === "PAN card") {
+          status = panVerification.status;
+          docNumber = item.fields.pan_number;
+        } else if (docType === "Driving license") {
+          status = dlVerification.status;
+          docNumber = item.fields.driving_licence_number;
+        } else if (docType === "Voter ID") {
+          status = voterVerification.status;
+          docNumber = item.fields.voter_id_number;
+        } else if (docType === "Passport") {
+          status = passportVerification.status;
+          docNumber = item.fields.passport_number;
+        }
+
+        return {
+          doc_type: docType,
+          doc_number: docNumber || "",
+          ocr_data: item.fields,
+          verification_status: status,
+          file_name: item.fileName
+        };
+      });
+
+      await submitCandidateIdDocuments({
+        cand_id: 1, // Dummy candidate ID for now
+        documents: documentsPayload
+      });
+
+      setSubmitSuccess(true);
+      setTimeout(() => {
+        onNext();
+      }, 2000);
+    } catch (err) {
+      alert("Failed to save documents: " + (err.error || err.message));
+      setIsSubmitting(false);
+    }
+  };
+
   const visibleDocs =
     openCard !== null
       ? docs.filter((doc) => doc === openCard)
@@ -354,10 +407,19 @@ export default function IdDetails({ onNext }) {
       {!openCard && Object.keys(data).length > 0 && (
         <div className="flex justify-center mt-8">
           <button
-            onClick={onNext}
-            className="w-28 h-10 rounded-xl bg-[#05058D] text-white text-sm"
+            onClick={handleSubmit}
+            disabled={isSubmitting || submitSuccess}
+            className={`w-32 h-10 rounded-xl text-white text-sm flex justify-center items-center gap-2 transition-all duration-300 ${
+              submitSuccess ? "bg-emerald-500" : "bg-[#05058D] disabled:opacity-70"
+            }`}
           >
-            Submit
+            {isSubmitting ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : submitSuccess ? (
+              <>Submitted <span className="font-bold">✓</span></>
+            ) : (
+              "Submit"
+            )}
           </button>
         </div>
       )}

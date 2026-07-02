@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-const ROLES = ["Recruiter", "Hr manager", "HR admin"];
+const ROLES = ["HR", "HR Manager", "HR Executive"];
 
 function CreateHRForm() {
   const navigate = useNavigate();
