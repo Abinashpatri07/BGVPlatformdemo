@@ -260,33 +260,21 @@ function Sidebar({
   /* LOGOUT */
   const handleLogout = () => {
 
-    const role =
-      localStorage.getItem("role");
+    // Get role before clearing
+    const role = localStorage.getItem("role");
 
+    // Clear everything
     localStorage.clear();
 
-    // ADMIN
-    if (role === "admin") {
-
-      navigate("/admin/login");
-    }
-
-    // HR
-    else if (role === "hr") {
-
-      navigate("/hr/login");
-    }
-
-    // SUPER ADMIN
-    else if (role === "super-admin") {
-
-      navigate("/super-admin/login");
-    }
-
-    // DEFAULT
-    else {
-
-      navigate("/");
+    // REDIRECT BASED ON ROLE
+    if (role === "admin" || role === "client_admin") {
+      navigate("/admin/login", { state: { message: "Logout Successful!" } });
+    } else if (role === "hr") {
+      navigate("/hr/login", { state: { message: "Logout Successful!" } });
+    } else if (role === "super-admin") {
+      navigate("/super-admin/login", { state: { message: "Logout Successful!" } });
+    } else {
+      navigate("/", { state: { message: "Logout Successful!" } });
     }
   };
 

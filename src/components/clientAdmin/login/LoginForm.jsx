@@ -1,10 +1,17 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
 /* ── LOGIN POPUP ─────────────────────────────────────────── */
-function LoginPopup({ type, message, onClose }) {
+function LoginPopup({ type, title, message, onClose }) {
   const isSuccess = type === "success";
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (onClose) onClose();
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
 
   return (
     <div className="fixed top-6 right-6 z-[9999] animate-[fadeIn_0.3s_ease-out]">
@@ -21,68 +28,109 @@ function LoginPopup({ type, message, onClose }) {
           </svg>
         )}
         <div className="flex flex-col">
-          <span className="font-bold">{isSuccess ? "Login Successful!" : "Login Failed"}</span>
+          <span className="font-bold">{title || (isSuccess ? "Success!" : "Failed")}</span>
           <span className="text-sm">{message}</span>
         </div>
-        {!isSuccess && (
-          <button onClick={onClose} className="ml-4 text-gray-400 hover:text-gray-600 transition">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        )}
+        <button onClick={onClose} className="ml-4 text-gray-400 hover:text-gray-600 transition">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
     </div>
   );
 }
 
 /* ── CLIENT ADMIN LOGIN FORM ─────────────────────────────── */
-export default function LoginForm() {
+export default function ClientAdminLoginForm() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
-  const [popup, setPopup]       = useState(null); // { type, message }
+  const [otp, setOtp]           = useState("");
+  const [step, setStep]         = useState(1); // 1 = Login, 2 = OTP
+  const [popup, setPopup]       = useState(null); // { type, title, message }
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
-    const dummyEmail    = "magnesh@gmail.com";
-    const dummyPassword = "123456";
+  useEffect(() => {
+    if (location.state?.message) {
+      setPopup({ type: "success", title: "Logged Out", message: location.state.message });
+      // Clear the state so it doesn't show again on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
+  const handleLogin = async () => {
     if (!email || !password) {
-      setPopup({ type: "error", message: "Please enter email and password." });
+      setPopup({ type: "error", title: "Input Required", message: "Please enter email and password." });
       return;
     }
 
-    if (email === dummyEmail && password === dummyPassword) {
-      localStorage.setItem("role", "admin");
-      localStorage.setItem(
-        "user",
-        JSON.stringify({ name: "Magnesh Shamal", email: "magnesh@gmail.com", role: "Client Admin" })
+    setIsLoading(true);
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/client-admin/auth/login`,
+        { email, password }
       );
-      setPopup({ type: "success", message: "Welcome back, Magnesh Shamal!" });
-      setTimeout(() => navigate("/admin/home"), 1500);
-    } else if (email === dummyEmail && password !== dummyPassword) {
-      setPopup({ type: "error", message: "Incorrect password. Please try again." });
-    } else {
-      setPopup({ type: "error", message: "Invalid email or password." });
+      
+      if (response.data.success && response.data.requires2FA) {
+        setPopup({ type: "success", title: "OTP Sent!", message: response.data.message });
+        setStep(2); // Move to OTP step
+      } else if (response.data.success) {
+        // Fallback for older behavior
+        localStorage.setItem("role", "admin");
+        const userName = response.data.user?.name || "Client Admin";
+        localStorage.setItem(
+          "user",
+          JSON.stringify({ name: userName, email: email, role: "Client Admin" })
+        );
+        setPopup({ type: "success", title: "Login Successful!", message: `Welcome back, ${userName}!` });
+        setTimeout(() => navigate("/admin/home"), 1500);
+      }
+    } catch (error) {
+      console.error("Login Error:", error);
+      setPopup({ 
+        type: "error", 
+        title: "Login Failed",
+        message: error.response?.data?.message || "Invalid email or password." 
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-//   const handleLogin = async () => {
-//   try {
-//     const response = await axios.post(
-//       `${import.meta.env.VITE_API_URL}/api/client-admin/auth/login`,
-//       { email, password }
-//     );
-//     console.log(response.data);
-//     localStorage.setItem("role", "admin");
-//     localStorage.setItem("user", JSON.stringify({ email, role: "Client Admin" }));
-//     navigate("/admin/home");
-//   } catch (error) {
-//     console.log(error);
-//     alert(error.response?.data?.message || "Invalid email or password");
-//   }
-// };
+  const handleVerifyOtp = async () => {
+    if (!otp) {
+      setPopup({ type: "error", title: "Verification Failed", message: "Please enter the OTP." });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/client-admin/auth/verify-otp`,
+        { email, otp }
+      );
+      
+      if (response.data.success) {
+        localStorage.clear();
+        localStorage.setItem("accessToken", response.data.token);
+        localStorage.setItem("refreshToken", response.data.refreshToken);
+        localStorage.setItem("role", "admin");
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        
+        setPopup({ type: "success", title: "Login Successful!", message: `Welcome back, ${response.data.user.name}!` });
+        setTimeout(() => navigate("/admin/home"), 1500);
+      }
+    } catch (error) {
+      console.error("Verify OTP Error:", error);
+      const errorMsg = error.response?.data?.message || "Invalid or expired OTP.";
+      setPopup({ type: "error", title: "Verification Failed", message: errorMsg });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="relative z-10 w-full max-w-sm px-8">
@@ -103,59 +151,101 @@ export default function LoginForm() {
         Client Admin login Portal
       </p>
 
-      {/* Email */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Email
-        </label>
-        <input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full border rounded-md px-4 py-2.5"
-        />
-      </div>
+      {step === 1 ? (
+        <>
+          {/* Email */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full border rounded-md px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
 
-      {/* Password */}
-      <div className="mb-3">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Password
-        </label>
-        <input
-          type="password"
-          placeholder="••••••••"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full border rounded-md px-4 py-2.5"
-        />
-      </div>
+          {/* Password */}
+          <div className="mb-3">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border rounded-md px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
 
-      {/* Remember + Forgot */}
-      <div className="flex justify-between mb-6">
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" />
-          Remember me
-        </label>
-        <button
-          onClick={() => navigate("/forgot-password")}
-          className="text-sm text-gray-500 hover:text-indigo-600"
-        >
-          Forgot password
-        </button>
-      </div>
+          {/* Remember + Forgot */}
+          <div className="flex justify-between mb-6">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" />
+              Remember me
+            </label>
+            <button
+              onClick={() => navigate("/forgot-password")}
+              className="text-sm text-gray-500 hover:text-indigo-600"
+            >
+              Forgot password
+            </button>
+          </div>
 
-      {/* Button */}
-      <button
-        onClick={handleLogin}
-        className="w-full bg-indigo-500 text-white py-3 rounded-lg"
-      >
-        Log in
-      </button>
+          {/* Button */}
+          <button
+            onClick={handleLogin}
+            disabled={isLoading}
+            className="w-full bg-indigo-500 hover:bg-indigo-600 transition-all text-white py-3 rounded-lg disabled:opacity-50"
+          >
+            {isLoading ? "Checking..." : "Log in"}
+          </button>
+        </>
+      ) : (
+        <>
+          {/* OTP Input */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
+              Enter the OTP sent to your email
+            </label>
+            <input
+              type="text"
+              placeholder="6-digit OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="w-full border rounded-md px-4 py-2.5 text-center tracking-widest text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              maxLength={6}
+            />
+          </div>
+          
+          <button
+            onClick={handleVerifyOtp}
+            disabled={isLoading}
+            className="w-full bg-indigo-500 hover:bg-indigo-600 transition-all text-white py-3 rounded-lg mb-3 disabled:opacity-50"
+          >
+            {isLoading ? "Verifying..." : "Verify OTP"}
+          </button>
+          
+          <button
+            onClick={() => setStep(1)}
+            className="w-full bg-gray-100 hover:bg-gray-200 transition-all text-gray-700 py-3 rounded-lg text-sm"
+          >
+            Back to Login
+          </button>
+        </>
+      )}
 
       <p className="text-center text-sm text-gray-500 mt-10">
         Don't have an account?{" "}
-        <span className="text-indigo-500 cursor-pointer">Sign up</span>
+        <span 
+          className="text-indigo-500 cursor-pointer hover:underline"
+          onClick={() => navigate("/admin/signup")}
+        >
+          Sign up
+        </span>
       </p>
 
     </div>

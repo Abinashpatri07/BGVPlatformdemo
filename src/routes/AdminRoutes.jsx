@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import AdminLogin from "../pages/clientAdmin/AdminLogin";
+import Signup from "../pages/clientAdmin/Signup";
 import Home from "../pages/clientAdmin/Home";
 
 import ProtectedRoute from "./ProtectedRoute";
@@ -27,6 +28,7 @@ function AdminRoutes() {
     <Routes>
       {/* LOGIN */}
       <Route path="login" element={<AdminLogin />} />
+      <Route path="signup" element={<Signup />} />
 
       {/* PROTECTED ADMIN LAYOUT */}
       <Route

@@ -237,31 +237,24 @@ export default function Header() {
   setDropdownOpen(false);
 
   // Clear storage
-  localStorage.removeItem("role");
-  localStorage.removeItem("user");
-
-  // Clear session
+  localStorage.clear();
   sessionStorage.clear();
 
   // Redirect based on role
   if (role === "candidate") {
-    navigate("/");
+    navigate("/", { state: { message: "Logout Successful!" } });
   }
-
   else if (role === "hr") {
-    navigate("/hr/login");
+    navigate("/hr/login", { state: { message: "Logout Successful!" } });
   }
-
-  else if (role === "admin") {
-    navigate("/admin/login");
+  else if (role === "admin" || role === "client_admin") {
+    navigate("/admin/login", { state: { message: "Logout Successful!" } });
   }
-
   else if (role === "super-admin") {
-    navigate("/super-admin/login");
+    navigate("/super-admin/login", { state: { message: "Logout Successful!" } });
   }
-
   else {
-    navigate("/");
+    navigate("/", { state: { message: "Logout Successful!" } });
   }
 };
 

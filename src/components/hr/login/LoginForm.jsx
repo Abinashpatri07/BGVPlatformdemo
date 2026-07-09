@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
 /* ── LOGIN POPUP ─────────────────────────────────────────── */
-function LoginPopup({ type, message, onClose }) {
+function LoginPopup({ type, title, message, onClose }) {
   const isSuccess = type === "success";
 
   useEffect(() => {
@@ -28,7 +28,7 @@ function LoginPopup({ type, message, onClose }) {
           </svg>
         )}
         <div className="flex flex-col">
-          <span className="font-bold">{isSuccess ? "Login Successful!" : "Login Failed"}</span>
+          <span className="font-bold">{title || (isSuccess ? "Success!" : "Failed")}</span>
           <span className="text-sm">{message}</span>
         </div>
         {!isSuccess && (
@@ -46,10 +46,22 @@ function LoginPopup({ type, message, onClose }) {
 /* ── HR LOGIN FORM ───────────────────────────────────────── */
 export default function HRLoginForm() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
-  const [popup, setPopup]       = useState(null); // { type, message }
+  const [otp, setOtp]           = useState("");
+  const [step, setStep]         = useState(1); // 1 = Login, 2 = OTP
+  const [popup, setPopup]       = useState(null); // { type, title, message }
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (location.state?.message) {
+      setPopup({ type: "success", title: "Logged Out", message: location.state.message });
+      // Clear the state so it doesn't show again on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -57,43 +69,66 @@ export default function HRLoginForm() {
       return;
     }
 
+    setIsLoading(true);
     try {
-      // ── STATIC BYPASS FOR VERCEL DEPLOYMENT ──
-      if (email === "puja@gmail.com" && password === "123456") {
-        localStorage.setItem("role", "hr");
-        localStorage.setItem(
-          "user",
-          JSON.stringify({ name: "Puja", email: "puja@gmail.com", role: "HR Executive" })
-        );
-        setPopup({ type: "success", message: "Welcome back, Puja!" });
-        setTimeout(() => navigate("/hr/home"), 1500);
-        return;
-      }
-
       // ── ACTUAL BACKEND CALL ──
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/hr/auth/login`, {
         email,
         password,
       });
 
-      if (res.data.success) {
+      if (res.data.success && res.data.requires2FA) {
+        setPopup({ type: "success", title: "OTP Sent!", message: res.data.message });
+        setStep(2); // Move to OTP step
+      } else if (res.data.success) {
+        // Fallback for older behavior if requires2FA isn't sent
         localStorage.setItem("role", "hr");
         const userName = res.data.user?.name || "HR Executive";
         localStorage.setItem(
           "user",
           JSON.stringify({ name: userName, email: email, role: "HR Executive" })
         );
-        setPopup({ type: "success", message: `Welcome back, ${userName}!` });
+        setPopup({ type: "success", title: "Login Successful!", message: `Welcome back, ${userName}!` });
         setTimeout(() => navigate("/hr/home"), 1500);
-      } else {
-        setPopup({ type: "error", message: res.data.message || "Invalid credentials" });
       }
     } catch (error) {
       console.error("Login Error:", error);
       setPopup({ 
         type: "error", 
-        message: error.response?.data?.message || "Network Error: Could not connect to backend." 
+        title: "Login Failed",
+        message: error.response?.data?.message || "Invalid email or password." 
       });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otp) {
+      setPopup({ type: "error", title: "Verification Failed", message: "Please enter the OTP." });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/hr/auth/verify-otp`, { email, otp });
+      
+      if (response.data.success) {
+        localStorage.clear();
+        localStorage.setItem("accessToken", response.data.token);
+        localStorage.setItem("refreshToken", response.data.refreshToken);
+        localStorage.setItem("role", "hr");
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        
+        setPopup({ type: "success", title: "Login Successful!", message: `Welcome back, ${response.data.user.name}!` });
+        setTimeout(() => navigate("/hr/home"), 1500);
+      }
+    } catch (error) {
+      console.error("Verify OTP Error:", error);
+      const errorMsg = error.response?.data?.message || "Invalid or expired OTP.";
+      setPopup({ type: "error", title: "Verification Failed", message: errorMsg });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -117,60 +152,97 @@ export default function HRLoginForm() {
         HR Login Portal
       </p>
 
-      {/* Email */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Email
-        </label>
-        <input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full border rounded-md px-4 py-2.5"
-        />
-      </div>
+      {step === 1 ? (
+        <>
+          {/* Email */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full border rounded-md px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
 
-      {/* Password */}
-      <div className="mb-3">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Password
-        </label>
-        <input
-          type="password"
-          placeholder="••••••••"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full border rounded-md px-4 py-2.5"
-        />
-      </div>
+          {/* Password */}
+          <div className="mb-3">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border rounded-md px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
 
-      {/* Remember + Forgot */}
-      <div className="flex justify-between mb-6">
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" />
-          Remember me
-        </label>
-        <button
-          onClick={() => navigate("/forgot-password")}
-          className="text-sm text-gray-500 hover:text-indigo-600"
-        >
-          Forgot password
-        </button>
-      </div>
+          {/* Remember + Forgot */}
+          <div className="flex justify-between items-center mb-6">
+            <label className="flex items-center gap-2 text-sm text-gray-600">
+              <input type="checkbox" />
+              Remember me
+            </label>
+            <button
+              onClick={() => navigate("/forgot-password")}
+              className="text-sm text-gray-500 hover:text-indigo-600"
+            >
+              Forgot password
+            </button>
+          </div>
 
-      {/* Button */}
-      <button
-        onClick={handleLogin}
-        className="w-full bg-indigo-500 text-white py-3 rounded-lg"
-      >
-        Log in
-      </button>
+          {/* Button */}
+          <button
+            onClick={handleLogin}
+            disabled={isLoading}
+            className="w-full bg-indigo-500 hover:bg-indigo-600 transition-all duration-200 text-white py-3 rounded-lg font-medium disabled:opacity-50"
+          >
+            {isLoading ? "Checking..." : "Log in"}
+          </button>
 
-      <p className="text-center text-sm text-gray-500 mt-10">
-        Don't have an account?{" "}
-        <span className="text-indigo-500 cursor-pointer">Sign up</span>
-      </p>
+          <p className="text-center text-sm text-gray-500 mt-10">
+            Don't have an account?{" "}
+            <span className="text-indigo-500 cursor-pointer hover:underline">Sign up</span>
+          </p>
+        </>
+      ) : (
+        <>
+          {/* OTP Input */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
+              Enter the OTP sent to your email
+            </label>
+            <input
+              type="text"
+              placeholder="6-digit OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="w-full border rounded-md px-4 py-2.5 text-center tracking-widest text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              maxLength={6}
+            />
+          </div>
+          
+          <button
+            onClick={handleVerifyOtp}
+            disabled={isLoading}
+            className="w-full bg-indigo-500 hover:bg-indigo-600 transition-all duration-200 text-white py-3 rounded-lg font-medium mb-3 disabled:opacity-50"
+          >
+            {isLoading ? "Verifying..." : "Verify OTP"}
+          </button>
+          
+          <button
+            onClick={() => setStep(1)}
+            className="w-full bg-gray-100 hover:bg-gray-200 transition-all duration-200 text-gray-700 py-3 rounded-lg font-medium text-sm"
+          >
+            Back to Login
+          </button>
+        </>
+      )}
 
     </div>
   );
