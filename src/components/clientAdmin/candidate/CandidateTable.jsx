@@ -58,6 +58,7 @@ function CandidateTable({
   const [showAssignHRModal, setShowAssignHRModal]                   = useState(false);
   const [assignHRCandidate, setAssignHRCandidate]                   = useState(null);
   const [showBulkAssignHRModal, setShowBulkAssignHRModal]           = useState(false);
+  const [emailSending, setEmailSending]                             = useState(false);
 
   const menuRefs = useRef([]);
 
@@ -108,6 +109,24 @@ function CandidateTable({
   useEffect(() => {
     fetchCandidates();
   }, [fetchCandidates]);
+
+  // ── SEND EMAIL ──
+  const handleSendEmail = async (candidate) => {
+    setEmailSending(true);
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/client-admin/candidate/send-welcome-email/${candidate.id}`);
+      if (response.data.success) {
+        setShowEmailModal(true);
+      } else {
+        alert(response.data.message || "Failed to send email");
+      }
+    } catch (error) {
+      console.error("Send email error:", error);
+      alert(error.response?.data?.message || "Error sending email");
+    } finally {
+      setEmailSending(false);
+    }
+  };
 
   // ── STATUS STYLE ──
   const getStatusStyle = (status) => {
@@ -367,7 +386,7 @@ function CandidateTable({
                             candidateStatus={item.status}
                             onView={() => { navigate(`/admin/view/${item.id}`); setOpenMenu(null); }}
                             onEdit={() => { navigate(`/admin/edit-candidate/${item.id}`); setOpenMenu(null); }}
-                            onEmail={() => { setShowEmailModal(true); setOpenMenu(null); }}
+                            onEmail={() => { handleSendEmail(item); setOpenMenu(null); }}
                             onAssignHr={() => { setAssignHRCandidate(item); setShowAssignHRModal(true); setOpenMenu(null); }}
                             onAuditLog={() => { navigate("/admin/audit-log"); setOpenMenu(null); }}
                             onHold={() => { setOnHoldCandidate(item); setShowOnHoldModal(true); setOpenMenu(null); }}
