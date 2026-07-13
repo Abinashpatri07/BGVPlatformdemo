@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!email.trim()) {
       setError("Please enter your email.");
       setSuccessMsg("");
@@ -18,13 +22,27 @@ export default function ForgotPassword() {
       setSuccessMsg("");
       return;
     }
+
     setError("");
-    setSuccessMsg("Password reset link has been sent to your email.");
+    setSuccessMsg("");
+    setLoading(true);
+
+    try {
+      const res = await axios.post(`${API_BASE}/api/candidate/auth/forgot-password`, { email });
+      if (res.data.success) {
+        setSuccessMsg(res.data.message || "Password reset link has been sent to your email.");
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to send reset link. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
+
   const handleResend = () => {
-    if (!email.trim()) return;
-    setSuccessMsg("Password reset link has been sent to your email.");
+    if (!email.trim() || loading) return;
+    handleSend();
   };
 
   return (
@@ -78,9 +96,10 @@ export default function ForgotPassword() {
         {/* Send Reset Link button */}
         <button
           onClick={handleSend}
-          className="w-full bg-indigo-500 hover:bg-indigo-600 active:scale-[0.98] text-white text-sm font-medium py-3 rounded-lg transition-all mt-3"
+          disabled={loading}
+          className="w-full bg-indigo-500 hover:bg-indigo-600 disabled:opacity-60 active:scale-[0.98] text-white text-sm font-medium py-3 rounded-lg transition-all mt-3"
         >
-          Send Reset Link
+          {loading ? "Sending..." : "Send Reset Link"}
         </button>
 
         {/* Resend link */}
@@ -95,12 +114,12 @@ export default function ForgotPassword() {
         </p>
 
         {/* Back to login */}
-        {/* <p
-          onClick={() => navigate("/login")}
+        <p
+          onClick={() => navigate("/")}
           className="text-center text-xs text-gray-400 hover:text-indigo-500 cursor-pointer mt-6 transition-colors"
         >
-          ← Back to Login
-        </p> */}
+          &larr; Back to Login
+        </p>
       </div>
     </div>
   );
