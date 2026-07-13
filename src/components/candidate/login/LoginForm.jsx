@@ -102,36 +102,45 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function LoginForm() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleLogin = () => {
-    const dummyEmail = "ramesh@gmail.com";
-    const dummyPassword = "123456";
-
-    if (email === dummyEmail && password === dummyPassword) {
-      // ✅ Store role
-      localStorage.setItem("role", "candidate");
-
-      // ✅ Store user
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          name: "Ramesh Kumar",
-          email: "ramesh@gmail.com",
-          role: "Candidate",
-        })
-      );
-
-      // ✅ Correct route
-      navigate("/verification");
-    } else {
-      alert("Invalid email or password");
+  const handleLogin = async () => {
+    setError("");
+    if (!email || !password) {
+      setError("Please enter email and password.");
+      return;
     }
+
+    setLoading(true);
+    try {
+      const res = await axios.post(`${API_BASE}/api/candidate/auth/login`, { email, password });
+
+      if (res.data.success) {
+        localStorage.setItem("candidateToken", res.data.token);
+        localStorage.setItem("role", "candidate");
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+        navigate("/verification");
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message || "Login failed. Please try again.";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleLogin();
   };
 
   return (
@@ -144,6 +153,13 @@ export default function LoginForm() {
         Candidate login Portal
       </p>
 
+      {/* Error Message */}
+      {error && (
+        <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-md">
+          {error}
+        </div>
+      )}
+
       {/* Email */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -154,7 +170,8 @@ export default function LoginForm() {
           placeholder="Enter your email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full border rounded-md px-4 py-2.5"
+          onKeyDown={handleKeyDown}
+          className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
         />
       </div>
 
@@ -168,7 +185,8 @@ export default function LoginForm() {
           placeholder="••••••••"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border rounded-md px-4 py-2.5"
+          onKeyDown={handleKeyDown}
+          className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
         />
       </div>
 
@@ -189,9 +207,10 @@ export default function LoginForm() {
 
       <button
         onClick={handleLogin}
-        className="w-full bg-indigo-500 text-white py-3 rounded-lg"
+        disabled={loading}
+        className="w-full bg-indigo-500 hover:bg-indigo-600 disabled:opacity-60 text-white py-3 rounded-lg font-medium transition-colors"
       >
-        Log in
+        {loading ? "Logging in..." : "Log in"}
       </button>
 
       <p className="text-center text-sm text-gray-500 mt-10">
@@ -201,3 +220,4 @@ export default function LoginForm() {
     </div>
   );
 }
+
