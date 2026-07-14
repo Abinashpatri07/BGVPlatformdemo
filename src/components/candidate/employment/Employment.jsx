@@ -4,7 +4,17 @@ import EmploymentForm from "./EmploymentForm";
 import EmploymentCard from "./EmploymentCard";
 
 function Employment({ onNext }) {
-  const [step, setStep] = useState("initial");
+  const [step, setStep] = useState(() => {
+    try {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        if (Number(user.candidate_experience) === 1) return "fresher_check";
+        if (Number(user.candidate_experience) === 2) return "form";
+      }
+    } catch (e) {}
+    return "initial";
+  });
   const [formData, setFormData] = useState(null);
 
   return (
