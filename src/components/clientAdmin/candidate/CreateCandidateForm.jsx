@@ -39,6 +39,7 @@ function CreateCandidateForm() {
           phone:         data.phone,
           email:         data.email,
           jobFunction:   data.jobFunction || "",
+          candidateExperience: data.candidateExperience || "1",
           tag:           data.tag || "",
           createdByRole: "client_admin",
           clientAdminId: createdById,
@@ -279,6 +280,23 @@ function CreateCandidateForm() {
                 <p className="text-red-500 text-xs mt-1">{errors.tag.message}</p>
               )}
             </div>
+          </div>
+
+          {/* EXPERIENCE */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Experience Level <span className="text-red-500">*</span>
+            </label>
+            <select
+              className={inputCls(errors.candidateExperience)}
+              {...register("candidateExperience", { required: "Experience is required" })}
+            >
+              <option value="1">Fresher</option>
+              <option value="2">Experienced</option>
+            </select>
+            {errors.candidateExperience && (
+              <p className="text-red-500 text-xs mt-1">{errors.candidateExperience.message}</p>
+            )}
           </div>
 
           {/* NOTE */}
