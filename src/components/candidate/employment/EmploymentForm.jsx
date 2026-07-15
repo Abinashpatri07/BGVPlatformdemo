@@ -250,7 +250,7 @@ function EmploymentForm({ onSubmit, isInternship }) {
           <InputBox label={isInternship ? "Stipend (Optional)" : "Drawn CTC"} value={formData.drawnCTC} />
           {!isInternship && (
             <InputBox 
-              label="UAN Number (Optional)" 
+              label="UAN Number" 
               value={formData.uanNumber} 
               readOnly={false} 
               onChange={(e) => setFormData({...formData, uanNumber: e.target.value})} 
@@ -260,7 +260,13 @@ function EmploymentForm({ onSubmit, isInternship }) {
 
           <div className="flex justify-center mt-8">
             <button
-              onClick={() => onSubmit(formData)}
+              onClick={() => {
+                if (!isInternship && !formData.uanNumber?.trim()) {
+                  alert("UAN Number is mandatory for Experienced candidates.");
+                  return;
+                }
+                onSubmit(formData);
+              }}
               className="bg-blue-900 text-white px-8 py-2 rounded-lg"
             >
               Submit
