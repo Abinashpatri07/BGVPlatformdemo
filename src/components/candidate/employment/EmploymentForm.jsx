@@ -17,6 +17,7 @@ function EmploymentForm({ onSubmit, isInternship }) {
     toDate: "",
     designation: "",
     drawnCTC: "",
+    uanNumber: "",
   });
 
   const handleMainFileChange = async (e) => {
@@ -118,7 +119,7 @@ function EmploymentForm({ onSubmit, isInternship }) {
     }
   };
 
-  const InputBox = ({ label, value, verified = false, type = "text" }) => (
+  const InputBox = ({ label, value, verified = false, type = "text", onChange, readOnly = true }) => (
     <div>
       <label className="block text-sm font-medium mb-2">
         {label} <span className="text-red-500">*</span>
@@ -127,8 +128,9 @@ function EmploymentForm({ onSubmit, isInternship }) {
         <input
           type={type}
           value={value}
-          readOnly
-          className="w-full border rounded-md px-3 py-2 pr-16 text-sm bg-white"
+          readOnly={readOnly}
+          onChange={onChange}
+          className={`w-full border rounded-md px-3 py-2 pr-16 text-sm ${readOnly ? 'bg-gray-50' : 'bg-white'}`}
         />
         {verified && (
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 text-xs font-medium">
@@ -246,6 +248,14 @@ function EmploymentForm({ onSubmit, isInternship }) {
           <InputBox label="To Date" value={formData.toDate} verified type="date" />
           <InputBox label={isInternship ? "Internship Role" : "Designation"} value={formData.designation} verified />
           <InputBox label={isInternship ? "Stipend (Optional)" : "Drawn CTC"} value={formData.drawnCTC} />
+          {!isInternship && (
+            <InputBox 
+              label="UAN Number (Optional)" 
+              value={formData.uanNumber} 
+              readOnly={false} 
+              onChange={(e) => setFormData({...formData, uanNumber: e.target.value})} 
+            />
+          )}
         </div>
 
           <div className="flex justify-center mt-8">

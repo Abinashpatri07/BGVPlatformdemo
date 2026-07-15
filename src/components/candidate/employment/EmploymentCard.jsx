@@ -42,6 +42,12 @@ function EmploymentCard({ data, onAddNew, onNext }) {
         <p className="text-sm text-gray-500 mt-1">
           Full-Time | {formatDate(from)} To {formatDate(to)} ({months} Months)
         </p>
+        
+        {data.uanNumber && (
+          <p className="text-sm text-gray-500 mt-1">
+            UAN: <span className="font-medium text-gray-700">{data.uanNumber}</span>
+          </p>
+        )}
       </div>
 
       <div className="flex-1 flex items-end justify-center pb-6">
