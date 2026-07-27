@@ -6,6 +6,7 @@ import ActionButtons from "../../components/candidate/concent/ActionButtons";
 import AddressStep from "../../components/candidate/address/AddressStep";
 import IdDetails from "../../components/candidate/id/IdDetails";
 import Employment from "../../components/candidate/employment/Employment";
+import UANStep from "../../components/candidate/uan/UANStep";
 import Education from "../../components/candidate/education/Education";
 import DrugTestStep from "../../components/candidate/drug/DrugTestStep";
 import CriminalCheck from "../../components/candidate/criminal/CriminalCheck";
@@ -37,7 +38,7 @@ export default function VerificationPage() {
   }, [highestStep]);
 
   const handleNext = () => {
-    if (currentStep < 8) {
+    if (currentStep < 9) {
       setCurrentStep((prev) => {
         const nextStep = prev + 1;
         setHighestStep((h) => Math.max(h, nextStep));
@@ -97,11 +98,12 @@ export default function VerificationPage() {
           {currentStep === 1 && <AddressStep onNext={handleNext} />}
           {currentStep === 2 && <IdDetails onNext={handleNext} />}
           {currentStep === 3 && <Employment onNext={handleNext} />}
-          {currentStep === 4 && <Education onNext={handleNext} />}
-          {currentStep === 5 && <DrugTestStep onNext={handleNext} />}
-          {currentStep === 6 && <CriminalCheck onNext={handleNext} />}
-          {currentStep === 7 && <ReferenceCheck onNext={handleNext} />}
-          {currentStep === 8 && <ReviewSubmit onNext={handleNext} />}
+          {currentStep === 4 && <UANStep onNext={handleNext} />}
+          {currentStep === 5 && <Education onNext={handleNext} />}
+          {currentStep === 6 && <DrugTestStep onNext={handleNext} />}
+          {currentStep === 7 && <CriminalCheck onNext={handleNext} />}
+          {currentStep === 8 && <ReferenceCheck onNext={handleNext} />}
+          {currentStep === 9 && <ReviewSubmit onNext={handleNext} />}
         </div>
       </div>
     </div>

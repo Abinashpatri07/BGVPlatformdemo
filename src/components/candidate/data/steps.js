@@ -15,6 +15,7 @@ export const steps = [
   { name: "Address" },
   { name: "ID Details" },
   { name: "Employment" },
+  { name: "UAN Verification" },
   { name: "Education" },
   { name: "Drug Test" },
   { name: "Criminal" },

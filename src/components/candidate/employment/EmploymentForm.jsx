@@ -2,6 +2,104 @@ import React, { useRef, useState } from "react";
 import { Check, X, Loader2 } from "lucide-react";
 import { uploadOCR } from "../../../API/ocrApi";
 
+const InputBox = ({ label, value, verified = false, type = "text", onChange, readOnly = true, required = true }) => (
+  <div>
+    <label className="block text-sm font-medium mb-2">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    <div className="relative">
+      <input
+        type={type}
+        value={value}
+        readOnly={readOnly}
+        onChange={onChange}
+        className={`w-full border rounded-md px-3 py-2 pr-16 text-sm ${readOnly ? 'bg-gray-50' : 'bg-white'}`}
+      />
+      {verified && (
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 text-xs font-medium">
+          Verified
+        </span>
+      )}
+    </div>
+  </div>
+);
+
+const UploadBox = ({ title, inputRef, onFileChange, isUploaded, filename, onReset, isExtracting }) => (
+  <div className="mb-8 max-w-xl mx-auto">
+    <h3 className="text-2xl font-medium text-[#05058D] mb-4 text-center">
+      {title}
+    </h3>
+    <div
+      className="border-2 border-dashed border-[#C3C6F5] rounded-2xl bg-[#F4F7FE] hover:bg-[#eef0fc] h-64 flex flex-col items-center justify-center cursor-pointer transition relative"
+    >
+      {!isUploaded ? (
+        isExtracting ? (
+          <div className="flex flex-col items-center w-full h-full justify-center">
+            <Loader2 className="animate-spin text-blue-600 mb-4" size={48} />
+            <p className="text-[#01026E] font-semibold text-lg">
+              Extracting Data...
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              Please wait while we scan your document
+            </p>
+          </div>
+        ) : (
+          <div onClick={() => inputRef.current.click()} className="flex flex-col items-center w-full h-full justify-center">
+            <div className="w-20 h-20 rounded-full bg-[#E0EEFF] flex items-center justify-center mb-5">
+              <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M6 14C6 11.8 7.8 10 10 10H18L21 14H34C36.2 14 38 15.8 38 18V32C38 34.2 36.2 36 34 36H10C7.8 36 6 34.2 6 32V14Z"
+                  fill="url(#folderGrad)"
+                />
+                <path
+                  d="M22 29V21M22 21L19 24M22 21L25 24"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <defs>
+                  <linearGradient id="folderGrad" x1="6" y1="10" x2="38" y2="36" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#5BB8F5" />
+                    <stop offset="1" stopColor="#1A56DB" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <p className="text-sm text-gray-600">
+              <span className="text-[#01026E] font-bold">Click Here</span>{" "}
+              to upload your File or Drag
+            </p>
+            <p className="text-xs text-gray-400 mt-3">
+              Supported format PDF, JPG, PNG, up to 5MB
+            </p>
+            <input type="file" ref={inputRef} className="hidden" onChange={onFileChange} />
+          </div>
+        )
+      ) : (
+        <div className="flex flex-col items-center w-full h-full justify-center">
+          <div className="w-20 h-20 flex items-center justify-center rounded-full bg-blue-100 mb-4">
+            <Check className="text-blue-600" size={36} />
+          </div>
+          <p className="text-[#01026E] font-semibold text-sm">
+            Document uploaded successfully
+          </p>
+          <p className="text-xs text-gray-400 mt-1 truncate max-w-xs">{filename}</p>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onReset();
+            }}
+            className="mt-4 flex items-center gap-2 border border-blue-600 text-blue-700 px-3 py-1.5 rounded-lg text-sm bg-white hover:bg-gray-50 transition"
+          >
+            <X size={14} /> Remove
+          </button>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
 function EmploymentForm({ onSubmit, isInternship }) {
   const mainFileRef = useRef(null);
   const [mainUploaded, setMainUploaded] = useState(false);
@@ -119,104 +217,6 @@ function EmploymentForm({ onSubmit, isInternship }) {
     }
   };
 
-  const InputBox = ({ label, value, verified = false, type = "text", onChange, readOnly = true }) => (
-    <div>
-      <label className="block text-sm font-medium mb-2">
-        {label} <span className="text-red-500">*</span>
-      </label>
-      <div className="relative">
-        <input
-          type={type}
-          value={value}
-          readOnly={readOnly}
-          onChange={onChange}
-          className={`w-full border rounded-md px-3 py-2 pr-16 text-sm ${readOnly ? 'bg-gray-50' : 'bg-white'}`}
-        />
-        {verified && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 text-xs font-medium">
-            Verified
-          </span>
-        )}
-      </div>
-    </div>
-  );
-
-  const UploadBox = ({ title, inputRef, onFileChange, isUploaded, filename, onReset }) => (
-    <div className="mb-8 max-w-xl mx-auto">
-      <h3 className="text-2xl font-medium text-[#05058D] mb-4 text-center">
-        {title}
-      </h3>
-      <div
-        className="border-2 border-dashed border-[#C3C6F5] rounded-2xl bg-[#F4F7FE] hover:bg-[#eef0fc] h-64 flex flex-col items-center justify-center cursor-pointer transition relative"
-      >
-        {!isUploaded ? (
-          isExtracting ? (
-            <div className="flex flex-col items-center w-full h-full justify-center">
-              <Loader2 className="animate-spin text-blue-600 mb-4" size={48} />
-              <p className="text-[#01026E] font-semibold text-lg">
-                Extracting Data...
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                Please wait while we scan your document
-              </p>
-            </div>
-          ) : (
-            <div onClick={() => inputRef.current.click()} className="flex flex-col items-center w-full h-full justify-center">
-              <div className="w-20 h-20 rounded-full bg-[#E0EEFF] flex items-center justify-center mb-5">
-                <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M6 14C6 11.8 7.8 10 10 10H18L21 14H34C36.2 14 38 15.8 38 18V32C38 34.2 36.2 36 34 36H10C7.8 36 6 34.2 6 32V14Z"
-                    fill="url(#folderGrad)"
-                  />
-                  <path
-                    d="M22 29V21M22 21L19 24M22 21L25 24"
-                    stroke="white"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <defs>
-                    <linearGradient id="folderGrad" x1="6" y1="10" x2="38" y2="36" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#5BB8F5" />
-                      <stop offset="1" stopColor="#1A56DB" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </div>
-              <p className="text-sm text-gray-600">
-                <span className="text-[#01026E] font-bold">Click Here</span>{" "}
-                to upload your File or Drag
-              </p>
-              <p className="text-xs text-gray-400 mt-3">
-                Supported format PDF, JPG, PNG, up to 5MB
-              </p>
-              <input type="file" ref={inputRef} className="hidden" onChange={onFileChange} />
-            </div>
-          )
-        ) : (
-          <div className="flex flex-col items-center w-full h-full justify-center">
-            <div className="w-20 h-20 flex items-center justify-center rounded-full bg-blue-100 mb-4">
-              <Check className="text-blue-600" size={36} />
-            </div>
-            <p className="text-[#01026E] font-semibold text-sm">
-              Document uploaded successfully
-            </p>
-            <p className="text-xs text-gray-400 mt-1 truncate max-w-xs">{filename}</p>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onReset();
-              }}
-              className="mt-4 flex items-center gap-2 border border-blue-600 text-blue-700 px-3 py-1.5 rounded-lg text-sm bg-white hover:bg-gray-50 transition"
-            >
-              <X size={14} /> Remove
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
   return (
     <>
       <p className="text-gray-600 mt-2 text-sm">
@@ -234,6 +234,7 @@ function EmploymentForm({ onSubmit, isInternship }) {
           isUploaded={mainUploaded}
           filename={mainFileName}
           onReset={() => setMainUploaded(false)}
+          isExtracting={isExtracting}
         />
       </div>
 
@@ -254,19 +255,14 @@ function EmploymentForm({ onSubmit, isInternship }) {
               value={formData.uanNumber} 
               readOnly={false} 
               onChange={(e) => setFormData({...formData, uanNumber: e.target.value})} 
+              required={false}
             />
           )}
         </div>
 
           <div className="flex justify-center mt-8">
             <button
-              onClick={() => {
-                if (!isInternship && !formData.uanNumber?.trim()) {
-                  alert("UAN Number is mandatory for Experienced candidates.");
-                  return;
-                }
-                onSubmit(formData);
-              }}
+              onClick={() => onSubmit(formData)}
               className="bg-blue-900 text-white px-8 py-2 rounded-lg"
             >
               Submit
