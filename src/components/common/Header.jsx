@@ -302,13 +302,21 @@ export default function Header() {
               className="flex items-center gap-3 hover:bg-gray-50 px-2 py-1 rounded-xl transition"
             >
               {/* Avatar initials */}
-              <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600">
-                {getInitials(user.name)}
+              <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-sm font-bold text-gray-600 overflow-hidden">
+                {user.avatar ? (
+                  <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  getInitials(window.location.pathname.includes("/vendor") ? "Rohit Desai" : (user.name || "User"))
+                )}
               </div>
 
               <div className="leading-tight text-left">
-                <p className="text-sm font-semibold text-gray-800">{user.name}</p>
-                <p className="text-xs text-gray-500">{user.role}</p>
+                <p className="text-sm font-semibold text-gray-800">
+                  {window.location.pathname.includes("/vendor") ? "Rohit Desai" : user.name}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {window.location.pathname.includes("/vendor") ? "rohitdesai254@gmail.com" : user.email}
+                </p>
               </div>
 
               {dropdownOpen ? (

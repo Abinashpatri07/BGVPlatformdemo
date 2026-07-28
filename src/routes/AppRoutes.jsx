@@ -34,6 +34,7 @@ import CandidateRoutes from "./CandidateRoutes";
 import AdminRoutes from "./AdminRoutes";
 import HRRoutes from "./HRRoutes";
 import SuperAdminRoutes from "./SuperAdminRoutes";
+import VendorRoutes from "./VendorRoutes";
 
 function AppRoutes() {
   return (
@@ -56,6 +57,12 @@ function AppRoutes() {
         <Route
           path="/super-admin/*"
           element={<SuperAdminRoutes />}
+        />
+
+        {/* Vendor */}
+        <Route
+          path="/vendor/*"
+          element={<VendorRoutes />}
         />
 
       </Routes>
