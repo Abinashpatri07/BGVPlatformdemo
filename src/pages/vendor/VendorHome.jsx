@@ -72,7 +72,7 @@ const tableData = [
     id: 6,
     caseId: "CASE-6567FAFB",
     candidateId: "CAND_100421",
-    caseType: "Reference Check",
+    caseType: "Address Verification",
     name: "Kavya Patel",
     email: "k.patel@company.com",
     phone: "1234567890",
@@ -111,6 +111,17 @@ const tableData = [
     phone: "1234567890",
     tat: "3 Days",
     status: "Unverified",
+  },
+  {
+    id: 10,
+    caseId: "CASE-9999XYZ",
+    candidateId: "CAND_999999",
+    caseType: "Employment Verification",
+    name: "Rahul Verma",
+    email: "rahul.v@email.com",
+    phone: "9876543210",
+    tat: "1 Day",
+    status: "Verified",
   },
 ];
 
@@ -286,8 +297,18 @@ function VendorHome() {
                     <button 
                       className="p-1 hover:bg-gray-200 rounded transition inline-flex justify-center items-center"
                       onClick={() => {
+                        const isEdit = row.status === "Assigned" || row.status === "Unverified";
+                        const mode = isEdit ? "edit" : "view";
                         if (row.caseType.includes("Employment Verification")) {
-                          navigate('/vendor/employment-details');
+                          navigate(`/vendor/employment-details?mode=${mode}`);
+                        } else if (row.caseType.includes("Address Verification")) {
+                          navigate(`/vendor/address-details?mode=${mode}`);
+                        } else if (row.caseType.includes("Drug Test")) {
+                          navigate(`/vendor/drug-test-details?mode=${mode}`);
+                        } else if (row.caseType.includes("Education Verification")) {
+                          navigate(`/vendor/education-details?mode=${mode}`);
+                        } else if (row.caseType.includes("Criminal Check")) {
+                          navigate(`/vendor/criminal-details?mode=${mode}`);
                         }
                       }}
                     >

@@ -9,6 +9,10 @@ import RefuteApplications from "../pages/vendor/RefuteApplications";
 import AssignedApplications from "../pages/vendor/AssignedApplications";
 import UnverifiedApplications from "../pages/vendor/UnverifiedApplications";
 import EmploymentDetails from "../pages/vendor/EmploymentDetails";
+import AddressDetails from "../pages/vendor/AddressDetails";
+import DrugTestDetails from "../pages/vendor/DrugTestDetails";
+import EducationDetails from "../pages/vendor/EducationDetails";
+import CriminalDetails from "../pages/vendor/CriminalDetails";
 
 function VendorRoutes() {
   return (
@@ -23,6 +27,10 @@ function VendorRoutes() {
         <Route path="assigned-applications" element={<AssignedApplications />} />
         <Route path="unverified-applications" element={<UnverifiedApplications />} />
         <Route path="employment-details" element={<EmploymentDetails />} />
+        <Route path="address-details" element={<AddressDetails />} />
+        <Route path="drug-test-details" element={<DrugTestDetails />} />
+        <Route path="education-details" element={<EducationDetails />} />
+        <Route path="criminal-details" element={<CriminalDetails />} />
         
         {/* Default route */}
         <Route path="" element={<Navigate to="home" replace />} />

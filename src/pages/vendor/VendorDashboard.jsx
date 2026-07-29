@@ -22,10 +22,10 @@ const AssignedIcon = () => (
       <circle cx="12" cy="11" r="2.5"></circle>
       <path d="M8.5 17a3.5 3.5 0 0 1 7 0"></path>
     </svg>
-    <div className="absolute -bottom-1 -right-1 bg-white rounded-full">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="#22c55e" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <div className="absolute -top-1.5 -right-1.5 bg-white rounded-full">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="#8b5cf6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10" stroke="none"></circle>
-        <path d="M8 12l3 3 5-5"></path>
+        <path d="M12 7v5l3 3"></path>
       </svg>
     </div>
   </div>
@@ -39,6 +39,12 @@ const VerifiedIcon = () => (
       <circle cx="12" cy="11" r="2.5"></circle>
       <path d="M8.5 17a3.5 3.5 0 0 1 7 0"></path>
     </svg>
+    <div className="absolute -top-1.5 -right-1.5 bg-white rounded-full">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="#22c55e" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" stroke="none"></circle>
+        <path d="M8 12l3 3 5-5"></path>
+      </svg>
+    </div>
   </div>
 );
 
@@ -50,10 +56,11 @@ const RefuteIcon = () => (
       <line x1="9" y1="18" x2="15" y2="18"></line>
       <line x1="9" y1="10" x2="11" y2="10"></line>
     </svg>
-    <div className="absolute -top-1.5 -right-1.5 bg-white rounded-full p-0.5">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="3"></circle>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+    <div className="absolute -top-1.5 -right-1.5 bg-white rounded-full">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="#ef4444" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" stroke="none"></circle>
+        <path d="M15 9l-6 6"></path>
+        <path d="M9 9l6 6"></path>
       </svg>
     </div>
   </div>
@@ -68,9 +75,10 @@ const UnverifiedIcon = () => (
       <line x1="9" y1="10" x2="11" y2="10"></line>
     </svg>
     <div className="absolute -top-1.5 -right-1.5 bg-white rounded-full">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="#22c55e" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="#f59e0b" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10" stroke="none"></circle>
-        <path d="M8 12l3 3 5-5"></path>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
       </svg>
     </div>
   </div>
@@ -84,7 +92,7 @@ const tableData = [
     caseType: "Employment Verification",
     name: "Arjun Sharma",
     email: "arjun.sharma@email.com",
-    phone: "123456789",
+    phone: "1234567890",
     tat: "2 Days",
     status: "Assigned",
   },
@@ -95,7 +103,7 @@ const tableData = [
     caseType: "Education Verification",
     name: "Ananya Iyer",
     email: "ananya.iyer@email.com",
-    phone: "123456789",
+    phone: "1234567890",
     tat: "5 Days",
     status: "Verified",
   },
@@ -106,7 +114,7 @@ const tableData = [
     caseType: "Address Verification",
     name: "Rohan Malhotra",
     email: "rohan.m@workspace.in",
-    phone: "123456789",
+    phone: "1234567890",
     tat: "1 Day",
     status: "Assigned",
   },
@@ -117,7 +125,7 @@ const tableData = [
     caseType: "Criminal Check",
     name: "Meera Deshmukh",
     email: "meera.d@talent.io",
-    phone: "123456789",
+    phone: "1234567890",
     tat: "3 Days",
     status: "Refute",
   },
@@ -128,7 +136,7 @@ const tableData = [
     caseType: "Education Verification",
     name: "Niten Sharma",
     email: "nitenkumar34@gmail.com",
-    phone: "123456789",
+    phone: "1234567890",
     tat: "2 Days",
     status: "Verified",
   },
@@ -136,10 +144,10 @@ const tableData = [
     id: 6,
     caseId: "CASE-6567FAFB",
     candidateId: "CAND_100421",
-    caseType: "Reference Check",
+    caseType: "Address Verification",
     name: "Kavya Patel",
     email: "k.patel@company.com",
-    phone: "123456789",
+    phone: "1234567890",
     tat: "1 Day",
     status: "Verified",
   },
@@ -150,9 +158,20 @@ const tableData = [
     caseType: "Drug Test",
     name: "Ishaan Verma",
     email: "ishaan.verma@talent.io",
-    phone: "123456789",
+    phone: "1234567890",
     tat: "4 Days",
     status: "Refute",
+  },
+  {
+    id: 8,
+    caseId: "CASE-9999XYZ",
+    candidateId: "CAND_999999",
+    caseType: "Employment Verification",
+    name: "Rahul Verma",
+    email: "rahul.v@email.com",
+    phone: "9876543210",
+    tat: "1 Day",
+    status: "Verified",
   },
 ];
 
@@ -357,15 +376,25 @@ function VendorDashboard() {
                     <div className="text-gray-900 font-medium">{row.name}</div>
                     <div className="text-gray-500 text-xs">{row.email}</div>
                   </td>
-                  <td className="px-6 py-4 text-gray-700">{row.phone}</td>
+                  <td className="px-6 py-4 text-gray-700">+91 {row.phone}</td>
                   <td className="px-6 py-4 text-gray-700">{row.tat}</td>
                   <td className="px-6 py-4">{getStatusBadge(row.status)}</td>
                   <td className="px-6 py-4 text-gray-400">
                     <button 
                       className="p-1 hover:bg-gray-200 rounded transition inline-flex justify-center items-center"
                       onClick={() => {
+                        const isEdit = row.status === "Assigned" || row.status === "Unverified";
+                        const mode = isEdit ? "edit" : "view";
                         if (row.caseType.includes("Employment Verification")) {
-                          navigate('/vendor/employment-details');
+                          navigate(`/vendor/employment-details?mode=${mode}`);
+                        } else if (row.caseType.includes("Address Verification")) {
+                          navigate(`/vendor/address-details?mode=${mode}`);
+                        } else if (row.caseType.includes("Drug Test")) {
+                          navigate(`/vendor/drug-test-details?mode=${mode}`);
+                        } else if (row.caseType.includes("Education Verification")) {
+                          navigate(`/vendor/education-details?mode=${mode}`);
+                        } else if (row.caseType.includes("Criminal Check")) {
+                          navigate(`/vendor/criminal-details?mode=${mode}`);
                         }
                       }}
                     >

@@ -21,7 +21,11 @@ export const vendorMenu = [
       "/vendor/refute-applications",
       "/vendor/assigned-applications",
       "/vendor/unverified-applications",
-      "/vendor/employment-details"
+      "/vendor/employment-details",
+      "/vendor/address-details",
+      "/vendor/drug-test-details",
+      "/vendor/education-details",
+      "/vendor/criminal-details"
     ],
   },
   {

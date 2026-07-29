@@ -20,7 +20,7 @@ const tableData = [
     caseType: "Employment Verification",
     name: "Arjun Sharma",
     email: "arjun.sharma@email.com",
-    phone: "123456789",
+    phone: "1234567890",
     tat: "2 Days",
     status: "Verified",
   },
@@ -31,7 +31,7 @@ const tableData = [
     caseType: "Education Verification",
     name: "Ananya Iyer",
     email: "ananya.iyer@email.com",
-    phone: "123456789",
+    phone: "1234567890",
     tat: "5 Days",
     status: "Verified",
   },
@@ -42,7 +42,7 @@ const tableData = [
     caseType: "Address Verification",
     name: "Rohan Malhotra",
     email: "rohan.m@workspace.in",
-    phone: "123456789",
+    phone: "1234567890",
     tat: "1 Day",
     status: "Verified",
   },
@@ -53,7 +53,7 @@ const tableData = [
     caseType: "Criminal Check",
     name: "Meera Deshmukh",
     email: "meera.d@talent.io",
-    phone: "123456789",
+    phone: "1234567890",
     tat: "3 Days",
     status: "Verified",
   },
@@ -64,7 +64,7 @@ const tableData = [
     caseType: "Education Verification",
     name: "Niten Sharma",
     email: "nitenkumar34@gmail.com",
-    phone: "123456789",
+    phone: "1234567890",
     tat: "2 Days",
     status: "Verified",
   },
@@ -72,10 +72,10 @@ const tableData = [
     id: 6,
     caseId: "CASE-6567FAFB",
     candidateId: "CAND_100421",
-    caseType: "Reference Check",
+    caseType: "Address Verification",
     name: "Kavya Patel",
     email: "k.patel@company.com",
-    phone: "123456789",
+    phone: "1234567890",
     tat: "1 Day",
     status: "Verified",
   },
@@ -86,7 +86,7 @@ const tableData = [
     caseType: "Drug Test",
     name: "Ishaan Verma",
     email: "ishaan.verma@talent.io",
-    phone: "123456789",
+    phone: "1234567890",
     tat: "4 Days",
     status: "Verified",
   },
@@ -97,7 +97,7 @@ const tableData = [
     caseType: "Address Verification",
     name: "Niten Sharma",
     email: "nitenkumar34@gmail.com",
-    phone: "123456789",
+    phone: "1234567890",
     tat: "5 Days",
     status: "Verified",
   },
@@ -108,7 +108,7 @@ const tableData = [
     caseType: "Education Verification",
     name: "Ishaan Verma",
     email: "ishaan.verma@talent.io",
-    phone: "123456789",
+    phone: "1234567890",
     tat: "3 Days",
     status: "Verified",
   },
@@ -253,7 +253,7 @@ function VerifiedApplications() {
                     <div className="text-gray-900 font-medium">{row.name}</div>
                     <div className="text-gray-500 text-xs">{row.email}</div>
                   </td>
-                  <td className="px-6 py-4 text-gray-700">{row.phone}</td>
+                  <td className="px-6 py-4 text-gray-700">+91 {row.phone}</td>
                   <td className="px-6 py-4 text-gray-700">{row.tat}</td>
                   <td className="px-6 py-4">{getStatusBadge(row.status)}</td>
                   <td className="px-6 py-4 text-gray-400 text-center">

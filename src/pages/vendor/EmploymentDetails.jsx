@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  User,
   Briefcase,
   Eye,
   Trash2,
@@ -12,32 +13,90 @@ import {
   Mic,
   ChevronLeft
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 function EmploymentDetails() {
   const [decision, setDecision] = useState("Verified");
   const [gpsVerified, setGpsVerified] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isView = searchParams.get("mode") === "view";
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto space-y-6 animate-fade-in pb-10 px-4">
-      {/* HEADER SECTION */}
-      <div className="flex items-center gap-4 border-b border-indigo-100 pb-4">
-        <button 
-          onClick={() => navigate(-1)}
-          className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <div className="p-2 bg-indigo-50 rounded-lg text-indigo-700 border border-indigo-100">
-          <Briefcase size={24} />
-        </div>
-        <h1 className="text-2xl font-bold text-indigo-900">
-          Employment Details
-        </h1>
-      </div>
+    <div className="w-full max-w-[1600px] mx-auto space-y-8 animate-fade-in pb-10 px-4 mt-4">
+      
+      {isView ? (
+        <>
+          {/* Case ID Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => navigate(-1)}
+                className="p-1 hover:bg-gray-100 rounded-md text-gray-500 transition"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <div className="p-1.5 bg-indigo-50 rounded-full text-indigo-700">
+                <User size={20} />
+              </div>
+              <h2 className="text-xl font-semibold text-indigo-900">Case ID - CASE1234</h2>
+            </div>
+            <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm flex flex-wrap gap-12 lg:gap-16 justify-start ml-2">
+              <div>
+                <p className="text-xs text-gray-500 mb-1 font-medium">First Name</p>
+                <p className="text-sm font-semibold text-gray-900">Ramesh</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1 font-medium">Last Name</p>
+                <p className="text-sm font-semibold text-gray-900">Kumar</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1 font-medium">Phone Number</p>
+                <p className="text-sm font-semibold text-gray-900">+91 2584369401</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1 font-medium">Email Id</p>
+                <p className="text-sm font-semibold text-gray-900">ramesh43@gmail.com</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1 font-medium">Tag</p>
+                <p className="text-sm font-semibold text-gray-900">IT</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1 font-medium">Function</p>
+                <p className="text-sm font-semibold text-gray-900">May Batch</p>
+              </div>
+            </div>
+          </div>
 
-      <div className="space-y-8 mt-6">
+          {/* Employment Details Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 ml-2 mt-8">
+              <div className="p-1.5 bg-indigo-50 rounded-full text-indigo-700">
+                <Briefcase size={20} />
+              </div>
+              <h2 className="text-xl font-semibold text-indigo-900">Employment Details</h2>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="flex items-center gap-4 border-b border-indigo-100 pb-4">
+          <button 
+            onClick={() => navigate(-1)}
+            className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <div className="p-2 bg-indigo-50 rounded-lg text-indigo-700 border border-indigo-100">
+            <Briefcase size={24} />
+          </div>
+          <h1 className="text-2xl font-bold text-indigo-900">
+            Employment Details
+          </h1>
+        </div>
+      )}
+
+      <div className="space-y-6 mt-4 ml-2">
         {/* Employer Card 1 */}
         <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -108,9 +167,11 @@ function EmploymentDetails() {
                       <button className="text-gray-400 hover:text-gray-600 transition">
                         <Eye size={18} />
                       </button>
-                      <button className="text-red-300 hover:text-red-500 transition">
-                        <Trash2 size={18} />
-                      </button>
+                      {!isView && (
+                        <button className="text-red-300 hover:text-red-500 transition">
+                          <Trash2 size={18} />
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -125,7 +186,13 @@ function EmploymentDetails() {
                       <p className="text-sm font-semibold text-gray-800">HR Verification E-mail</p>
                       <p className="text-xs text-gray-400">Supported formats: CSV, XLSX</p>
                     </div>
-                    <CloudUpload size={22} className="text-indigo-600 group-hover:scale-110 transition-transform" />
+                    {isView ? (
+                      <button className="text-gray-400 hover:text-gray-600 transition">
+                        <Eye size={18} />
+                      </button>
+                    ) : (
+                      <CloudUpload size={22} className="text-indigo-600 group-hover:scale-110 transition-transform" />
+                    )}
                   </div>
                 </div>
 
@@ -139,7 +206,13 @@ function EmploymentDetails() {
                       <p className="text-sm font-semibold text-gray-800">Offer Letter</p>
                       <p className="text-xs text-gray-400">Supported formats: CSV, XLSX</p>
                     </div>
-                    <CloudUpload size={22} className="text-indigo-600 group-hover:scale-110 transition-transform" />
+                    {isView ? (
+                      <button className="text-gray-400 hover:text-gray-600 transition">
+                        <Eye size={18} />
+                      </button>
+                    ) : (
+                      <CloudUpload size={22} className="text-indigo-600 group-hover:scale-110 transition-transform" />
+                    )}
                   </div>
                 </div>
 
@@ -153,7 +226,13 @@ function EmploymentDetails() {
                       <p className="text-sm font-semibold text-gray-800">Pay slip</p>
                       <p className="text-xs text-gray-400">Supported formats: CSV, XLSX</p>
                     </div>
-                    <CloudUpload size={22} className="text-indigo-600 group-hover:scale-110 transition-transform" />
+                    {isView ? (
+                      <button className="text-gray-400 hover:text-gray-600 transition">
+                        <Eye size={18} />
+                      </button>
+                    ) : (
+                      <CloudUpload size={22} className="text-indigo-600 group-hover:scale-110 transition-transform" />
+                    )}
                   </div>
                 </div>
               </div>
@@ -231,9 +310,11 @@ function EmploymentDetails() {
                       <button className="text-gray-400 hover:text-gray-600 transition">
                         <Eye size={18} />
                       </button>
-                      <button className="text-red-300 hover:text-red-500 transition">
-                        <Trash2 size={18} />
-                      </button>
+                      {!isView && (
+                        <button className="text-red-300 hover:text-red-500 transition">
+                          <Trash2 size={18} />
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -248,7 +329,13 @@ function EmploymentDetails() {
                       <p className="text-sm font-semibold text-gray-800">HR Verification E-mail</p>
                       <p className="text-xs text-gray-400">Supported formats: CSV, XLSX</p>
                     </div>
-                    <CloudUpload size={22} className="text-indigo-600 group-hover:scale-110 transition-transform" />
+                    {isView ? (
+                      <button className="text-gray-400 hover:text-gray-600 transition">
+                        <Eye size={18} />
+                      </button>
+                    ) : (
+                      <CloudUpload size={22} className="text-indigo-600 group-hover:scale-110 transition-transform" />
+                    )}
                   </div>
                 </div>
 
@@ -262,7 +349,13 @@ function EmploymentDetails() {
                       <p className="text-sm font-semibold text-gray-800">Offer Letter</p>
                       <p className="text-xs text-gray-400">Supported formats: CSV, XLSX</p>
                     </div>
-                    <CloudUpload size={22} className="text-indigo-600 group-hover:scale-110 transition-transform" />
+                    {isView ? (
+                      <button className="text-gray-400 hover:text-gray-600 transition">
+                        <Eye size={18} />
+                      </button>
+                    ) : (
+                      <CloudUpload size={22} className="text-indigo-600 group-hover:scale-110 transition-transform" />
+                    )}
                   </div>
                 </div>
 
@@ -276,7 +369,9 @@ function EmploymentDetails() {
                       <p className="text-sm font-semibold text-gray-800">Pay slip</p>
                       <p className="text-xs text-gray-400">Supported formats: CSV, XLSX</p>
                     </div>
-                    <CloudUpload size={22} className="text-indigo-600 group-hover:scale-110 transition-transform" />
+                    <button className="text-gray-400 hover:text-gray-600 transition">
+                      <Eye size={18} />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -284,112 +379,117 @@ function EmploymentDetails() {
           </div>
         </div>
 
-        {/* Verification Decision */}
-        <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-3 border-b border-gray-100 pb-4 mb-6">
-            <div className="p-1.5 bg-indigo-50 rounded text-indigo-700">
-              <CheckSquare size={20} />
-            </div>
-            <h2 className="text-lg font-bold text-indigo-900">
-              Verification Decision
-            </h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            {[
-              "Verified",
-              "Partially Verified",
-              "Unable To Verify",
-              "Verification Pending"
-            ].map((opt) => (
-              <label
-                key={opt}
-                className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition ${
-                  decision === opt
-                    ? "border-indigo-600 bg-indigo-50/30 shadow-sm"
-                    : "border-gray-200 hover:bg-gray-50"
-                }`}
-              >
-                <div
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                    decision === opt
-                      ? "border-indigo-800"
-                      : "border-gray-300"
-                  }`}
-                >
-                  {decision === opt && (
-                    <div className="w-2.5 h-2.5 bg-indigo-800 rounded-full" />
-                  )}
+        {!isView && (
+          <>
+            {/* Verification Decision */}
+            <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
+              <div className="flex items-center gap-3 border-b border-gray-100 pb-4 mb-6">
+                <div className="p-1.5 bg-indigo-50 rounded text-indigo-700">
+                  <CheckSquare size={20} />
                 </div>
-                <span
-                  className={`text-sm font-semibold ${
-                    decision === opt ? "text-gray-900" : "text-gray-700"
-                  }`}
-                >
-                  {opt}
-                </span>
-              </label>
-            ))}
-          </div>
-
-          <div className="flex items-center justify-between pt-6 border-t border-gray-100">
-            <div className="flex items-center gap-12">
-              <div>
-                <p className="text-xs text-gray-500 mb-1">Verification Date & Time</p>
-                <p className="text-sm font-semibold text-gray-900">12 Oct 2023, 14:30 IST</p>
+                <h2 className="text-lg font-bold text-indigo-900">
+                  Verification Decision
+                </h2>
               </div>
-              <div>
-                <p className="text-xs text-gray-500 mb-1">Verified By</p>
-                <p className="text-sm font-semibold text-gray-900">Amit Kumar (Field Exec)</p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                {[
+                  "Verified",
+                  "Partially Verified",
+                  "Unable To Verify",
+                  "Verification Pending"
+                ].map((opt) => (
+                  <label
+                    key={opt}
+                    className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition ${
+                      decision === opt
+                        ? "border-indigo-600 bg-indigo-50/30 shadow-sm"
+                        : "border-gray-200 hover:bg-gray-50"
+                    }`}
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                        decision === opt
+                          ? "border-indigo-800"
+                          : "border-gray-300"
+                      }`}
+                    >
+                      {decision === opt && (
+                        <div className="w-2.5 h-2.5 bg-indigo-800 rounded-full" />
+                      )}
+                    </div>
+                    <span
+                      className={`text-sm font-semibold ${
+                        decision === opt ? "text-gray-900" : "text-gray-700"
+                      }`}
+                    >
+                      {opt}
+                    </span>
+                  </label>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-between pt-6 border-t border-gray-100">
+                <div className="flex items-center gap-12">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Verification Date & Time</p>
+                    <p className="text-sm font-semibold text-gray-900">12 Oct 2023, 14:30 IST</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Verified By</p>
+                    <p className="text-sm font-semibold text-gray-900">Amit Kumar (Field Exec)</p>
+                  </div>
+                </div>
+                
+                <div className="flex flex-col items-end">
+                  <span className="text-xs text-gray-500 mb-2 font-medium">GPS Verified</span>
+                  <button
+                    type="button"
+                    onClick={() => setGpsVerified(!gpsVerified)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      gpsVerified ? "bg-indigo-600" : "bg-gray-300"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        gpsVerified ? "translate-x-6" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
               </div>
             </div>
-            
-            <div className="flex flex-col items-end">
-              <span className="text-xs text-gray-500 mb-2 font-medium">GPS Verified</span>
-              <button
-                type="button"
-                onClick={() => setGpsVerified(!gpsVerified)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  gpsVerified ? "bg-indigo-600" : "bg-gray-300"
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    gpsVerified ? "translate-x-6" : "translate-x-1"
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
-        </div>
 
-        {/* Verification Remarks */}
-        <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-3 border-b border-gray-100 pb-4 mb-6">
-            <div className="p-1.5 bg-indigo-50 rounded text-indigo-700">
-              <MessageSquare size={20} />
+            {/* Verification Remarks */}
+            <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
+              <div className="flex items-center gap-3 border-b border-gray-100 pb-4 mb-6">
+                <div className="p-1.5 bg-indigo-50 rounded text-indigo-700">
+                  <MessageSquare size={20} />
+                </div>
+                <h2 className="text-lg font-bold text-indigo-900">
+                  Verification Remarks
+                </h2>
+              </div>
+              
+              <div className="relative">
+                <textarea
+                  rows="4"
+                  className="w-full rounded-lg border border-indigo-100 bg-indigo-50/30 p-4 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 resize-none"
+                  placeholder="Enter remarks..."
+                ></textarea>
+                <div className="absolute bottom-4 right-4 text-gray-400">
+                  <Mic size={18} />
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center mt-2 px-1">
+                <span className="text-xs text-gray-500">Max 1000 Characters</span>
+                <span className="text-xs text-gray-500">0 / 1000</span>
+              </div>
             </div>
-            <h2 className="text-lg font-bold text-indigo-900">
-              Verification Remarks
-            </h2>
-          </div>
-          
-          <div className="relative">
-            <textarea
-              rows="4"
-              className="w-full rounded-lg border border-indigo-100 bg-indigo-50/30 p-4 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 resize-none"
-              placeholder="Enter remarks..."
-            ></textarea>
-            <div className="absolute bottom-4 right-4 text-gray-400">
-              <Mic size={18} />
-            </div>
-          </div>
-          
-          <div className="flex justify-between items-center mt-2 px-1">
-            <span className="text-xs text-gray-500">Max 1000 Characters</span>
-            <span className="text-xs text-gray-500">0 / 1000</span>
-          </div>
-        </div>
+          </>
+        )}
+
       </div>
     </div>
   );
