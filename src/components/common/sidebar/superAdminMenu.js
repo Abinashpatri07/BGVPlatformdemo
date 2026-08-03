@@ -6,6 +6,7 @@ import {
   ReceiptText,
   BarChart3,
   UserRound,
+  Briefcase,
 } from "lucide-react";
 
 export const superAdminMenu = [
@@ -75,6 +76,20 @@ export const superAdminMenu = [
       "/super-admin/view/",
       "/super-admin/edit-candidate",
       "/super-admin/audit",
+    ],
+  },
+
+  /* CASE */
+  {
+    name: "Case",
+    icon: Briefcase,
+    path: "/super-admin/cases",
+    badge: 12,
+
+    activePaths: [
+      "/super-admin/cases",
+      "/super-admin/view-case",
+      "/super-admin/edit-case",
     ],
   },
 

@@ -253,6 +253,9 @@ export default function Header() {
   else if (role === "super-admin") {
     navigate("/super-admin/login", { state: { message: "Logout Successful!" } });
   }
+  else if (role === "vendor") {
+    navigate("/vendor/login", { state: { message: "Logout Successful!" } });
+  }
   else {
     navigate("/", { state: { message: "Logout Successful!" } });
   }

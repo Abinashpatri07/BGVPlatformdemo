@@ -10,7 +10,7 @@ import {
   ChevronRight,
   ChevronRight as ChevronRightSmall
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const tableData = [
   {
@@ -122,7 +122,19 @@ const getStatusBadge = (status) => {
   );
 };
 
+const getDetailsLink = (caseType) => {
+  switch (caseType) {
+    case "Employment Verification": return "/vendor/employment-details";
+    case "Education Verification": return "/vendor/education-details";
+    case "Address Verification": return "/vendor/address-details";
+    case "Criminal Check": return "/vendor/criminal-details";
+    case "Drug Test": return "/vendor/drug-test-details";
+    default: return "#";
+  }
+};
+
 function AssignedApplications() {
+  const navigate = useNavigate();
   const [selectedRows, setSelectedRows] = useState([]);
 
   const toggleRow = (id) => {
@@ -256,8 +268,24 @@ function AssignedApplications() {
                   <td className="px-6 py-4 text-gray-700">+91 {row.phone}</td>
                   <td className="px-6 py-4 text-gray-700">{row.tat}</td>
                   <td className="px-6 py-4">{getStatusBadge(row.status)}</td>
-                  <td className="px-6 py-4 text-gray-400 text-center">
-                    <button className="p-1 hover:bg-gray-200 rounded transition inline-flex justify-center items-center">
+                  <td className="px-6 py-4 text-gray-400">
+                    <button 
+                      className="p-1 hover:bg-gray-200 rounded transition inline-flex justify-center items-center"
+                      onClick={() => {
+                        const mode = "edit";
+                        if (row.caseType.includes("Employment Verification")) {
+                          navigate(`/vendor/employment-details?mode=${mode}`);
+                        } else if (row.caseType.includes("Address Verification")) {
+                          navigate(`/vendor/address-details?mode=${mode}`);
+                        } else if (row.caseType.includes("Drug Test")) {
+                          navigate(`/vendor/drug-test-details?mode=${mode}`);
+                        } else if (row.caseType.includes("Education Verification")) {
+                          navigate(`/vendor/education-details?mode=${mode}`);
+                        } else if (row.caseType.includes("Criminal Check")) {
+                          navigate(`/vendor/criminal-details?mode=${mode}`);
+                        }
+                      }}
+                    >
                       <Edit size={18} />
                     </button>
                   </td>

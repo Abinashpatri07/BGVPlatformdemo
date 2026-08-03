@@ -273,6 +273,8 @@ function Sidebar({
       navigate("/hr/login", { state: { message: "Logout Successful!" } });
     } else if (role === "super-admin") {
       navigate("/super-admin/login", { state: { message: "Logout Successful!" } });
+    } else if (role === "vendor") {
+      navigate("/vendor/login", { state: { message: "Logout Successful!" } });
     } else {
       navigate("/", { state: { message: "Logout Successful!" } });
     }
@@ -377,24 +379,28 @@ function Sidebar({
 
                 {/* TEXT */}
                 {expanded && (
-
-                  <span className="text-sm font-medium">
-
+                  <span className="text-sm font-medium flex-1">
                     {item.name}
-
                   </span>
+                )}
 
+                {/* BADGE (expanded) */}
+                {expanded && item.badge != null && item.badge > 0 && (
+                  <span className="ml-auto min-w-[20px] h-5 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 shadow-sm">
+                    {item.badge > 99 ? '99+' : item.badge}
+                  </span>
+                )}
+
+                {/* BADGE DOT (collapsed) */}
+                {!expanded && item.badge != null && item.badge > 0 && (
+                  <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
                 )}
 
                 {/* TOOLTIP */}
                 {!expanded && (
-
                   <span className="absolute left-16 whitespace-nowrap bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition z-50">
-
-                    {item.name}
-
+                    {item.name}{item.badge > 0 ? ` (${item.badge})` : ''}
                   </span>
-
                 )}
 
               </NavLink>

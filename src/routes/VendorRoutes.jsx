@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import VendorLayout from "../layouts/VendorLayout";
+import VendorLogin from "../pages/vendor/VendorLogin";
 import VendorHome from "../pages/vendor/VendorHome";
 import VendorDashboard from "../pages/vendor/VendorDashboard";
 import VendorAnalytics from "../pages/vendor/VendorAnalytics";
@@ -17,6 +18,7 @@ import CriminalDetails from "../pages/vendor/CriminalDetails";
 function VendorRoutes() {
   return (
     <Routes>
+      <Route path="login" element={<VendorLogin />} />
       <Route element={<VendorLayout />}>
         <Route path="home" element={<VendorHome />} />
         <Route path="dashboard" element={<VendorDashboard />} />
@@ -32,9 +34,11 @@ function VendorRoutes() {
         <Route path="education-details" element={<EducationDetails />} />
         <Route path="criminal-details" element={<CriminalDetails />} />
         
-        {/* Default route */}
-        <Route path="" element={<Navigate to="home" replace />} />
+        
       </Route>
+      
+      {/* Default route */}
+      <Route path="" element={<Navigate to="login" replace />} />
     </Routes>
   );
 }
