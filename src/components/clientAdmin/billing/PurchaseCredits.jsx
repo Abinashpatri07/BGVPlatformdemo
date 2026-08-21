@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { load } from "@cashfreepayments/cashfree-js";
 
 const PACKAGES = [
   {
@@ -27,7 +29,84 @@ const PACKAGES = [
   },
 ];
 
+import { useLocation, useNavigate } from "react-router-dom";
+
 export default function PurchaseCredits() {
+  const [loading, setLoading] = useState(false);
+  const [cashfree, setCashfree] = useState(null);
+  const [selectedPkg, setSelectedPkg] = useState(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const initializeCashfree = async () => {
+      const cf = await load({ mode: "sandbox" });
+      setCashfree(cf);
+    };
+    initializeCashfree();
+  }, []);
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const orderId = query.get("order_id");
+    
+    if (orderId) {
+      const verifyPayment = async () => {
+        try {
+          const { data } = await axios.post("http://localhost:5000/api/client-admin/billing/verify", {
+            order_id: orderId
+          });
+          if (data.success) {
+            alert("Payment Successful! Units have been added to your balance.");
+            // Remove order_id from url to prevent re-verify
+            navigate("/client-admin/billing", { replace: true });
+          }
+        } catch (error) {
+          console.error("Verification failed", error);
+          alert("Payment verification failed or payment is pending.");
+          navigate("/client-admin/billing", { replace: true });
+        }
+      };
+      verifyPayment();
+    }
+  }, [location.search, navigate]);
+
+  const handlePurchase = async (pkg) => {
+    if (!cashfree) {
+      alert("Payment gateway is loading. Please try again.");
+      return;
+    }
+    
+    setLoading(true);
+    setSelectedPkg(pkg.name);
+    try {
+      const amount = parseInt(pkg.price.replace(/[^0-9]/g, ''), 10);
+      
+      const { data } = await axios.post("http://localhost:5000/api/client-admin/billing/create-order", {
+        amount,
+        customerName: "Client Admin User", 
+        customerPhone: "9999999999", 
+        customerEmail: "admin@client.com", 
+        packageId: pkg.name
+      }, { withCredentials: true });
+      
+      if (data.success && data.payment_session_id) {
+        cashfree.checkout({
+          paymentSessionId: data.payment_session_id,
+          returnUrl: "http://localhost:5173/client-admin/billing?order_id={order_id}"
+        });
+      } else {
+        alert("Failed to initialize payment");
+      }
+    } catch (error) {
+      console.error("Purchase error", error);
+      alert("Error initiating purchase. Please try again.");
+    } finally {
+      setLoading(false);
+      setSelectedPkg(null);
+    }
+  };
+
   return (
     <div className="py-8">
 
@@ -99,13 +178,15 @@ export default function PurchaseCredits() {
 
             {/* CTA Button */}
             <button
+              onClick={() => handlePurchase(pkg)}
+              disabled={loading}
               className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer mt-4
                 ${pkg.popular
                   ? "bg-indigo-700 text-white hover:bg-indigo-800"
                   : "bg-indigo-50 text-indigo-600 hover:bg-indigo-100"
-                }`}
+                } ${loading && selectedPkg === pkg.name ? "opacity-75 cursor-not-allowed" : ""}`}
             >
-              Purchase Package
+              {loading && selectedPkg === pkg.name ? "Processing..." : "Purchase Package"}
             </button>
 
           </div>
