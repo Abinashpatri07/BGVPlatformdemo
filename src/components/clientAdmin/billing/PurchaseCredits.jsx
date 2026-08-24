@@ -33,18 +33,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 export default function PurchaseCredits() {
   const [loading, setLoading] = useState(false);
-  const [cashfree, setCashfree] = useState(null);
   const [selectedPkg, setSelectedPkg] = useState(null);
+  const [showEmailPopup, setShowEmailPopup] = useState(false);
+  const [financeEmail, setFinanceEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [pkgToPurchase, setPkgToPurchase] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const initializeCashfree = async () => {
-      const cf = await load({ mode: "sandbox" });
-      setCashfree(cf);
-    };
-    initializeCashfree();
-  }, []);
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
@@ -71,32 +66,36 @@ export default function PurchaseCredits() {
     }
   }, [location.search, navigate]);
 
-  const handlePurchase = async (pkg) => {
-    if (!cashfree) {
-      alert("Payment gateway is loading. Please try again.");
+  const onPurchaseClick = (pkg) => {
+    setPkgToPurchase(pkg);
+    setShowEmailPopup(true);
+    setEmailError("");
+  };
+
+  const handlePurchase = async () => {
+    if (!financeEmail) {
+      setEmailError("Please enter the finance department email.");
       return;
     }
-    
+
     setLoading(true);
+    const pkg = pkgToPurchase;
     setSelectedPkg(pkg.name);
     try {
       const amount = parseInt(pkg.price.replace(/[^0-9]/g, ''), 10);
       
-      const { data } = await axios.post("http://localhost:5000/api/client-admin/billing/create-order", {
+      const { data } = await axios.post("http://localhost:5000/api/client-admin/billing/send-payment-link", {
         amount,
-        customerName: "Client Admin User", 
-        customerPhone: "9999999999", 
-        customerEmail: "admin@client.com", 
+        customerEmail: financeEmail, 
         packageId: pkg.name
       }, { withCredentials: true });
       
-      if (data.success && data.payment_session_id) {
-        cashfree.checkout({
-          paymentSessionId: data.payment_session_id,
-          returnUrl: "http://localhost:5173/client-admin/billing?order_id={order_id}"
-        });
+      if (data.success) {
+        alert("Payment link has been successfully sent to the finance department.");
+        setShowEmailPopup(false);
+        setFinanceEmail("");
       } else {
-        alert("Failed to initialize payment");
+        alert("Failed to send payment link");
       }
     } catch (error) {
       console.error("Purchase error", error);
@@ -104,6 +103,7 @@ export default function PurchaseCredits() {
     } finally {
       setLoading(false);
       setSelectedPkg(null);
+      setShowEmailPopup(false);
     }
   };
 
@@ -178,7 +178,7 @@ export default function PurchaseCredits() {
 
             {/* CTA Button */}
             <button
-              onClick={() => handlePurchase(pkg)}
+              onClick={() => onPurchaseClick(pkg)}
               disabled={loading}
               className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors cursor-pointer mt-4
                 ${pkg.popular
@@ -192,6 +192,44 @@ export default function PurchaseCredits() {
           </div>
         ))}
       </div>
+
+      {/* Email Popup Modal */}
+      {showEmailPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/5 backdrop-blur-[2px]">
+          <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md border border-gray-100">
+            <h3 className="text-xl font-bold text-gray-900 mb-4">Finance Department Email</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              Please provide the finance department email to proceed with the purchase.
+            </p>
+            <input
+              type="email"
+              value={financeEmail}
+              onChange={(e) => {
+                setFinanceEmail(e.target.value);
+                setEmailError("");
+              }}
+              placeholder="finance@company.com"
+              className={`w-full border ${emailError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-indigo-500'} rounded-lg px-4 py-2 ${emailError ? 'mb-1' : 'mb-6'} focus:outline-none focus:ring-2`}
+            />
+            {emailError && <p className="text-red-500 text-sm mb-5">{emailError}</p>}
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowEmailPopup(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handlePurchase}
+                disabled={loading}
+                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
+              >
+                {loading ? "Sending..." : "Send Email"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
