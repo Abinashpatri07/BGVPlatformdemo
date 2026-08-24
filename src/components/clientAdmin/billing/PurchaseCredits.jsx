@@ -37,6 +37,7 @@ export default function PurchaseCredits() {
   const [showEmailPopup, setShowEmailPopup] = useState(false);
   const [financeEmail, setFinanceEmail] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [pkgToPurchase, setPkgToPurchase] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -70,6 +71,7 @@ export default function PurchaseCredits() {
     setPkgToPurchase(pkg);
     setShowEmailPopup(true);
     setEmailError("");
+    setSuccessMessage("");
   };
 
   const handlePurchase = async () => {
@@ -91,11 +93,10 @@ export default function PurchaseCredits() {
       }, { withCredentials: true });
       
       if (data.success) {
-        alert("Payment link has been successfully sent to the finance department.");
-        setShowEmailPopup(false);
+        setSuccessMessage("Payment link has been successfully sent to the finance department.");
         setFinanceEmail("");
       } else {
-        alert("Failed to send payment link");
+        setEmailError("Failed to send payment link");
       }
     } catch (error) {
       console.error("Purchase error", error);
@@ -103,7 +104,6 @@ export default function PurchaseCredits() {
     } finally {
       setLoading(false);
       setSelectedPkg(null);
-      setShowEmailPopup(false);
     }
   };
 
@@ -212,20 +212,23 @@ export default function PurchaseCredits() {
               className={`w-full border ${emailError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-indigo-500'} rounded-lg px-4 py-2 ${emailError ? 'mb-1' : 'mb-6'} focus:outline-none focus:ring-2`}
             />
             {emailError && <p className="text-red-500 text-sm mb-5">{emailError}</p>}
+            {successMessage && <p className="text-green-600 text-sm font-medium mb-5">{successMessage}</p>}
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowEmailPopup(false)}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 cursor-pointer"
               >
-                Cancel
+                {successMessage ? "Close" : "Cancel"}
               </button>
-              <button
-                onClick={handlePurchase}
-                disabled={loading}
-                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
-              >
-                {loading ? "Sending..." : "Send Email"}
-              </button>
+              {!successMessage && (
+                <button
+                  onClick={handlePurchase}
+                  disabled={loading}
+                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Sending..." : "Send Email"}
+                </button>
+              )}
             </div>
           </div>
         </div>
