@@ -47,38 +47,29 @@ export default function ClientStatCards({ stats = STATS }) {
         return (
           <div
             key={card.title}
-            className="relative bg-[#f8f8f8] border border-gray-200 rounded-2xl px-5 py-4 shadow-sm"
+            className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col justify-between min-h-[110px]"
           >
-            {/* Top */}
-            <div className="flex items-center justify-between">
-              <h3 className="text-[20px] font-semibold text-gray-800">
+            {/* TOP */}
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="text-sm font-medium text-gray-800 leading-5">
                 {card.title}
               </h3>
-
               <div
-                className={`w-11 h-11 rounded-full flex items-center justify-center ${card.iconBg}`}
+                className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${card.iconBg}`}
               >
-                <Icon
-                  size={22}
-                  strokeWidth={2}
-                  className={card.iconColor}
-                />
+                <Icon size={18} className={card.iconColor} />
               </div>
             </div>
 
-            {/* Value */}
-            <div className="mt-6">
-              <h1 className="text-5xl font-bold text-gray-900 tracking-tight">
+            {/* BOTTOM */}
+            <div className="flex items-end justify-between mt-3">
+              <h1 className="text-4xl font-bold text-gray-900 leading-none">
                 {card.value}
               </h1>
+              <button className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition">
+                <Maximize2 className="w-3 h-3 text-gray-500" />
+              </button>
             </div>
-
-            {/* Bottom Right Button */}
-            <button
-              className="absolute bottom-3 right-3 w-5 h-5 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 hover:text-indigo-500 transition-all"
-            >
-              <Maximize2 size={10} strokeWidth={2.5} />
-            </button>
           </div>
         );
       })}

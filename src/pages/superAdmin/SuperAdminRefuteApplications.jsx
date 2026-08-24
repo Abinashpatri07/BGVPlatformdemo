@@ -154,7 +154,7 @@ function SuperAdminRefuteApplications() {
   };
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto space-y-6 animate-fade-in pb-10 px-4">
+    <div className="w-full max-w-[1600px] mx-auto flex flex-col gap-5 pb-10 px-4 mt-4">
       {/* HEADER SECTION */}
       <div>
         <h1 className="text-2xl font-bold text-[#1E1B4B] mb-2">
@@ -207,15 +207,15 @@ function SuperAdminRefuteApplications() {
       </div>
 
       {/* TABLE SECTION */}
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm mt-4">
+      <div className="bg-white rounded-2xl border border-gray-200 overflow-visible shadow-sm mt-4">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-base">
-            <thead className="bg-gray-50 text-gray-700 font-semibold border-b border-gray-200">
+          <table className="w-full border-collapse">
+            <thead className="bg-[#FAFAFA] border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4 w-12">
+                <th className="px-5 py-4 w-12 text-left">
                   <input
                     type="checkbox"
-                    className="w-4 h-4 rounded border-gray-300 text-[#4338CA] focus:ring-[#4338CA]"
+                    className="w-4 h-4 accent-[#4338CA] cursor-pointer"
                     checked={
                       selectedRows.length === tableData.length &&
                       tableData.length > 0
@@ -223,36 +223,36 @@ function SuperAdminRefuteApplications() {
                     onChange={toggleAll}
                   />
                 </th>
-                <th className="px-6 py-4">Case ID</th>
-                <th className="px-6 py-4">Candidate ID</th>
-                <th className="px-6 py-4">Case Type</th>
-                <th className="px-6 py-4">Name</th>
-                <th className="px-6 py-4">Phone</th>
-                <th className="px-6 py-4">TAT</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-center">Action</th>
+                <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Case ID</th>
+                <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Candidate ID</th>
+                <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Case Type</th>
+                <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Name</th>
+                <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Phone</th>
+                <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">TAT</th>
+                <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left">Status</th>
+                <th className="px-5 py-4 text-sm font-semibold text-[#1F2937] text-left text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {tableData.map((row) => (
                 <tr
                   key={row.id}
-                  className="hover:bg-gray-50 transition-colors duration-150"
+                  className="border-b border-gray-100 hover:bg-[#FAFAFA] transition-all duration-150"
                 >
-                  <td className="px-6 py-4">
+                  <td className="px-5 py-2.5">
                     <input
                       type="checkbox"
-                      className="w-4 h-4 rounded border-gray-300 text-[#4338CA] focus:ring-[#4338CA]"
+                      className="w-4 h-4 accent-[#4338CA] cursor-pointer"
                       checked={selectedRows.includes(row.id)}
                       onChange={() => toggleRow(row.id)}
                     />
                   </td>
-                  <td className="px-6 py-4 font-medium text-gray-900">
+                  <td className="px-5 py-2.5 text-sm text-gray-700 font-mono">
                     {row.caseId}
                   </td>
-                  <td className="px-6 py-4 text-gray-700">{row.candidateId}</td>
-                  <td className="px-6 py-4">
-                    <div className="text-gray-900 font-medium">
+                  <td className="px-5 py-2.5 text-sm text-gray-700">{row.candidateId}</td>
+                  <td className="px-5 py-2.5">
+                    <div className="text-sm text-gray-800 font-medium">
                       {row.caseType.split(" ")[0]}
                     </div>
                     {row.caseType.split(" ")[1] && (
@@ -261,16 +261,16 @@ function SuperAdminRefuteApplications() {
                       </div>
                     )}
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-gray-900 font-medium">{row.name}</div>
+                  <td className="px-5 py-2.5">
+                    <div className="font-semibold text-[15px] text-gray-900 leading-5">{row.name}</div>
                     <div className="text-gray-500 text-xs">{row.email}</div>
                   </td>
-                  <td className="px-6 py-4 text-gray-700">+91 {row.phone}</td>
-                  <td className="px-6 py-4 text-gray-700">{row.tat}</td>
-                  <td className="px-6 py-4">{getStatusBadge(row.status)}</td>
-                  <td className="px-6 py-4 text-gray-400">
+                  <td className="px-5 py-2.5 text-sm text-gray-700">+91 {row.phone}</td>
+                  <td className="px-5 py-2.5 text-sm text-gray-700">{row.tat}</td>
+                  <td className="px-5 py-2.5">{getStatusBadge(row.status)}</td>
+                  <td className="px-5 py-2.5 text-center w-20">
                     <button 
-                      className="p-1 hover:bg-gray-200 rounded transition inline-flex justify-center items-center"
+                      className="p-2 rounded-lg hover:bg-gray-100 transition inline-flex justify-center items-center"
                       onClick={() => {
                         const mode = "view";
                         if (row.caseType.includes("Employment Verification")) {
