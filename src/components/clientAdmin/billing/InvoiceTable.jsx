@@ -3,7 +3,7 @@ import StatusBadge from "./StatusBadge";
 import Pagination from "../home/Pagination";
 import { downloadSingleInvoicePDF } from "../../../utils/exportPdf";
 
-const COLUMNS = ["Invoice", "Date", "Description", "Status", "Amount", "Invoice"];
+const COLUMNS = ["Invoice", "Date", "Description", "Status", "Amount", "Download Invoice"];
 
 function TableRow({ row, isLast }) {
   return (
@@ -18,7 +18,7 @@ function TableRow({ row, isLast }) {
         <StatusBadge status={row.status} />
       </td>
       <td className="px-4 py-3.5 text-sm text-gray-900 font-semibold">{row.amount}</td>
-      <td className="px-4 py-3.5">
+      <td className="px-4 py-3.5 text-center">
         <button
           title="Download PDF Invoice"
           onClick={() => downloadSingleInvoicePDF(row)}
@@ -47,10 +47,10 @@ export default function InvoiceTable({ rows = [] }) {
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-[#F3F4F6] border-b border-gray-200">
-            {COLUMNS.map((col) => (
+            {COLUMNS.map((col, idx) => (
               <th
-                key={col}
-                className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b border-gray-200 whitespace-nowrap"
+                key={`${col}-${idx}`}
+                className={`px-4 py-3 text-sm font-semibold text-gray-700 border-b border-gray-200 whitespace-nowrap ${idx === COLUMNS.length - 1 ? 'text-center' : 'text-left'}`}
               >
                 {col}
               </th>
