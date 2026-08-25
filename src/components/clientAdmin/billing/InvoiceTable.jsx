@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import StatusBadge from "./StatusBadge";
+import Pagination from "../home/Pagination";
+import { downloadSingleInvoicePDF } from "../../../utils/exportPdf";
 
-const COLUMNS = ["Invoice", "Date", "Description", "Status", "Amount", "View"];
+const COLUMNS = ["Invoice", "Date", "Description", "Status", "Amount", "Invoice"];
 
 function TableRow({ row, isLast }) {
   return (
@@ -18,7 +20,8 @@ function TableRow({ row, isLast }) {
       <td className="px-4 py-3.5 text-sm text-gray-900 font-semibold">{row.amount}</td>
       <td className="px-4 py-3.5">
         <button
-          title="View Invoice"
+          title="Download PDF Invoice"
+          onClick={() => downloadSingleInvoicePDF(row)}
           className="border border-gray-200 rounded-lg px-2 py-1 text-sm text-gray-500 hover:border-blue-400 hover:text-blue-600 transition-colors cursor-pointer bg-transparent"
         >
           📄
@@ -28,7 +31,17 @@ function TableRow({ row, isLast }) {
   );
 }
 
-export default function InvoiceTable({ rows }) {
+export default function InvoiceTable({ rows = [] }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5;
+
+  const totalPages = Math.ceil(rows.length / rowsPerPage);
+  
+  // Get current rows
+  const indexOfLastRow = currentPage * rowsPerPage;
+  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+  const currentRows = rows.slice(indexOfFirstRow, indexOfLastRow);
+
   return (
     <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
       <table className="w-full border-collapse">
@@ -45,11 +58,28 @@ export default function InvoiceTable({ rows }) {
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, i) => (
-            <TableRow key={i} row={row} isLast={i === rows.length - 1} />
-          ))}
+          {currentRows.length === 0 ? (
+            <tr>
+              <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500">No invoices found.</td>
+            </tr>
+          ) : (
+            currentRows.map((row, i) => (
+              <TableRow key={i} row={row} isLast={i === currentRows.length - 1} />
+            ))
+          )}
         </tbody>
       </table>
+      
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="px-4 py-3 bg-white border-t border-gray-200">
+          <Pagination 
+            currentPage={currentPage} 
+            totalPages={totalPages} 
+            onPageChange={setCurrentPage} 
+          />
+        </div>
+      )}
     </div>
   );
 }
