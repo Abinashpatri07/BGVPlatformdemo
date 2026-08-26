@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import { downloadCSV } from "../../utils/exportCsv";
 import { downloadPDF } from "../../utils/exportPdf";
 import { Upload, FileText, FileDown } from "lucide-react";
@@ -22,7 +22,7 @@ export default function BillingPage() {
 
   useEffect(() => {
     if (activeTab === "Purchase History") {
-      axios.get("http://localhost:5000/api/client-admin/billing/history", { withCredentials: true })
+      axiosInstance.get("/api/client-admin/billing/history", { withCredentials: true })
         .then(res => {
           if (res.data.success) {
             setHistoryData({
@@ -33,7 +33,7 @@ export default function BillingPage() {
         })
         .catch(err => console.error("Error fetching history:", err));
     } else if (activeTab === "Usage Log") {
-      axios.get("http://localhost:5000/api/client-admin/billing/usage-logs", { withCredentials: true })
+      axiosInstance.get("/api/client-admin/billing/usage-logs", { withCredentials: true })
         .then(res => {
           if (res.data.success) {
             setUsageData({
