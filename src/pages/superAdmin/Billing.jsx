@@ -170,12 +170,6 @@ const Billing = () => {
             <div className="p-1.5 bg-white rounded-lg text-green-500 shadow-sm">
               <Banknote size={16} />
             </div>
-            <span className="inline-flex items-center px-1.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-semibold rounded">
-              <svg className="w-2.5 h-2.5 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-              +12.1%
-            </span>
           </div>
           <div className="mt-2.5">
             <p className="text-xs text-gray-600 font-medium">Total Payments</p>
@@ -189,12 +183,6 @@ const Billing = () => {
             <div className="p-1.5 bg-white rounded-lg text-red-400 shadow-sm">
               <History size={16} />
             </div>
-            <span className="inline-flex items-center px-1.5 py-0.5 bg-red-100 text-red-600 text-[10px] font-semibold rounded">
-              <svg className="w-2.5 h-2.5 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-              </svg>
-              -05.6%
-            </span>
           </div>
           <div className="mt-2.5">
             <p className="text-xs text-gray-600 font-medium">Total Refunds</p>
@@ -208,12 +196,6 @@ const Billing = () => {
             <div className="p-1.5 bg-white rounded-lg text-blue-500 shadow-sm">
               <CheckCircle size={16} />
             </div>
-            <span className="inline-flex items-center px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-semibold rounded">
-              <svg className="w-2.5 h-2.5 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-              +07.1%
-            </span>
           </div>
           <div className="mt-2.5">
             <p className="text-xs text-gray-600 font-medium">Total Settlements</p>
