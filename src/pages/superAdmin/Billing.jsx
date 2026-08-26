@@ -12,7 +12,8 @@ import {
   Download,
   Filter,
   CircleDollarSign,
-  X
+  X,
+  MoreVertical
 } from "lucide-react";
 import {
   Chart as ChartJS,
@@ -161,7 +162,7 @@ const Billing = () => {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
         {/* Total Payments */}
         <div className="bg-[#f0fdf4] rounded-2xl p-4 shadow-sm border border-green-50 relative overflow-hidden">
@@ -198,25 +199,6 @@ const Billing = () => {
           <div className="mt-2.5">
             <p className="text-xs text-gray-600 font-medium">Total Refunds</p>
             <h3 className="text-lg font-bold text-gray-900 mt-0.5">₹ 1,20,450.00</h3>
-          </div>
-        </div>
-
-        {/* Total Disputes */}
-        <div className="bg-[#faf5ff] rounded-2xl p-4 shadow-sm border border-purple-50 relative overflow-hidden">
-          <div className="flex justify-between items-start">
-            <div className="p-1.5 bg-white rounded-lg text-purple-500 shadow-sm">
-              <FileText size={16} />
-            </div>
-            <span className="inline-flex items-center px-1.5 py-0.5 bg-purple-100 text-purple-700 text-[10px] font-semibold rounded">
-              <svg className="w-2.5 h-2.5 mr-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-              +10.1%
-            </span>
-          </div>
-          <div className="mt-2.5">
-            <p className="text-xs text-gray-600 font-medium">Total Disputes</p>
-            <h3 className="text-lg font-bold text-gray-900 mt-0.5">₹ 85,320.00</h3>
           </div>
         </div>
 
@@ -587,17 +569,19 @@ const Billing = () => {
                     <th className="px-6 py-4 font-medium">Amount</th>
                     <th className="px-6 py-4 font-medium">Payment Method</th>
                     <th className="px-6 py-4 font-medium text-center">Status</th>
+                    <th className="px-6 py-4 font-medium">Payment Ref. No.</th>
+                    <th className="px-6 py-4 font-medium text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {[
-                    { date: "31 May 2025, 10:45 AM", txnId: "TXN-5267789012", client: "TechNova Solutions", orderId: "ORD-2025-5589", amount: "₹ 12,450.00", method: "UPI", status: "Success", statusColor: "bg-green-100 text-green-700" },
-                    { date: "31 May 2025, 09:30 AM", txnId: "TXN-5264506677", client: "NextGen Solutions", orderId: "ORD-2025-5582", amount: "₹ 12,450.00", method: "Credit Card", status: "Success", statusColor: "bg-green-100 text-green-700" },
-                    { date: "30 May 2025, 06:15 PM", txnId: "TXN-5267712233", client: "Global Talent Hub", orderId: "ORD-2025-5583", amount: "₹ 12,450.00", method: "Net Banking", status: "Success", statusColor: "bg-green-100 text-green-700" },
-                    { date: "30 May 2025, 06:15 PM", txnId: "TXN-5266457780", client: "Skyline HR", orderId: "ORD-2025-5584", amount: "₹ 12,450.00", method: "UPI", status: "Pending", statusColor: "bg-orange-100 text-orange-700" },
-                    { date: "30 May 2025, 05:40 PM", txnId: "TXN-5266003321", client: "HR Vision Corp.", orderId: "ORD-2025-5585", amount: "₹ 12,450.00", method: "UPI", status: "Success", statusColor: "bg-green-100 text-green-700" },
-                    { date: "29 May 2025, 04:22 PM", txnId: "TXN-5265338890", client: "Bright Future HR", orderId: "ORD-2025-5586", amount: "₹ 12,450.00", method: "Wallet", status: "Failed", statusColor: "bg-red-100 text-red-700" },
-                    { date: "29 May 2025, 02:10 PM", txnId: "TXN-5265211122", client: "PeopleFro Services", orderId: "ORD-2025-5587", amount: "₹ 12,450.00", method: "UPI", status: "Success", statusColor: "bg-green-100 text-green-700" },
+                    { date: "31 May 2025, 10:45 AM", txnId: "TXN-5267789012", client: "TechNova Solutions", orderId: "ORD-2025-5589", amount: "₹ 12,450.00", method: "UPI", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "UPI/5267789012" },
+                    { date: "31 May 2025, 09:30 AM", txnId: "TXN-5264506677", client: "NextGen Solutions", orderId: "ORD-2025-5582", amount: "₹ 12,450.00", method: "Credit Card", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "NB/1122334456" },
+                    { date: "30 May 2025, 06:15 PM", txnId: "TXN-5267712233", client: "Global Talent Hub", orderId: "ORD-2025-5583", amount: "₹ 12,450.00", method: "Net Banking", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "CC/8899001122" },
+                    { date: "30 May 2025, 06:15 PM", txnId: "TXN-5266457780", client: "Skyline HR", orderId: "ORD-2025-5584", amount: "₹ 12,450.00", method: "UPI", status: "Pending", statusColor: "bg-orange-100 text-orange-700", refNo: "UPI/5265211122" },
+                    { date: "30 May 2025, 05:40 PM", txnId: "TXN-5266003321", client: "HR Vision Corp.", orderId: "ORD-2025-5585", amount: "₹ 12,450.00", method: "UPI", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "WLT/889900112" },
+                    { date: "29 May 2025, 04:22 PM", txnId: "TXN-5265338890", client: "Bright Future HR", orderId: "ORD-2025-5586", amount: "₹ 12,450.00", method: "Wallet", status: "Failed", statusColor: "bg-red-100 text-red-700", refNo: "UPI/5266003321" },
+                    { date: "29 May 2025, 02:10 PM", txnId: "TXN-5265211122", client: "PeopleFro Services", orderId: "ORD-2025-5587", amount: "₹ 12,450.00", method: "UPI", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "CC/4756128890" },
                   ].map((row, idx) => (
                     <tr key={idx} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 text-gray-500">{row.date}</td>
@@ -610,6 +594,12 @@ const Billing = () => {
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${row.statusColor}`}>
                           {row.status}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-700">{row.refNo}</td>
+                      <td className="px-6 py-4 text-center">
+                        <button className="text-gray-400 hover:text-gray-600">
+                          <MoreVertical size={18} />
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -732,17 +722,18 @@ const Billing = () => {
                     <th className="px-6 py-4 font-medium">Amount</th>
                     <th className="px-6 py-4 font-medium">Payment Method</th>
                     <th className="px-6 py-4 font-medium text-center">Status</th>
+                    <th className="px-6 py-4 font-medium">Payment Ref. No.</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {[
-                    { date: "31 May 2025, 10:45 AM", txnId: "TXN-5267789012", client: "TechNova Solutions", orderId: "ORD-2025-5589", amount: "₹ 12,450.00", method: "UPI", status: "Success", statusColor: "bg-green-100 text-green-700" },
-                    { date: "31 May 2025, 09:30 AM", txnId: "TXN-5264506677", client: "NextGen Solutions", orderId: "ORD-2025-5582", amount: "₹ 12,450.00", method: "Credit Card", status: "Success", statusColor: "bg-green-100 text-green-700" },
-                    { date: "30 May 2025, 06:15 PM", txnId: "TXN-5267712233", client: "Global Talent Hub", orderId: "ORD-2025-5583", amount: "₹ 12,450.00", method: "Net Banking", status: "Success", statusColor: "bg-green-100 text-green-700" },
-                    { date: "30 May 2025, 06:15 PM", txnId: "TXN-5266457780", client: "Skyline HR", orderId: "ORD-2025-5584", amount: "₹ 12,450.00", method: "UPI", status: "Pending", statusColor: "bg-orange-100 text-orange-700" },
-                    { date: "30 May 2025, 05:40 PM", txnId: "TXN-5266003321", client: "HR Vision Corp.", orderId: "ORD-2025-5585", amount: "₹ 12,450.00", method: "UPI", status: "Success", statusColor: "bg-green-100 text-green-700" },
-                    { date: "29 May 2025, 04:22 PM", txnId: "TXN-5265338890", client: "Bright Future HR", orderId: "ORD-2025-5586", amount: "₹ 12,450.00", method: "Wallet", status: "Failed", statusColor: "bg-red-100 text-red-700" },
-                    { date: "29 May 2025, 02:10 PM", txnId: "TXN-5265211122", client: "PeopleFro Services", orderId: "ORD-2025-5587", amount: "₹ 12,450.00", method: "UPI", status: "Success", statusColor: "bg-green-100 text-green-700" },
+                    { date: "31 May 2025, 10:45 AM", txnId: "TXN-5267789012", client: "TechNova Solutions", orderId: "ORD-2025-5589", amount: "₹ 12,450.00", method: "UPI", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "UPI/5267789012" },
+                    { date: "31 May 2025, 09:30 AM", txnId: "TXN-5264506677", client: "NextGen Solutions", orderId: "ORD-2025-5582", amount: "₹ 12,450.00", method: "Credit Card", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "NB/1122334456" },
+                    { date: "30 May 2025, 06:15 PM", txnId: "TXN-5267712233", client: "Global Talent Hub", orderId: "ORD-2025-5583", amount: "₹ 12,450.00", method: "Net Banking", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "CC/8899001122" },
+                    { date: "30 May 2025, 06:15 PM", txnId: "TXN-5266457780", client: "Skyline HR", orderId: "ORD-2025-5584", amount: "₹ 12,450.00", method: "UPI", status: "Pending", statusColor: "bg-orange-100 text-orange-700", refNo: "UPI/5265211122" },
+                    { date: "30 May 2025, 05:40 PM", txnId: "TXN-5266003321", client: "HR Vision Corp.", orderId: "ORD-2025-5585", amount: "₹ 12,450.00", method: "UPI", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "WLT/889900112" },
+                    { date: "29 May 2025, 04:22 PM", txnId: "TXN-5265338890", client: "Bright Future HR", orderId: "ORD-2025-5586", amount: "₹ 12,450.00", method: "Wallet", status: "Failed", statusColor: "bg-red-100 text-red-700", refNo: "UPI/5266003321" },
+                    { date: "29 May 2025, 02:10 PM", txnId: "TXN-5265211122", client: "PeopleFro Services", orderId: "ORD-2025-5587", amount: "₹ 12,450.00", method: "UPI", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "CC/4756128890" },
                   ].map((row, idx) => (
                     <tr key={idx} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 text-gray-500">{row.date}</td>
@@ -756,6 +747,7 @@ const Billing = () => {
                           {row.status}
                         </span>
                       </td>
+                      <td className="px-6 py-4 text-gray-700">{row.refNo}</td>
                     </tr>
                   ))}
                 </tbody>
