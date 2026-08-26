@@ -55,6 +55,7 @@ import EditCandidate from "../components/superAdmin/candidate/EditCandidate";
 import BulkAssignPage from "../pages/superAdmin/BulkAssignPage";
 import ViewVendor from "../pages/superAdmin/ViewVendor";
 import EditVendor from "../pages/superAdmin/EditVendor";
+import Billing from "../pages/superAdmin/Billing";
 
 function SuperAdminRoutes() {
   return (
@@ -134,6 +135,9 @@ function SuperAdminRoutes() {
           element={<AssignVerificationOfficer />}
         />
         <Route path="bulk-assign" element={<BulkAssignPage />} />
+
+        {/* BILLING */}
+        <Route path="billing" element={<Billing />} />
       </Route>
     </Routes>
   );
