@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import { load } from "@cashfreepayments/cashfree-js";
 
 const PACKAGES = [
@@ -49,7 +49,7 @@ export default function PurchaseCredits() {
     if (orderId) {
       const verifyPayment = async () => {
         try {
-          const { data } = await axios.post("http://localhost:5000/api/client-admin/billing/verify", {
+          const { data } = await axiosInstance.post("/api/client-admin/billing/verify", {
             order_id: orderId
           });
           if (data.success) {
@@ -86,7 +86,7 @@ export default function PurchaseCredits() {
     try {
       const amount = parseInt(pkg.price.replace(/[^0-9]/g, ''), 10);
       
-      const { data } = await axios.post("http://localhost:5000/api/client-admin/billing/send-payment-link", {
+      const { data } = await axiosInstance.post("/api/client-admin/billing/send-payment-link", {
         amount,
         customerEmail: financeEmail, 
         packageId: pkg.name
