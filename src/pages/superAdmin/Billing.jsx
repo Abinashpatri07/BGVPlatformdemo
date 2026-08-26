@@ -101,11 +101,11 @@ const Billing = () => {
 
   // Doughnut Chart Data
   const doughnutData = {
-    labels: ["Successful", "Pending", "Disputed", "Failed"],
+    labels: ["Successful", "Pending", "Failed"],
     datasets: [
       {
-        data: [896, 156, 98, 98],
-        backgroundColor: ["#22C55E", "#FACC15", "#F97316", "#EF4444"],
+        data: [896, 156, 98],
+        backgroundColor: ["#22C55E", "#FACC15", "#EF4444"],
         borderWidth: 0,
         hoverOffset: 4,
       },
@@ -251,7 +251,6 @@ const Billing = () => {
               {[
                 { label: "Successful", value: "896", percent: "71.8%", color: "bg-green-500" },
                 { label: "Pending", value: "156", percent: "12.5%", color: "bg-yellow-400" },
-                { label: "Disputed", value: "98", percent: "7.9%", color: "bg-orange-500" },
                 { label: "Failed", value: "98", percent: "7.8%", color: "bg-red-500" },
               ].map((item, idx) => (
                 <div key={idx} className="flex justify-between items-center text-sm">
