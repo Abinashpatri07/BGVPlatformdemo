@@ -13,7 +13,8 @@ import {
   Filter,
   CircleDollarSign,
   X,
-  MoreVertical
+  MoreVertical,
+  RotateCcw
 } from "lucide-react";
 import {
   Chart as ChartJS,
@@ -562,8 +563,8 @@ const Billing = () => {
                       </td>
                       <td className="px-6 py-4 text-gray-700">{row.refNo}</td>
                       <td className="px-6 py-4 text-center">
-                        <button className="text-gray-400 hover:text-gray-600">
-                          <MoreVertical size={18} />
+                        <button title="Initiate Refund" className="text-gray-400 hover:text-indigo-600 transition-colors">
+                          <RotateCcw size={16} />
                         </button>
                       </td>
                     </tr>
