@@ -60,16 +60,6 @@ const Billing = () => {
         borderWidth: 2,
         tension: 0.4,
         pointRadius: 0,
-      },
-      {
-        label: "Refunds",
-        data: [3000, 11000, 9000, 16000, 5000, 24000, 31000],
-        borderColor: "#FBBF24",
-        backgroundColor: "transparent",
-        borderWidth: 2,
-        borderDash: [5, 5],
-        tension: 0.4,
-        pointRadius: 0,
       }
     ],
   };
@@ -217,12 +207,6 @@ const Billing = () => {
             <div className="flex items-center gap-4 text-xs font-medium text-gray-500">
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-indigo-600"></div> Payment
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-yellow-400"></div> Refunds
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div> Settlements
               </div>
             </div>
 
