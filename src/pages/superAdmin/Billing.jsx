@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axiosInstance from "../../API/axiosInstance";
 import {
   Banknote,
   History,
@@ -47,20 +48,79 @@ const Billing = () => {
   const [searchFilter, setSearchFilter] = useState("Order ID");
   const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
 
+  const [overviewData, setOverviewData] = useState({
+    totalPayments: 0,
+    totalRefunds: 0,
+    totalSettlements: 0,
+    transactionStatus: { successful: 0, pending: 0, failed: 0 },
+    lineChartData: { labels: [], data: [] },
+    topPaymentMethods: [],
+    topClients: [],
+    recentActivities: []
+  });
+  
+  const [paymentsList, setPaymentsList] = useState([]);
+  const [refundsList, setRefundsList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Pagination for Payments Tab
+  const [paymentCurrentPage, setPaymentCurrentPage] = useState(1);
+  const [paymentItemsPerPage, setPaymentItemsPerPage] = useState(10);
+
+  const [trendFilter, setTrendFilter] = useState("Monthly");
+
+  useEffect(() => {
+    const fetchOverviewData = async () => {
+      try {
+        const overviewRes = await axiosInstance.get(`/api/billing/overview?trend=${trendFilter.toLowerCase()}`);
+        if (overviewRes.data.success) {
+          setOverviewData(overviewRes.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching overview data", error);
+      }
+    };
+    fetchOverviewData();
+  }, [trendFilter]);
+
+  useEffect(() => {
+    const fetchTableData = async () => {
+      try {
+        setIsLoading(true);
+        const paymentsRes = await axiosInstance.get("/api/billing/payments");
+        if (paymentsRes.data.success) {
+          setPaymentsList(paymentsRes.data.data);
+        }
+
+        const refundsRes = await axiosInstance.get("/api/billing/payments?type=refund");
+        if (refundsRes.data.success) {
+          setRefundsList(refundsRes.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching table data", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchTableData();
+  }, []);
+
   const tabs = ["Overview", "Payment", "Refund"]; // "Dispute" commented out for now
 
   // Line Chart Data
   const lineChartData = {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    labels: overviewData.lineChartData.labels.length ? overviewData.lineChartData.labels : ["Jan"],
     datasets: [
       {
         label: "Payment",
-        data: [5000, 17000, 12000, 21000, 9000, 20000, 25000],
+        data: overviewData.lineChartData.data.length ? overviewData.lineChartData.data.map(d => parseFloat(d || 0)) : [0],
         borderColor: "#4F46E5",
         backgroundColor: "transparent",
         borderWidth: 2,
         tension: 0.4,
-        pointRadius: 0,
+        pointRadius: 4,
+        pointBackgroundColor: "#4F46E5",
       }
     ],
   };
@@ -95,7 +155,11 @@ const Billing = () => {
     labels: ["Successful", "Pending", "Failed"],
     datasets: [
       {
-        data: [896, 156, 98],
+        data: [
+          overviewData.transactionStatus.successful,
+          overviewData.transactionStatus.pending,
+          overviewData.transactionStatus.failed
+        ],
         backgroundColor: ["#22C55E", "#FACC15", "#EF4444"],
         borderWidth: 0,
         hoverOffset: 4,
@@ -112,6 +176,16 @@ const Billing = () => {
         display: false,
       },
     },
+  };
+
+  // Payment Tab Pagination Logic
+  const indexOfLastPayment = paymentCurrentPage * paymentItemsPerPage;
+  const indexOfFirstPayment = indexOfLastPayment - paymentItemsPerPage;
+  const currentPayments = paymentsList.slice(indexOfFirstPayment, indexOfLastPayment);
+  const totalPaymentPages = Math.ceil(paymentsList.length / paymentItemsPerPage);
+
+  const handlePaymentPageChange = (pageNumber) => {
+    setPaymentCurrentPage(pageNumber);
   };
 
   return (
@@ -164,7 +238,7 @@ const Billing = () => {
           </div>
           <div className="mt-2.5">
             <p className="text-xs text-gray-600 font-medium">Total Payments</p>
-            <h3 className="text-lg font-bold text-gray-900 mt-0.5">₹ 22,13,520.00</h3>
+            <h3 className="text-lg font-bold text-gray-900 mt-0.5">₹ {overviewData.totalPayments.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h3>
           </div>
         </div>
 
@@ -177,7 +251,7 @@ const Billing = () => {
           </div>
           <div className="mt-2.5">
             <p className="text-xs text-gray-600 font-medium">Total Refunds</p>
-            <h3 className="text-lg font-bold text-gray-900 mt-0.5">₹ 1,20,450.00</h3>
+            <h3 className="text-lg font-bold text-gray-900 mt-0.5">₹ {overviewData.totalRefunds.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h3>
           </div>
         </div>
 
@@ -190,7 +264,7 @@ const Billing = () => {
           </div>
           <div className="mt-2.5">
             <p className="text-xs text-gray-600 font-medium">Total Settlements</p>
-            <h3 className="text-lg font-bold text-gray-900 mt-0.5">₹ 78,600.00</h3>
+            <h3 className="text-lg font-bold text-gray-900 mt-0.5">₹ {overviewData.totalSettlements.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h3>
           </div>
         </div>
 
@@ -211,10 +285,14 @@ const Billing = () => {
               </div>
             </div>
 
-            <select className="bg-gray-50 border border-gray-200 text-gray-600 text-xs rounded-md px-2 py-1 focus:outline-none">
-              <option>Daily</option>
-              <option>Weekly</option>
-              <option>Monthly</option>
+            <select 
+              value={trendFilter}
+              onChange={(e) => setTrendFilter(e.target.value)}
+              className="bg-gray-50 border border-gray-200 text-gray-600 text-xs rounded-md px-2 py-1 focus:outline-none"
+            >
+              <option value="Daily">Daily</option>
+              <option value="Weekly">Weekly</option>
+              <option value="Monthly">Monthly</option>
             </select>
           </div>
 
@@ -234,9 +312,24 @@ const Billing = () => {
 
             <div className="w-full space-y-3">
               {[
-                { label: "Successful", value: "896", percent: "71.8%", color: "bg-green-500" },
-                { label: "Pending", value: "156", percent: "12.5%", color: "bg-yellow-400" },
-                { label: "Failed", value: "98", percent: "7.8%", color: "bg-red-500" },
+                { 
+                  label: "Successful", 
+                  value: overviewData.transactionStatus.successful, 
+                  percent: overviewData.transactionStatus.successful > 0 ? ((overviewData.transactionStatus.successful / (overviewData.transactionStatus.successful + overviewData.transactionStatus.pending + overviewData.transactionStatus.failed)) * 100).toFixed(1) + "%" : "0%", 
+                  color: "bg-green-500" 
+                },
+                { 
+                  label: "Pending", 
+                  value: overviewData.transactionStatus.pending, 
+                  percent: overviewData.transactionStatus.pending > 0 ? ((overviewData.transactionStatus.pending / (overviewData.transactionStatus.successful + overviewData.transactionStatus.pending + overviewData.transactionStatus.failed)) * 100).toFixed(1) + "%" : "0%", 
+                  color: "bg-yellow-400" 
+                },
+                { 
+                  label: "Failed", 
+                  value: overviewData.transactionStatus.failed, 
+                  percent: overviewData.transactionStatus.failed > 0 ? ((overviewData.transactionStatus.failed / (overviewData.transactionStatus.successful + overviewData.transactionStatus.pending + overviewData.transactionStatus.failed)) * 100).toFixed(1) + "%" : "0%", 
+                  color: "bg-red-500" 
+                },
               ].map((item, idx) => (
                 <div key={idx} className="flex justify-between items-center text-sm">
                   <div className="flex items-center gap-2">
@@ -258,145 +351,100 @@ const Billing = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-2">
         
         {/* Top Payment Methods */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-          <h3 className="text-sm font-bold text-gray-900 mb-4">Top Payment Methods</h3>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3">
+          <h3 className="text-sm font-bold text-gray-900 mb-2">Top Payment Methods</h3>
           
-          <div className="space-y-3">
-            {/* UPI */}
-            <div>
-              <div className="flex justify-between items-center text-xs font-semibold text-gray-900 mb-1.5">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-4 h-4 bg-indigo-100 rounded text-indigo-600 flex justify-center items-center text-[9px]">₹</div>
-                  UPI
-                </div>
-                <span>₹ 9,85,420.00</span>
-              </div>
-              <div className="w-full bg-indigo-50 rounded-full h-1.5">
-                <div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: "65%" }}></div>
-              </div>
-            </div>
+          <div className="space-y-2">
+            {(() => {
+              const staticMethods = [
+                { name: 'UPI', icon: '₹', bg: 'bg-indigo-100', text: 'text-indigo-600', barBg: 'bg-indigo-50', barFill: 'bg-indigo-500' },
+                { name: 'Credit Card', icon: <Banknote size={10}/>, bg: 'bg-green-100', text: 'text-green-600', barBg: 'bg-green-50', barFill: 'bg-green-500' },
+                { name: 'Net Banking', icon: <Building2 size={10}/>, bg: 'bg-yellow-100', text: 'text-yellow-600', barBg: 'bg-yellow-50', barFill: 'bg-yellow-400' },
+                { name: 'Wallet', icon: <Wallet size={10}/>, bg: 'bg-purple-100', text: 'text-purple-600', barBg: 'bg-purple-50', barFill: 'bg-purple-500' }
+              ];
+              const totalPaymentSum = overviewData.topPaymentMethods?.reduce((sum, item) => sum + parseFloat(item.total || 0), 0) || 1;
 
-            {/* Credit Card */}
-            <div>
-              <div className="flex justify-between items-center text-xs font-semibold text-gray-900 mb-1.5">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-4 h-4 bg-green-100 rounded text-green-600 flex justify-center items-center text-[9px]"><Banknote size={10}/></div>
-                  Credit Card
-                </div>
-                <span>₹ 6,45,210.00</span>
-              </div>
-              <div className="w-full bg-green-50 rounded-full h-1.5">
-                <div className="bg-green-500 h-1.5 rounded-full" style={{ width: "45%" }}></div>
-              </div>
-            </div>
+              return staticMethods.map((method, idx) => {
+                const foundMethod = overviewData.topPaymentMethods?.find(m => m.method.toUpperCase() === method.name.toUpperCase());
+                const total = foundMethod ? parseFloat(foundMethod.total || 0) : 0;
+                const percent = ((total / totalPaymentSum) * 100).toFixed(1);
 
-            {/* Net Banking */}
-            <div>
-              <div className="flex justify-between items-center text-xs font-semibold text-gray-900 mb-1.5">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-4 h-4 bg-yellow-100 rounded text-yellow-600 flex justify-center items-center text-[9px]"><Building2 size={10}/></div>
-                  Net Banking
-                </div>
-                <span>₹ 4,25,110.00</span>
-              </div>
-              <div className="w-full bg-yellow-50 rounded-full h-1.5">
-                <div className="bg-yellow-400 h-1.5 rounded-full" style={{ width: "30%" }}></div>
-              </div>
-            </div>
-
-            {/* Wallet */}
-            <div>
-              <div className="flex justify-between items-center text-xs font-semibold text-gray-900 mb-1.5">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-4 h-4 bg-purple-100 rounded text-purple-600 flex justify-center items-center text-[9px]"><Wallet size={10}/></div>
-                  Wallet
-                </div>
-                <span>₹ 1,57,780.00</span>
-              </div>
-              <div className="w-full bg-purple-50 rounded-full h-1.5">
-                <div className="bg-purple-500 h-1.5 rounded-full" style={{ width: "15%" }}></div>
-              </div>
-            </div>
+                return (
+                  <div key={idx}>
+                    <div className="flex justify-between items-center text-xs font-semibold text-gray-900 mb-1">
+                      <div className="flex items-center gap-1.5">
+                        <div className={`w-4 h-4 ${method.bg} rounded ${method.text} flex justify-center items-center text-[9px]`}>
+                          {method.icon}
+                        </div>
+                        {method.name}
+                      </div>
+                      <span>₹ {total.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                    </div>
+                    <div className={`w-full ${method.barBg} rounded-full h-1.5`}>
+                      <div className={`${method.barFill} h-1.5 rounded-full`} style={{ width: `${percent}%` }}></div>
+                    </div>
+                  </div>
+                );
+              });
+            })()}
           </div>
         </div>
 
         {/* Top Clients By Revenue */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-          <h3 className="text-sm font-bold text-gray-900 mb-4">Top Clients By Revenue</h3>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3">
+          <h3 className="text-sm font-bold text-gray-900 mb-2">Top Clients By Revenue</h3>
           
-          <div className="space-y-2">
-            {[
-              { name: "TechNova Solutions", amount: "₹ 9,85,420.00" },
-              { name: "InnoTech Pvt. Ltd.", amount: "₹ 3,75,400.00" },
-              { name: "Bright Future HR", amount: "₹ 3,25,000.00" },
-              { name: "PeopleFro Services", amount: "₹ 2,15,700.00" },
-              { name: "HR Vision Corp.", amount: "₹ 1,65,250.00" },
-            ].map((client, idx) => (
-              <div key={idx} className="flex justify-between items-center text-xs font-semibold text-gray-900 py-1 border-b border-gray-50 last:border-0">
+          <div className="space-y-1">
+            {overviewData.topClients && overviewData.topClients.map((client, idx) => (
+              <div key={idx} className="flex justify-between items-center text-xs font-semibold text-gray-900 py-0.5 border-b border-gray-50 last:border-0">
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 bg-indigo-50 rounded text-indigo-600 flex justify-center items-center">
                     <User size={10} />
                   </div>
                   <span className="font-medium text-gray-700">{client.name}</span>
                 </div>
-                <span>{client.amount}</span>
+                <span>₹ {client.amount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
               </div>
             ))}
+            {(!overviewData.topClients || overviewData.topClients.length === 0) && (
+              <div className="text-center text-xs text-gray-400 py-4">No top clients found</div>
+            )}
           </div>
         </div>
 
         {/* Recent Activities */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-          <h3 className="text-sm font-bold text-gray-900 mb-4">Recent Activities</h3>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3">
+          <h3 className="text-sm font-bold text-gray-900 mb-2">Recent Activities</h3>
           
           <div className="space-y-0">
-            {/* Activity 1 */}
-            <div className="flex justify-between items-start py-2 border-b border-gray-100 first:pt-0">
-              <div className="flex items-start gap-3">
-                <div className="w-7 h-7 bg-green-50 rounded-lg text-green-500 flex justify-center items-center shrink-0">
-                  <CheckCircle size={14} strokeWidth={2} />
+            {overviewData.recentActivities && overviewData.recentActivities.map((activity, idx) => {
+              let iconInfo = { bg: 'bg-green-50', text: 'text-green-500', icon: <CheckCircle size={14} strokeWidth={2} />, desc: 'Payment Received From' };
+              if (activity.status === 'FAILED' || activity.status === 'REFUNDED') {
+                iconInfo = { bg: 'bg-red-50', text: 'text-red-500', icon: <History size={14} strokeWidth={2} />, desc: 'Refund Processed For' };
+              } else if (activity.status === 'PENDING') {
+                iconInfo = { bg: 'bg-orange-50', text: 'text-orange-500', icon: <FileText size={14} strokeWidth={2} />, desc: 'Payment Pending From' };
+              }
+              
+              return (
+                <div key={idx} className={`flex justify-between items-start py-1.5 ${idx !== overviewData.recentActivities.length - 1 ? 'border-b border-gray-100' : ''} ${idx === 0 ? 'first:pt-0' : ''}`}>
+                  <div className="flex items-start gap-3">
+                    <div className={`w-7 h-7 ${iconInfo.bg} rounded-lg ${iconInfo.text} flex justify-center items-center shrink-0`}>
+                      {iconInfo.icon}
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <p className="text-xs font-medium text-gray-800 leading-snug">
+                        {iconInfo.desc}<br/>{activity.client}
+                      </p>
+                      <span className="text-[10px] text-gray-400">{activity.date}</span>
+                    </div>
+                  </div>
+                  <span className="text-xs font-semibold text-gray-900 mt-1">₹ {activity.amount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                 </div>
-                <div className="flex flex-col gap-0.5">
-                  <p className="text-xs font-medium text-gray-800 leading-snug">
-                    Payment Received From<br/>TechNova Solutions
-                  </p>
-                  <span className="text-[10px] text-gray-400">31 May 2025</span>
-                </div>
-              </div>
-              <span className="text-xs font-semibold text-gray-900 mt-1">₹ 12,450.00</span>
-            </div>
-
-            {/* Activity 2 */}
-            <div className="flex justify-between items-start py-2 border-b border-gray-100">
-              <div className="flex items-start gap-3">
-                <div className="w-7 h-7 bg-red-50 rounded-lg text-red-500 flex justify-center items-center shrink-0">
-                  <History size={14} strokeWidth={2} />
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <p className="text-xs font-medium text-gray-800 leading-snug">
-                    Refund Processed For InnoTech<br/>Pvt. Ltd.
-                  </p>
-                  <span className="text-[10px] text-gray-400">31 May 2025</span>
-                </div>
-              </div>
-              <span className="text-xs font-semibold text-gray-900 mt-1">₹ 2,500.00</span>
-            </div>
-
-            {/* Activity 3 */}
-            <div className="flex justify-between items-start py-2 border-b border-gray-100 last:border-0 last:pb-0">
-              <div className="flex items-start gap-3">
-                <div className="w-7 h-7 bg-orange-50 rounded-lg text-orange-500 flex justify-center items-center shrink-0">
-                  <FileText size={14} strokeWidth={2} />
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <p className="text-xs font-medium text-gray-800 leading-snug">
-                    Dispute Raised By Bright Future<br/>HR
-                  </p>
-                  <span className="text-[10px] text-gray-400">31 May 2025</span>
-                </div>
-              </div>
-              <span className="text-xs font-semibold text-gray-900 mt-1">₹ 5,200.00</span>
-            </div>
+              );
+            })}
+            {(!overviewData.recentActivities || overviewData.recentActivities.length === 0) && (
+              <div className="text-center text-xs text-gray-400 py-4">No recent activities found</div>
+            )}
           </div>
         </div>
       </div>
@@ -436,7 +484,9 @@ const Billing = () => {
               </div>
               <div className="flex justify-between items-end mt-auto">
                 <p className="text-xs text-gray-600 font-medium">All Payments</p>
-                <h3 className="text-lg font-bold text-gray-900 leading-none">1,124</h3>
+                <h3 className="text-lg font-bold text-gray-900 leading-none">
+                  {(overviewData.transactionStatus.successful + overviewData.transactionStatus.pending + overviewData.transactionStatus.failed).toLocaleString('en-IN')}
+                </h3>
               </div>
             </div>
 
@@ -447,7 +497,9 @@ const Billing = () => {
               </div>
               <div className="flex justify-between items-end mt-auto">
                 <p className="text-xs text-gray-600 font-medium">Successful</p>
-                <h3 className="text-lg font-bold text-gray-900 leading-none">896</h3>
+                <h3 className="text-lg font-bold text-gray-900 leading-none">
+                  {overviewData.transactionStatus.successful.toLocaleString('en-IN')}
+                </h3>
               </div>
             </div>
 
@@ -458,7 +510,9 @@ const Billing = () => {
               </div>
               <div className="flex justify-between items-end mt-auto">
                 <p className="text-xs text-gray-600 font-medium">Pending</p>
-                <h3 className="text-lg font-bold text-gray-900 leading-none">156</h3>
+                <h3 className="text-lg font-bold text-gray-900 leading-none">
+                  {overviewData.transactionStatus.pending.toLocaleString('en-IN')}
+                </h3>
               </div>
             </div>
 
@@ -472,7 +526,9 @@ const Billing = () => {
               </div>
               <div className="flex justify-between items-end mt-auto">
                 <p className="text-xs text-gray-600 font-medium">Failed</p>
-                <h3 className="text-lg font-bold text-gray-900 leading-none">72</h3>
+                <h3 className="text-lg font-bold text-gray-900 leading-none">
+                  {overviewData.transactionStatus.failed.toLocaleString('en-IN')}
+                </h3>
               </div>
             </div>
           </div>
@@ -540,15 +596,7 @@ const Billing = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {[
-                    { date: "31 May 2025, 10:45 AM", txnId: "TXN-5267789012", client: "TechNova Solutions", orderId: "ORD-2025-5589", amount: "₹ 12,450.00", method: "UPI", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "UPI/5267789012" },
-                    { date: "31 May 2025, 09:30 AM", txnId: "TXN-5264506677", client: "NextGen Solutions", orderId: "ORD-2025-5582", amount: "₹ 12,450.00", method: "Credit Card", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "NB/1122334456" },
-                    { date: "30 May 2025, 06:15 PM", txnId: "TXN-5267712233", client: "Global Talent Hub", orderId: "ORD-2025-5583", amount: "₹ 12,450.00", method: "Net Banking", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "CC/8899001122" },
-                    { date: "30 May 2025, 06:15 PM", txnId: "TXN-5266457780", client: "Skyline HR", orderId: "ORD-2025-5584", amount: "₹ 12,450.00", method: "UPI", status: "Pending", statusColor: "bg-orange-100 text-orange-700", refNo: "UPI/5265211122" },
-                    { date: "30 May 2025, 05:40 PM", txnId: "TXN-5266003321", client: "HR Vision Corp.", orderId: "ORD-2025-5585", amount: "₹ 12,450.00", method: "UPI", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "WLT/889900112" },
-                    { date: "29 May 2025, 04:22 PM", txnId: "TXN-5265338890", client: "Bright Future HR", orderId: "ORD-2025-5586", amount: "₹ 12,450.00", method: "Wallet", status: "Failed", statusColor: "bg-red-100 text-red-700", refNo: "UPI/5266003321" },
-                    { date: "29 May 2025, 02:10 PM", txnId: "TXN-5265211122", client: "PeopleFro Services", orderId: "ORD-2025-5587", amount: "₹ 12,450.00", method: "UPI", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "CC/4756128890" },
-                  ].map((row, idx) => (
+                  {currentPayments.map((row, idx) => (
                     <tr key={idx} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 text-gray-500">{row.date}</td>
                       <td className="px-6 py-4 font-medium text-indigo-600">{row.txnId}</td>
@@ -569,6 +617,20 @@ const Billing = () => {
                       </td>
                     </tr>
                   ))}
+                  {paymentsList.length === 0 && !isLoading && (
+                    <tr>
+                      <td colSpan="9" className="px-6 py-8 text-center text-gray-500">
+                        No payments found
+                      </td>
+                    </tr>
+                  )}
+                  {isLoading && (
+                    <tr>
+                      <td colSpan="9" className="px-6 py-8 text-center text-gray-500">
+                        Loading...
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -577,28 +639,45 @@ const Billing = () => {
             <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 Showing 
-                <select className="border border-gray-200 rounded px-1 py-0.5 outline-none bg-white">
-                  <option>9</option>
-                  <option>10</option>
-                  <option>20</option>
+                <select 
+                  className="border border-gray-200 rounded px-1 py-0.5 outline-none bg-white"
+                  value={paymentItemsPerPage}
+                  onChange={(e) => {
+                    setPaymentItemsPerPage(Number(e.target.value));
+                    setPaymentCurrentPage(1);
+                  }}
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
                 </select> 
-                out of 40
+                out of {paymentsList.length}
               </div>
               <div className="flex items-center gap-1 text-sm">
-                <button className="flex items-center gap-1 px-3 py-1 text-gray-500 hover:text-gray-900 disabled:opacity-50">
+                <button 
+                  onClick={() => setPaymentCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={paymentCurrentPage === 1}
+                  className="flex items-center gap-1 px-3 py-1 text-gray-500 hover:text-gray-900 disabled:opacity-50"
+                >
                   &larr; Previous
                 </button>
                 <div className="flex items-center gap-1">
-                  <button className="w-7 h-7 rounded-md bg-indigo-50 text-indigo-600 font-medium">1</button>
-                  <button className="w-7 h-7 rounded-md text-gray-500 hover:bg-gray-50">2</button>
-                  <button className="w-7 h-7 rounded-md text-gray-500 hover:bg-gray-50">3</button>
-                  <button className="w-7 h-7 rounded-md text-gray-500 hover:bg-gray-50">4</button>
-                  <button className="w-7 h-7 rounded-md text-gray-500 hover:bg-gray-50">5</button>
-                  <span className="text-gray-400 px-1">...</span>
-                  <button className="w-7 h-7 rounded-md text-gray-500 hover:bg-gray-50">8</button>
-                  <button className="w-7 h-7 rounded-md text-gray-500 hover:bg-gray-50">9</button>
+                  {Array.from({ length: totalPaymentPages }, (_, i) => i + 1).map(page => (
+                    <button 
+                      key={page}
+                      onClick={() => handlePaymentPageChange(page)}
+                      className={`w-7 h-7 rounded-md font-medium ${paymentCurrentPage === page ? 'bg-indigo-50 text-indigo-600' : 'text-gray-500 hover:bg-gray-50'}`}
+                    >
+                      {page}
+                    </button>
+                  ))}
                 </div>
-                <button className="flex items-center gap-1 px-3 py-1 text-gray-900 font-medium hover:opacity-80">
+                <button 
+                  onClick={() => setPaymentCurrentPage(prev => Math.min(prev + 1, totalPaymentPages))}
+                  disabled={paymentCurrentPage === totalPaymentPages || totalPaymentPages === 0}
+                  className="flex items-center gap-1 px-3 py-1 text-gray-900 font-medium hover:opacity-80 disabled:opacity-50"
+                >
                   Next &rarr;
                 </button>
               </div>
@@ -692,15 +771,7 @@ const Billing = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {[
-                    { date: "31 May 2025, 10:45 AM", txnId: "TXN-5267789012", client: "TechNova Solutions", orderId: "ORD-2025-5589", amount: "₹ 12,450.00", method: "UPI", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "UPI/5267789012" },
-                    { date: "31 May 2025, 09:30 AM", txnId: "TXN-5264506677", client: "NextGen Solutions", orderId: "ORD-2025-5582", amount: "₹ 12,450.00", method: "Credit Card", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "NB/1122334456" },
-                    { date: "30 May 2025, 06:15 PM", txnId: "TXN-5267712233", client: "Global Talent Hub", orderId: "ORD-2025-5583", amount: "₹ 12,450.00", method: "Net Banking", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "CC/8899001122" },
-                    { date: "30 May 2025, 06:15 PM", txnId: "TXN-5266457780", client: "Skyline HR", orderId: "ORD-2025-5584", amount: "₹ 12,450.00", method: "UPI", status: "Pending", statusColor: "bg-orange-100 text-orange-700", refNo: "UPI/5265211122" },
-                    { date: "30 May 2025, 05:40 PM", txnId: "TXN-5266003321", client: "HR Vision Corp.", orderId: "ORD-2025-5585", amount: "₹ 12,450.00", method: "UPI", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "WLT/889900112" },
-                    { date: "29 May 2025, 04:22 PM", txnId: "TXN-5265338890", client: "Bright Future HR", orderId: "ORD-2025-5586", amount: "₹ 12,450.00", method: "Wallet", status: "Failed", statusColor: "bg-red-100 text-red-700", refNo: "UPI/5266003321" },
-                    { date: "29 May 2025, 02:10 PM", txnId: "TXN-5265211122", client: "PeopleFro Services", orderId: "ORD-2025-5587", amount: "₹ 12,450.00", method: "UPI", status: "Success", statusColor: "bg-green-100 text-green-700", refNo: "CC/4756128890" },
-                  ].map((row, idx) => (
+                  {refundsList.map((row, idx) => (
                     <tr key={idx} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 text-gray-500">{row.date}</td>
                       <td className="px-6 py-4 font-medium text-indigo-600">{row.txnId}</td>
@@ -716,6 +787,20 @@ const Billing = () => {
                       <td className="px-6 py-4 text-gray-700">{row.refNo}</td>
                     </tr>
                   ))}
+                  {refundsList.length === 0 && !isLoading && (
+                    <tr>
+                      <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
+                        No refunds found
+                      </td>
+                    </tr>
+                  )}
+                  {isLoading && (
+                    <tr>
+                      <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
+                        Loading...
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
