@@ -504,8 +504,8 @@ const Billing = () => {
             </div>
 
             {/* Pending */}
-            <div className="bg-[#fff1f2] rounded-2xl p-4 shadow-sm border border-red-50 flex flex-col justify-between h-28">
-              <div className="w-8 h-8 bg-red-100 rounded-xl text-red-500 flex justify-center items-center">
+            <div className="bg-[#faf5ff] rounded-2xl p-4 shadow-sm border border-purple-50 flex flex-col justify-between h-28">
+              <div className="w-8 h-8 bg-purple-100 rounded-xl text-purple-500 flex justify-center items-center">
                 <CircleDollarSign size={16} strokeWidth={2} />
               </div>
               <div className="flex justify-between items-end mt-auto">
@@ -517,10 +517,10 @@ const Billing = () => {
             </div>
 
             {/* Failed */}
-            <div className="bg-[#faf5ff] rounded-2xl p-4 shadow-sm border border-purple-50 flex flex-col justify-between h-28">
-              <div className="w-8 h-8 bg-purple-100 rounded-xl text-purple-500 flex justify-center items-center relative">
+            <div className="bg-[#fff1f2] rounded-2xl p-4 shadow-sm border border-red-50 flex flex-col justify-between h-28">
+              <div className="w-8 h-8 bg-red-100 rounded-xl text-red-500 flex justify-center items-center relative">
                 <Banknote size={16} strokeWidth={2} />
-                <div className="absolute bottom-1 right-1 bg-purple-100 rounded-full w-2.5 h-2.5 flex items-center justify-center">
+                <div className="absolute bottom-1 right-1 bg-red-100 rounded-full w-2.5 h-2.5 flex items-center justify-center">
                   <X size={8} strokeWidth={4} />
                 </div>
               </div>
