@@ -23,10 +23,16 @@ export default function VerificationPage() {
     return location.state?.step ?? 0;
   });
 
-  const [highestStep, setHighestStep] = useState(() => {
-    const saved = sessionStorage.getItem("candidate_highestStep");
-    if (saved !== null) return parseInt(saved, 10);
-    return location.state?.step ?? 0;
+  const [completedSteps, setCompletedSteps] = useState(() => {
+    const saved = sessionStorage.getItem("candidate_completedSteps");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
   });
 
   useEffect(() => {
@@ -34,16 +40,18 @@ export default function VerificationPage() {
   }, [currentStep]);
 
   useEffect(() => {
-    sessionStorage.setItem("candidate_highestStep", highestStep);
-  }, [highestStep]);
+    sessionStorage.setItem("candidate_completedSteps", JSON.stringify(completedSteps));
+  }, [completedSteps]);
 
   const handleNext = () => {
     if (currentStep < 9) {
-      setCurrentStep((prev) => {
-        const nextStep = prev + 1;
-        setHighestStep((h) => Math.max(h, nextStep));
-        return nextStep;
+      setCompletedSteps((prev) => {
+        if (!prev.includes(currentStep)) {
+          return [...prev, currentStep];
+        }
+        return prev;
       });
+      setCurrentStep((prev) => prev + 1);
     }
   };
 
@@ -62,9 +70,9 @@ export default function VerificationPage() {
         {/* Sidebar */}
         <SidebarStepper
           currentStep={currentStep}
-          highestStep={highestStep}
+          completedSteps={completedSteps}
           onStepBack={handleBack}
-          onStepClick={setCurrentStep}   // ✅ THIS FIXES EVERYTHING
+          onStepClick={setCurrentStep}
         />
 
         {/* Content */}
@@ -74,15 +82,15 @@ export default function VerificationPage() {
           {currentStep === 0 && (
             <main className="bg-white rounded-2xl shadow-sm p-8 max-w-5xl">
               
-              <div className="w-14 h-14 rounded-full bg-green-500 flex items-center justify-center text-white text-2xl mx-auto">
+              <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white text-xl mx-auto">
                 ✓
               </div>
 
-              <h1 className="text-center text-2xl font-bold text-indigo-700 mt-4">
+              <h1 className="text-center text-xl font-bold text-indigo-700 mt-3">
                 Consent for Background Verification
               </h1>
 
-              <p className="text-center text-sm text-gray-700 mt-2">
+              <p className="text-center text-xs text-gray-700 mt-1 mb-2">
                 Please review and provide consent
               </p>
 

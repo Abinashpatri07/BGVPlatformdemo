@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function SidebarStepper({
   currentStep,
-  highestStep,
+  completedSteps = [],
   onStepBack,
   onStepClick,
 }) {
@@ -22,44 +22,49 @@ export default function SidebarStepper({
       
       {/* Steps */}
       <div className="flex-1 space-y-2 overflow-y-auto pr-2">
-        {steps.map((step, index) => (
-          <div
-            key={index}
-            onClick={() => onStepClick(index)}   // ✅ CLICK ENABLED
-            className="flex gap-4 cursor-pointer hover:opacity-80 transition"
-          >
-            
-            {/* Dot + Line */}
-            <div className="flex flex-col items-center">
-              <div
-                className={`w-3.5 h-3.5 rounded-full ${
-                  index === currentStep
-                    ? "bg-blue-600"
-                    : index <= highestStep
-                    ? "bg-green-500"
-                    : "bg-gray-300"
-                }`}
-              />
+        {steps.map((step, index) => {
+          const isCompleted = completedSteps.map(Number).includes(index);
+          const isCurrent = index === currentStep;
 
-              {index !== steps.length - 1 && (
-                <div className={`w-px h-10 ${index < highestStep ? "bg-green-500" : "bg-gray-300"}`} />
-              )}
-            </div>
-
-            {/* Text */}
-            <span
-              className={`text-sm ${
-                index === currentStep
-                  ? "text-blue-700 font-medium"
-                  : index <= highestStep
-                  ? "text-green-600 font-medium"
-                  : "text-gray-400"
-              }`}
+          return (
+            <div
+              key={index}
+              onClick={() => onStepClick(index)}
+              className="flex gap-4 cursor-pointer hover:opacity-80 transition"
             >
-              {step.name}   {/* ✅ FIXED */}
-            </span>
-          </div>
-        ))}
+              
+              {/* Dot + Line */}
+              <div className="flex flex-col items-center">
+                <div
+                  className={`w-3.5 h-3.5 rounded-full ${
+                    isCurrent
+                      ? "bg-blue-600"
+                      : isCompleted
+                      ? "bg-green-500"
+                      : "bg-gray-300"
+                  }`}
+                />
+
+                {index !== steps.length - 1 && (
+                  <div className={`w-px h-10 ${isCompleted ? "bg-green-500" : "bg-gray-300"}`} />
+                )}
+              </div>
+
+              {/* Text */}
+              <span
+                className={`text-sm ${
+                  isCurrent
+                    ? "text-blue-700 font-medium"
+                    : isCompleted
+                    ? "text-green-600 font-medium"
+                    : "text-gray-400"
+                }`}
+              >
+                {step.name}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
       {/* Back Button */}

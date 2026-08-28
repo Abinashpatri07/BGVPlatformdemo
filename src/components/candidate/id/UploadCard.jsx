@@ -11,21 +11,21 @@ export default function UploadCard({
   onToggle,
 }) {
   return (
-    <div className="bg-white border border-[#D8D8F8] rounded-2xl shadow-md px-5 py-5">
+    <div className="bg-white border border-[#D8D8F8] rounded-xl shadow-sm px-4 py-3">
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-[18px] font-semibold text-[#05058D] flex items-center gap-2">
+          <h3 className="text-base font-semibold text-[#05058D] flex items-center gap-2">
             {doc}
-            {uploaded && verificationState?.status !== "failed" && <CheckCircle2 size={18} className="text-green-600" />}
-            {uploaded && verificationState?.status === "failed" && <XCircle size={18} className="text-red-500" />}
+            {uploaded && verificationState?.status !== "failed" && <CheckCircle2 size={16} className="text-green-600" />}
+            {uploaded && verificationState?.status === "failed" && <XCircle size={16} className="text-red-500" />}
           </h3>
 
           {!uploaded ? (
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-[11px] text-gray-500 mt-0.5">
               Supported format PDF, JPG, PNG, up to 5MB
             </p>
           ) : (
-            <p className={`text-xs mt-1 flex items-center gap-1 ${verificationState?.status === "failed" ? "text-red-500" : "text-green-600"}`}>
+            <p className={`text-[11px] mt-0.5 flex items-center gap-1 ${verificationState?.status === "failed" ? "text-red-500" : "text-green-600"}`}>
               {verificationState?.status === "failed" ? "Verification failed" : "Upload successful"}
             </p>
           )}
@@ -33,13 +33,13 @@ export default function UploadCard({
 
         {!uploaded ? (
           isUploading ? (
-            <div className="bg-[#05058D] opacity-80 text-white h-11 px-6 rounded-xl flex items-center gap-2 text-sm cursor-not-allowed">
-              <Loader2 size={18} className="animate-spin" />
+            <div className="bg-[#05058D] opacity-80 text-white h-9 px-4 rounded-lg flex items-center gap-2 text-[13px] cursor-not-allowed">
+              <Loader2 size={16} className="animate-spin" />
               Extracting...
             </div>
           ) : (
-            <label className="bg-[#05058D] text-white h-11 px-6 rounded-xl flex items-center gap-2 cursor-pointer text-sm">
-              <Upload size={18} />
+            <label className="bg-[#05058D] text-white h-9 px-4 rounded-lg flex items-center gap-2 cursor-pointer text-[13px]">
+              <Upload size={16} />
               Upload
               <input
                 hidden

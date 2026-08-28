@@ -335,9 +335,9 @@ export default function IdDetails({ onNext }) {
       : docs;
 
   return (
-    <main className="bg-white rounded-2xl shadow-sm w-215 px-8 py-6">
+    <main className="bg-white rounded-xl shadow-sm max-w-4xl px-6 py-5 mx-auto">
       {/* Title */}
-      <h1 className="text-[32px] font-bold text-[#05058D] mb-6">
+      <h1 className="text-2xl font-bold text-[#05058D] mb-4">
         ID Details
       </h1>
 
@@ -345,8 +345,8 @@ export default function IdDetails({ onNext }) {
       {!openCard && (
         <>
           {/* How It Works */}
-          <div className="rounded-2xl border border-[#6E72E8] bg-[#EEF0FF] px-6 py-5 mb-8">
-            <p className="text-sm leading-7">
+          <div className="rounded-xl border border-[#6E72E8] bg-[#EEF0FF] px-4 py-3 mb-5">
+            <p className="text-[13px] leading-6">
               <span className="font-bold">How It Works:</span>
               Upload Your Identity Documents (Passport, PAN,
               Driving License, Or Voter ID) In JPG, PNG, Or PDF Format.
@@ -357,7 +357,7 @@ export default function IdDetails({ onNext }) {
           </div>
 
           {/* Heading */}
-          <h2 className="text-[22px] font-semibold text-[#05058D] mb-5">
+          <h2 className="text-lg font-semibold text-[#05058D] mb-4">
             Document Upload & Verification
           </h2>
         </>

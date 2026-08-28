@@ -14,15 +14,6 @@ function Education({ onNext }) {
   const [files, setFiles] = useState({});
   const [openCard, setOpenCard] = useState(null);
 
-  const autoFields = {
-    institute: "Sakalesubria Vidya Pitha, Iasimagar",
-    degree: "Matriculation",
-    startDate: "2002-05-25",
-    endDate: "2012-04-04",
-    course: "Odia, English, Hindi",
-    percentage: "83%",
-  };
-
   const handleUpload = (e, docName) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -58,17 +49,35 @@ function Education({ onNext }) {
     setFiles((prev) => ({
       ...prev,
       [docName]: {
+        ...prev[docName],
         success: true,
         fileName: file.name,
         size: (file.size / 1024 / 1024).toFixed(2),
         fields: {
-          ...autoFields,
+          institute: prev[docName]?.fields?.institute || "",
           degree: docName,
+          startDate: prev[docName]?.fields?.startDate || "",
+          endDate: prev[docName]?.fields?.endDate || "",
+          course: prev[docName]?.fields?.course || "",
+          percentage: prev[docName]?.fields?.percentage || "",
         },
       },
     }));
 
     setOpenCard(docName);
+  };
+
+  const handleFieldChange = (docName, field, value) => {
+    setFiles((prev) => ({
+      ...prev,
+      [docName]: {
+        ...prev[docName],
+        fields: {
+          ...prev[docName]?.fields,
+          [field]: value
+        }
+      }
+    }));
   };
 
   const visibleDocs = openCard
@@ -80,27 +89,27 @@ function Education({ onNext }) {
   );
 
   return (
-    <div className="w-full max-w-5xl bg-white rounded-2xl shadow-sm p-8 min-h-screen">
+    <div className="w-full max-w-5xl bg-white rounded-2xl shadow-sm p-6 min-h-[500px]">
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h2 className="text-3xl font-bold text-[#05058D]">
+          <h2 className="text-2xl font-bold text-[#05058D]">
             Education Details
           </h2>
-          <p className="text-sm text-gray-700 mt-1">
+          <p className="text-xs text-gray-700 mt-1">
             Include Your Education To Create A Stronger Profile
           </p>
         </div>
         {!openCard && (
-        <button className="flex items-center gap-2 border border-[#05058D] text-[#05058D] px-5 py-2.5 rounded-xl">
-          <Plus size={16} />
+        <button className="flex items-center gap-2 border border-[#05058D] text-[#05058D] px-4 py-2 rounded-lg text-sm">
+          <Plus size={14} />
           Add Education
         </button>
         )}
       </div>
 
       {/* Cards */}
-      <div className="mt-10 space-y-5">
+      <div className="mt-6 space-y-3">
         {visibleDocs.map((doc) => (
           <EducationCard
             key={doc}
@@ -113,6 +122,7 @@ function Education({ onNext }) {
             onUpload={(e) => handleUpload(e, doc)}
             inputRef={(el) => (fileRefs.current[doc] = el)}
             onOpenFile={() => fileRefs.current[doc]?.click()}
+            onChangeField={(field, val) => handleFieldChange(doc, field, val)}
             onOk={() => setOpenCard(null)}
           />
         ))}
@@ -120,13 +130,13 @@ function Education({ onNext }) {
 
       {/* Guidelines */}
       {!openCard && (
-        <div className="mt-16 bg-[#F8EFE7] rounded-2xl px-6 py-5">
-          <div className="flex items-center gap-2 font-medium">
-            <AlertCircle size={18} className="text-orange-500" />
+        <div className="mt-8 bg-[#F8EFE7] rounded-xl px-4 py-3">
+          <div className="flex items-center gap-2 font-medium text-sm">
+            <AlertCircle size={16} className="text-orange-500" />
             Upload Guidelines
           </div>
 
-          <ul className="mt-4 space-y-2 text-sm list-disc list-inside text-gray-700">
+          <ul className="mt-2 space-y-1 text-xs list-disc list-inside text-gray-700">
             <li>File Formats: PDF, JPG, Or PNG Only</li>
             <li>Maximum File Size: 5MB Per Document</li>
             <li>Ensure All Text Is Clearly Readable</li>
@@ -136,10 +146,10 @@ function Education({ onNext }) {
       )}
 
         {hasUploaded && !openCard && (
-        <div className="flex justify-center mt-10 pb-4">
+        <div className="flex justify-center mt-6 pb-4">
             <button
             onClick={onNext}
-            className="bg-[#05058D] text-white px-12 py-2.5 rounded-xl hover:bg-blue-900 transition"
+            className="bg-[#05058D] text-white px-8 py-2 rounded-lg text-sm hover:bg-blue-900 transition"
             >
             Submit
             </button>

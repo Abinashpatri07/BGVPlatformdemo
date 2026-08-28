@@ -45,24 +45,24 @@ export default function VerificationList() {
   const [showConsentModal, setShowConsentModal] = useState(false);
 
   return (
-    <div className="mt-6 space-y-6">
+    <div className="mt-5 space-y-4 max-w-lg mx-auto">
 
       {/* LIST */}
       {verificationItems.map((item, index) => {
         const Icon = item.icon;
 
         return (
-          <div key={index} className="flex gap-4 items-start">
-            <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
-              <Icon size={20} className="text-indigo-600" />
+          <div key={index} className="flex gap-3 items-start">
+            <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+              <Icon size={16} className="text-indigo-600" />
             </div>
 
             <div>
-              <h3 className="text-[18px] font-medium text-gray-700">
+              <h3 className="text-[15px] font-medium text-gray-700">
                 {item.title}
               </h3>
 
-              <p className="text-xs text-gray-600 mt-1">
+              <p className="text-[11px] text-gray-500 mt-0.5">
                 {item.description}
               </p>
             </div>
@@ -71,11 +71,11 @@ export default function VerificationList() {
       })}
 
       {/* CONSENT FORM ROW */}
-      <div className="flex items-center justify-between border rounded-lg px-4 py-2 max-w-md">
-        <span className="text-sm text-gray-700">Consent form</span>
+      <div className="flex items-center justify-between border border-gray-200 rounded-lg px-3 py-1.5 mt-2">
+        <span className="text-[13px] text-gray-700">Consent form</span>
         <button 
           onClick={() => setShowConsentModal(true)}
-          className="text-indigo-600 text-sm font-medium hover:underline"
+          className="text-indigo-600 text-[13px] font-medium hover:underline"
         >
           View
         </button>

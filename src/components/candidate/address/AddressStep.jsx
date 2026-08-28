@@ -25,58 +25,56 @@ export default function AddressStep({ onNext }) {
   const [uploadError, setUploadError] = useState(false);
   const [fileName, setFileName] = useState("");
 
-  
-
   const handleSubmit = async () => {
-  // First click = open OTP
-  if (!verified) {
-    if (aadhaar.trim().length !== 12) {
-      alert("Please enter a valid 12-digit Aadhaar Number");
+    // First click = open OTP
+    if (!verified) {
+      if (aadhaar.trim().length !== 12) {
+        alert("Please enter a valid 12-digit Aadhaar Number");
+        return;
+      }
+
+      try {
+        setIsGenerating(true);
+        const res = await generateAadhaarOtp(aadhaar);
+        if (res.error) {
+          alert("Failed to generate OTP: " + res.error);
+          setIsGenerating(false);
+          return;
+        }
+        setTaskId(res.task_id);
+        setIsGenerating(false);
+        setShowOtp(true);
+      } catch (err) {
+        alert("Error initiating Aadhaar verification.");
+        setIsGenerating(false);
+      }
       return;
     }
 
-    try {
-      setIsGenerating(true);
-      const res = await generateAadhaarOtp(aadhaar);
-      if (res.error) {
-        alert("Failed to generate OTP: " + res.error);
-        setIsGenerating(false);
-        return;
-      }
-      setTaskId(res.task_id);
-      setIsGenerating(false);
-      setShowOtp(true);
-    } catch (err) {
-      alert("Error initiating Aadhaar verification.");
-      setIsGenerating(false);
+    // Require address type
+    if (!addressType) {
+      setRadioError(true);
+      return;
     }
-    return;
-  }
 
-  // Require address type
-  if (!addressType) {
-    setRadioError(true);
-    return;
-  }
+    // Require same address
+    if (!sameAddress) {
+      setSameError(true);
+      return;
+    }
 
-  // Require same address
-  if (!sameAddress) {
-    setSameError(true);
-    return;
-  }
+    setRadioError(false);
+    setSameError(false);
 
-  setRadioError(false);
-  setSameError(false);
+    // If No and file not uploaded => show upload box
+    if (sameAddress === "no" && !uploaded) {
+      setShowUpload(true);
+      return;
+    }
 
-  // If No and file not uploaded => show upload box
-  if (sameAddress === "no" && !uploaded) {
-    setShowUpload(true);
-    return;
-  }
-
-  // If Yes OR uploaded successfully => next page
-  onNext();
-};
+    // If Yes OR uploaded successfully => next page
+    onNext();
+  };
 
   const handleOtpSuccess = (data) => {
     setShowOtp(false);
@@ -85,32 +83,28 @@ export default function AddressStep({ onNext }) {
   };
 
   const handleFileUpload = (e) => {
-  const file = e.target.files[0];
+    const file = e.target.files[0];
 
-  if (!file) return;
+    if (!file) return;
 
-  const validTypes = [
-    "image/png",
-    "image/jpeg",
-    "application/pdf",
-  ];
+    const validTypes = ["image/png", "image/jpeg", "application/pdf"];
 
-  if (!validTypes.includes(file.type)) {
-    setUploadError(true);
-    setUploaded(false);
-    return;
-  }
+    if (!validTypes.includes(file.type)) {
+      setUploadError(true);
+      setUploaded(false);
+      return;
+    }
 
-  setFileName(file.name);
-  setUploadError(false);
-  setUploaded(true);
-};
+    setFileName(file.name);
+    setUploadError(false);
+    setUploaded(true);
+  };
 
-const getMaskedAadhaar = (val) => {
-  if (val.length <= 4) return val;
-  const maskedLength = val.length - 4;
-  return "*".repeat(maskedLength) + val.slice(-4);
-};
+  const getMaskedAadhaar = (val) => {
+    if (val.length <= 4) return val;
+    const maskedLength = val.length - 4;
+    return "*".repeat(maskedLength) + val.slice(-4);
+  };
 
   return (
     <>
@@ -149,7 +143,7 @@ const getMaskedAadhaar = (val) => {
               return;
             }
 
-            // If string has no asterisks (e.g. typing first 4 digits or pasting a full number)
+            // If string has no asterisks
             if (!val.includes('*')) {
               setAadhaar(val.replace(/\D/g, "").slice(0, 12));
               return;
@@ -333,30 +327,30 @@ const getMaskedAadhaar = (val) => {
                 Please choose Yes or No to continue.
               </p>
             )}
+            
             {/* Upload Box Before Success */}
-              {showUpload && !uploaded && (
-                <UploadBox
-                  title="Present Address"
-                  onUpload={handleFileUpload}
-                  showError={uploadError}
+            {showUpload && !uploaded && (
+              <UploadBox
+                title="Present Address"
+                onUpload={handleFileUpload}
+                showError={uploadError}
+              />
+            )}
+
+            {/* After Upload Success */}
+            {uploaded && (
+              <>
+                <UploadSuccess
+                  fileName={fileName}
+                  fileSize="Uploaded"
+                  onChangeFile={() => {
+                    setUploaded(false);
+                    setUploadError(false);
+                  }}
                 />
-              )}
-
-              {/* After Upload Success */}
-              {uploaded && (
-                <>
-                  <UploadSuccess
-                    fileName={fileName}
-                    fileSize="Uploaded"
-                    onChangeFile={() => {
-                      setUploaded(false);
-                      setUploadError(false);
-                    }}
-                  />
-
-                  <PermanentAddressSection />
-                </>
-              )}
+                <PermanentAddressSection />
+              </>
+            )}
           </>
         )}
 
