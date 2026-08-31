@@ -15,8 +15,8 @@ const InputBox = ({ label, value, type = "text", onChange, required = true }) =>
   </div>
 );
 
-function EmploymentForm({ onSubmit, isInternship }) {
-  const [formData, setFormData] = useState({
+function EmploymentForm({ onSubmit, isInternship, initialData }) {
+  const [formData, setFormData] = useState(initialData || {
     employeeId: "",
     companyName: "",
     firstName: "",

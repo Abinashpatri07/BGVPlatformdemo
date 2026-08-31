@@ -3,7 +3,7 @@ import { Trash2 } from "lucide-react";
 
 const Input = ({ label, field, index, value, type = "text", placeholder = "", onChange, error }) => (
   <div>
-    <label htmlFor={`${field}-${index}`} className="block text-sm mb-1 font-medium text-gray-700">
+    <label htmlFor={`${field}-${index}`} className="block text-xs font-medium text-gray-700 mb-1">
       {label} <span className="text-red-500">*</span>
     </label>
     <input
@@ -12,7 +12,7 @@ const Input = ({ label, field, index, value, type = "text", placeholder = "", on
       value={value}
       placeholder={placeholder}
       onChange={(e) => onChange(index, field, e.target.value)}
-      className={`w-full h-11 border rounded-lg px-4 text-sm outline-none focus:ring-2 transition
+      className={`w-full h-10 border rounded-lg px-3 text-sm outline-none focus:ring-2 transition
         ${error
           ? "border-red-400 focus:ring-red-300 focus:border-red-400"
           : "border-gray-300 focus:ring-[#05058D] focus:border-[#05058D]"
@@ -24,14 +24,14 @@ const Input = ({ label, field, index, value, type = "text", placeholder = "", on
 
 const Select = ({ label, field, index, value, options, onChange, error }) => (
   <div>
-    <label htmlFor={`${field}-${index}`} className="block text-sm mb-1 font-medium text-gray-700">
+    <label htmlFor={`${field}-${index}`} className="block text-xs font-medium text-gray-700 mb-1">
       {label} <span className="text-red-500">*</span>
     </label>
     <select
       id={`${field}-${index}`}
       value={value}
       onChange={(e) => onChange(index, field, e.target.value)}
-      className={`w-full h-11 border rounded-lg px-4 text-sm outline-none focus:ring-2 bg-white transition
+      className={`w-full h-10 border rounded-lg px-3 text-sm outline-none focus:ring-2 bg-white transition
         ${error
           ? "border-red-400 focus:ring-red-300 focus:border-red-400"
           : "border-gray-300 focus:ring-[#05058D] focus:border-[#05058D]"
@@ -102,17 +102,17 @@ function ReferenceForm({ index, data, type, onChange }) {
     touched[field] ? validateField(field, data[field]) : "";
 
   return (
-    <div className="border border-gray-200 rounded-2xl p-6 bg-white shadow-sm">
+    <div className="border border-gray-200 rounded-xl p-5 bg-white shadow-sm hover:shadow-md transition-shadow">
       {/* Header */}
-      <div className="flex justify-between items-center mb-5">
-        <h3 className="text-2xl font-semibold text-[#05058D]">
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="text-lg font-semibold tracking-tight text-[#05058D]">
           {type === "professional" ? "1. Professional / Academic Reference" : "2. Personal / Family Reference"}
         </h3>
       </div>
 
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div onBlur={() => handleBlur("name")}>
           <Input
             label="Name"

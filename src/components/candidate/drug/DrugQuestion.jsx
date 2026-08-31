@@ -9,25 +9,25 @@ function DrugQuestion({
 }) {
   return (
     <>
-      <h3 className="mt-12 text-2xl font-medium text-[#05058D]">
+      <h3 className="mt-6 text-sm font-semibold tracking-wide text-[#05058D]">
         {question}
       </h3>
 
-      <div className="mt-8 space-y-5">
+      <div className="mt-3 space-y-3">
         {options.map((item) => (
           <label
             key={item.value}
-            className="flex items-center gap-4 cursor-pointer"
+            className="flex items-center gap-3 cursor-pointer group"
           >
             <input
               type="radio"
               name="drug-test"
               checked={selected === item.value}
               onChange={() => onSelect(item.value)}
-              className="h-5 w-5 accent-[#05058D]"
+              className="h-4 w-4 accent-[#05058D] cursor-pointer"
             />
 
-            <span className="text-lg text-gray-900">
+            <span className="text-sm text-gray-700 font-medium group-hover:text-[#05058D] transition-colors">
               {item.label}
             </span>
           </label>

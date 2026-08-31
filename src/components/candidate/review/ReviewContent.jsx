@@ -3,15 +3,15 @@ import React from "react";
 function Field({ label, value, verified = false }) {
   return (
     <div>
-      <label className="block text-sm font-medium mb-1 text-gray-700">
+      <label className="block text-xs font-medium mb-1 text-gray-500">
         {label}
       </label>
 
-      <div className="w-full border rounded-lg px-4 py-2 bg-gray-50 flex justify-between items-center gap-3">
-        <span className="truncate">{value}</span>
+      <div className="w-full border border-gray-200 rounded-lg px-3 py-2 bg-gray-50/50 flex justify-between items-center gap-2 hover:bg-white transition-colors">
+        <span className="truncate text-sm text-gray-800 font-medium">{value}</span>
 
         {verified && (
-          <span className="text-green-600 text-xs font-medium whitespace-nowrap">
+          <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase whitespace-nowrap">
             Verified
           </span>
         )}
@@ -22,175 +22,154 @@ function Field({ label, value, verified = false }) {
 
 function Section({ title, children }) {
   return (
-    <div className="mb-10">
-      <h3 className="text-2xl font-semibold text-[#05058D] mb-5">
+    <div className="mb-8 bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+      <h3 className="text-lg font-semibold tracking-tight text-[#05058D] mb-4 border-b pb-2">
         {title}
       </h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {children}
       </div>
     </div>
   );
 }
 
-function ReviewContent() {
+function ReviewContent({ candidateData }) {
+  if (!candidateData) return null;
+  const { basicInfo, address, idDocs, education, employment, drugTest, criminal, references } = candidateData;
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "N/A";
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? dateStr : d.toLocaleDateString('en-GB');
+  };
+
+  const getDocName = (type) => {
+    switch (type) {
+      case 1: return "PAN";
+      case 2: return "Aadhaar";
+      case 3: return "Passport";
+      case 4: return "Driving License";
+      case 5: return "Voter ID";
+      default: return "ID Document";
+    }
+  };
+
   return (
     <div>
       {/* Permanent Address */}
       <Section title="Permanent Address">
-        <Field label="House Number" value="G-501" />
-        <Field label="Address Line 1" value="Kula Layout, Sanjib Nagar 3rd Phase" />
-        <Field label="Address Line 2" value="Jaynagar Layout, Bangalore" />
-        <Field label="Pin Code" value="562214" />
-        <Field label="City" value="Bangalore" />
-        <Field label="State" value="Karnataka" />
+        <Field label="Address" value={address?.permanent_address || "N/A"} />
+        <Field label="City" value={address?.permanent_city || "N/A"} />
+        <Field label="State" value={address?.permanent_state || "N/A"} />
+        <Field label="Pin Code" value={address?.permanent_zipcode || "N/A"} />
       </Section>
 
       {/* Present Address */}
       <Section title="Present Address">
-        <Field label="House Number" value="FA-521" />
-        <Field label="Address" value="Zilla Panchayat, Bangalore Urban, Banashankari" />
-        <Field label="Pin Code" value="560050" />
-        <Field label="City" value="Bangalore" />
-        <Field label="State" value="Karnataka" />
+        <Field label="Address" value={address?.candidate_current_address || "N/A"} />
+        <Field label="City" value={address?.current_city || "N/A"} />
+        <Field label="State" value={address?.current_state || "N/A"} />
+        <Field label="Pin Code" value={address?.current_zipcode || "N/A"} />
       </Section>
 
-      {/* Passport */}
-      <Section title="Passport Details">
-        <Field label="Passport Number" value="LYA52014IE" verified />
-        <Field label="Place Of Issue" value="Odisha" verified />
-        <Field label="First Name" value="Ramesh Kumar" verified />
-        <Field label="Last Name" value="Mishra" verified />
-        <Field label="Date Of Birth" value="25/05/1997" verified />
-        <Field label="Place Of Birth" value="Odisha" verified />
-        <Field label="Date Of Issue" value="21/06/2020" verified />
-        <Field label="Date Of Expiry" value="04/10/2030" verified />
-        <Field label="Nationality" value="INDIAN" verified />
-        <Field label="Gender" value="Male" verified />
-      </Section>
+      {/* ID Documents */}
+      {idDocs && idDocs.length > 0 && (
+        <Section title="ID Documents">
+          {idDocs.map((doc, idx) => {
+            let docNumber = "N/A";
+            if (doc.cand_iden_type === "PAN card") docNumber = doc.pan_number;
+            else if (doc.cand_iden_type === "Driving license") docNumber = doc.driving_number;
+            else if (doc.cand_iden_type === "Voter ID") docNumber = doc.voter_number;
+            else if (doc.cand_iden_type === "Passport") docNumber = doc.passport_number;
 
-      {/* PAN */}
-      <Section title="PAN Card Details">
-        <Field label="PAN Number" value="LYA52014IE" verified />
-        <Field label="Date Of Birth" value="25/05/1997" verified />
-        <Field label="First Name" value="Ramesh Kumar" verified />
-        <Field label="Last Name" value="Mishra" verified />
-        <Field label="Nationality" value="INDIAN" verified />
-        <Field label="Gender" value="Male" verified />
-      </Section>
-
-      {/* Driving License */}
-      <Section title="Driving License Details">
-        <Field label="Driving Licence Number" value="LYA5201254895545" verified />
-        <Field label="Full Name" value="Ramesh Kumar Mishra" verified />
-        <Field label="Date Of Birth" value="25/05/1997" verified />
-        <Field label="Address" value="Bhubaneswar" verified />
-        <Field label="Issued Date" value="20/06/2017" verified />
-        <Field label="Expire Date" value="04/12/2034" verified />
-        <Field label="Vehicle Class" value="HUTF" verified />
-        <Field label="Blood Group" value="O+VE" verified />
-      </Section>
-
-      {/* Voter ID */}
-      <Section title="Voter ID Details">
-        <Field label="Voter ID Number" value="LYA52014IE" verified />
-        <Field label="Full Name" value="Ramesh Kumar Mishra" verified />
-        <Field label="Date Of Birth" value="25/05/1997" verified />
-        <Field label="Date Of Issue" value="20/04/2020" verified />
-        <Field label="Nationality" value="INDIAN" verified />
-        <Field label="Gender" value="Male" verified />
-      </Section>
+            return (
+              <Field 
+                key={idx} 
+                label={doc.cand_iden_type || `Document ${idx+1}`} 
+                value={docNumber || "N/A"} 
+                verified={doc.iden_verification_status === 1} 
+              />
+            );
+          })}
+        </Section>
+      )}
 
       {/* Employment */}
       <Section title="Employment Details">
-        <Field label="Employee ID" value="DAQ52014IE" verified />
-        <Field label="Company Name" value="DQNex Private Limited" verified />
-        <Field label="First Name" value="Ramesh Kumar" />
-        <Field label="Last Name" value="Mishra" />
-        <Field label="From Date" value="25/05/2017" />
-        <Field label="To Date" value="06/09/2024" />
-        <Field label="Designation" value="UI/UX Designer" />
-        <Field label="Drawn CTC" value="9 LPA" />
+        {employment && employment.length > 0 ? employment.map((emp, idx) => (
+          <React.Fragment key={idx}>
+            <h4 className="col-span-1 sm:col-span-2 md:col-span-3 font-medium text-[#101A78] mt-2 mb-1 border-b pb-2">
+              {emp.cand_emp_type || `Employment ${idx + 1}`}
+            </h4>
+            <Field label="Company Name" value={emp.cand_emp_company || "N/A"} />
+            <Field label="Employee ID" value={emp.cand_emp_empid || "N/A"} />
+            <Field label="Designation" value={emp.cand_emp_designation || "N/A"} />
+            <Field label="Start Date" value={formatDate(emp.cand_emp_from_date)} />
+            <Field label="End Date" value={formatDate(emp.cand_emp_to_date)} />
+          </React.Fragment>
+        )) : <p className="text-sm text-gray-500 col-span-1 sm:col-span-2 md:col-span-3">No employment details added.</p>}
       </Section>
 
       {/* Education */}
       <Section title="Education Details">
-        <h4 className="col-span-1 md:col-span-2 font-medium text-[#101A78] mt-2 mb-1 border-b pb-2">
-          Matriculation (10th)
-        </h4>
-        <Field label="Institute Name" value="Sakalsubha Vidya Pitha, Laxminagar" />
-        <Field label="Degree" value="10th" />
-        <Field label="Start Date" value="25/05/2002" />
-        <Field label="End Date" value="06/04/2012" />
-        <Field label="Course" value="Odia, English, Hindi" />
-        <Field label="Percentage" value="83%" />
-
-        <h4 className="col-span-1 md:col-span-2 font-medium text-[#101A78] mt-6 mb-1 border-b pb-2">
-          Intermediate (12th)
-        </h4>
-        <Field label="Institute Name" value="Mindgap Junior Science College" />
-        <Field label="Degree" value="12th" />
-        <Field label="Start Date" value="25/05/2012" />
-        <Field label="End Date" value="06/04/2014" />
-        <Field label="Course" value="Science" />
-        <Field label="Percentage" value="76%" />
-
-        <h4 className="col-span-1 md:col-span-2 font-medium text-[#101A78] mt-6 mb-1 border-b pb-2">
-          Graduation
-        </h4>
-        <Field label="Institute Name" value="Nolend Group Of Institutions" />
-        <Field label="Degree" value="B Tech" />
-        <Field label="Start Date" value="25/05/2014" />
-        <Field label="End Date" value="06/04/2018" />
-        <Field label="Course" value="Computer Science Engineering" />
-        <Field label="CGPA" value="9.2 CGPA" />
-
-        <h4 className="col-span-1 md:col-span-2 font-medium text-[#101A78] mt-6 mb-1 border-b pb-2">
-          Post Graduation
-        </h4>
-        <Field label="Institute Name" value="Nolend Group Of Institutions" />
-        <Field label="Degree" value="M Tech" />
-        <Field label="Start Date" value="25/05/2018" />
-        <Field label="End Date" value="06/04/2022" />
-        <Field label="Course" value="Computer Science Engineering" />
-        <Field label="CGPA" value="8.9 CGPA" />
+        {education && education.length > 0 ? education.map((edu, idx) => (
+          <React.Fragment key={idx}>
+            <h4 className="col-span-1 sm:col-span-2 md:col-span-3 font-medium text-[#101A78] mt-2 mb-1 border-b pb-2">
+              {edu.cand_edu_dgree || edu.cand_edu_type || `Education ${idx + 1}`}
+            </h4>
+            <Field label="Institute Name" value={edu.cand_edu_institute || "N/A"} />
+            <Field label="Start Date" value={formatDate(edu.cand_edu_from_date)} />
+            <Field label="End Date" value={formatDate(edu.cand_edu_to_date)} />
+            <Field label="Course" value={edu.cand_specialization || "N/A"} />
+            <Field label="Percentage/CGPA" value={edu.cand_edu_grade || "N/A"} />
+          </React.Fragment>
+        )) : <p className="text-sm text-gray-500 col-span-1 sm:col-span-2 md:col-span-3">No education details added.</p>}
       </Section>
 
       {/* Drug Test */}
       <Section title="Drug Test Details">
-        <Field label="Status" value="Yes, I Have Taken The Drug Test" />
-        <Field label="Date of Test" value="15/10/2023" />
-        <Field label="Test Result" value="Tested Negative (Clear)" />
+        {drugTest ? (
+          <>
+            <Field label="Taken Drug Test?" value={drugTest.cand_drug_test || "N/A"} />
+            {drugTest.cand_drug_test === "Yes" && (
+              <>
+                <Field label="Date of Test" value={formatDate(drugTest.cand_drug_date)} />
+                <Field label="Remarks" value={drugTest.cand_drug_remarks || "N/A"} />
+              </>
+            )}
+          </>
+        ) : <p className="text-sm text-gray-500 col-span-1 sm:col-span-2 md:col-span-3">No drug test details submitted.</p>}
       </Section>
 
       {/* Criminal */}
-      <Section title="Criminal Checkup">
-        <Field label="Status" value="Yes, I Have A Criminal Record" />
-        <Field
-          label="Details"
-          value="On [date], the accused allegedly committed offense at [location]."
-        />
+      <Section title="Criminal Check">
+        {criminal ? (
+          <>
+            <Field label="Has Criminal Record?" value={criminal.cand_crim_record || "N/A"} />
+            {criminal.cand_crim_record === "Yes" && (
+              <Field label="Details" value={criminal.cand_crim_remarks || "N/A"} />
+            )}
+          </>
+        ) : <p className="text-sm text-gray-500 col-span-1 sm:col-span-2 md:col-span-3">No criminal check details submitted.</p>}
       </Section>
 
       {/* Reference */}
       <Section title="Reference Check">
-        <h4 className="col-span-1 md:col-span-2 font-medium text-[#101A78] mt-2 mb-1 border-b pb-2">
-          1. Professional / Academic Reference
-        </h4>
-        <Field label="Name" value="Varun Kummel" />
-        <Field label="Relationship" value="Manager" />
-        <Field label="Organization / College Name" value="Brindavan College of Engineering" />
-        <Field label="Contact Number" value="+91 1234567890" />
-        <Field label="Email Address" value="varun@brindavan.edu" />
-
-        <h4 className="col-span-1 md:col-span-2 font-medium text-[#101A78] mt-6 mb-1 border-b pb-2">
-          2. Personal / Family Reference
-        </h4>
-        <Field label="Name" value="Manisha Tewari" />
-        <Field label="Relationship" value="Friend" />
-        <Field label="Contact Number" value="+91 9876543210" />
-        <Field label="Email Address" value="manisha@mail.com" />
+        {references && references.length > 0 ? references.map((ref, idx) => (
+          <React.Fragment key={idx}>
+            <h4 className="col-span-1 sm:col-span-2 md:col-span-3 font-medium text-[#101A78] mt-2 mb-1 border-b pb-2">
+              {ref.cand_ref_type || `Reference ${idx + 1}`}
+            </h4>
+            <Field label="Name" value={ref.cand_ref_name || "N/A"} />
+            <Field label="Relationship" value={ref.cand_ref_relation || "N/A"} />
+            <Field label="Contact Number" value={ref.cand_ref_phone || "N/A"} />
+            <Field label="Email Address" value={ref.cand_ref_email || "N/A"} />
+            {ref.cand_ref_org && (
+              <Field label="Organization" value={ref.cand_ref_org} />
+            )}
+          </React.Fragment>
+        )) : <p className="text-sm text-gray-500 col-span-1 sm:col-span-2 md:col-span-3">No references added.</p>}
       </Section>
     </div>
   );

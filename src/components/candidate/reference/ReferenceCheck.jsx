@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 import { AlertCircle } from "lucide-react";
 import ReferenceForm from "./ReferenceForm";
 
@@ -17,6 +18,34 @@ function ReferenceCheck({ onNext }) {
   ]);
 
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  React.useEffect(() => {
+    const fetchExisting = async () => {
+      try {
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/1`);
+        if (response.data && response.data.references && response.data.references.length > 0) {
+          const loadedRefs = [createEmptyRef(), createEmptyRef()];
+          response.data.references.forEach(ref => {
+            const mappedRef = {
+              name: ref.cand_ref_name || "",
+              relationship: ref.cand_ref_relation || "",
+              organization: ref.cand_ref_org || "",
+              phone: ref.cand_ref_phone || "",
+              email: ref.cand_ref_email || ""
+            };
+            if (ref.cand_ref_type === "Organization") loadedRefs[0] = mappedRef;
+            else if (ref.cand_ref_type === "Family") loadedRefs[1] = mappedRef;
+          });
+          setReferences(loadedRefs);
+        }
+      } catch (err) {
+        console.error("Error fetching references:", err);
+      }
+    };
+    fetchExisting();
+  }, []);
 
   const handleChange = (index, field, value) => {
     setReferences((prev) =>
@@ -49,22 +78,43 @@ function ReferenceCheck({ onNext }) {
     return true;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate()) return;
     setError("");
-    onNext && onNext(references);
+    setLoading(true);
+
+    try {
+      const payload = {
+        cand_id: 1, // Assume 1 for now
+        references: [
+          { ...references[0], type: "Organization" },
+          { ...references[1], type: "Family" }
+        ]
+      };
+
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      await axios.post(`${API_BASE}/api/candidate/submit/reference`, payload);
+      if (onNext) onNext(references);
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.error || "Failed to save References.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="w-full max-w-5xl bg-white rounded-2xl shadow-sm p-10 min-h-screen">
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold text-[#05058D]">Reference Check</h2>
-        <p className="text-gray-600 mt-2 text-sm">
-          Please provide two references (one professional/academic and one personal/family).
-        </p>
+    <div className="w-full max-w-5xl bg-white rounded-2xl shadow-sm p-6 flex flex-col min-h-[300px]">
+      <div className="mb-4 flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-bold text-blue-900">Reference Check</h2>
+          <p className="text-gray-500 mt-1 text-sm">
+            Please provide two references (one professional/academic and one personal/family).
+          </p>
+        </div>
       </div>
 
-      <div className="space-y-10 mt-6">
+      <div className="space-y-6 mt-2">
         <ReferenceForm
           index={0}
           data={references[0]}
@@ -80,16 +130,16 @@ function ReferenceCheck({ onNext }) {
       </div>
 
       {error && (
-        <p className="mt-6 text-red-500 text-sm flex items-center gap-2">
+        <p className="mt-4 text-red-500 text-sm flex items-center gap-2">
           <AlertCircle size={14} />
           {error}
         </p>
       )}
 
-      <div className="flex justify-center mt-12">
+      <div className="flex justify-center mt-8 mb-2">
         <button
           onClick={handleSubmit}
-          className="bg-[#05058D] text-white px-14 py-3 rounded-xl hover:bg-blue-900 transition"
+          className="bg-[#05058D] text-white px-10 py-2.5 rounded-xl font-medium hover:bg-blue-800 transition shadow-lg shadow-blue-900/20 text-sm"
         >
           Submit
         </button>

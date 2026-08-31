@@ -63,6 +63,91 @@ export default function IdDetails({ onNext }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
+  React.useEffect(() => {
+    const fetchExistingData = async () => {
+      try {
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/1`);
+        if (response.data && response.data.idDocs && response.data.idDocs.length > 0) {
+          const loadedData = {};
+          response.data.idDocs.forEach(doc => {
+            const docType = doc.cand_iden_type;
+            if (docType) {
+              // Reconstruct the OCR-like fields object based on document type
+              let fields = {};
+              let docNumber = "";
+              if (docType === "PAN card") {
+                fields = {
+                  pan_number: doc.pan_number || "",
+                  date_of_birth: doc.cand_dob ? new Date(doc.cand_dob).toISOString().split('T')[0] : "",
+                  full_name: doc.cand_full_name || "",
+                  father_name: doc.cand_father_name || ""
+                };
+                docNumber = doc.pan_number;
+              } else if (docType === "Driving license") {
+                fields = {
+                  driving_licence_number: doc.driving_number || "",
+                  full_name: doc.cand_full_name || "",
+                  date_of_birth: doc.cand_dob ? new Date(doc.cand_dob).toISOString().split('T')[0] : "",
+                  address: doc.cand_address || "",
+                  issued_date: doc.driv_issue_date ? new Date(doc.driv_issue_date).toISOString().split('T')[0] : "",
+                  expire_date: doc.driv_expiry_date ? new Date(doc.driv_expiry_date).toISOString().split('T')[0] : "",
+                  vehicle_class: doc.cand_vehicle_class || "",
+                  blood_group: doc.cand_blood_group || ""
+                };
+                docNumber = doc.driving_number;
+              } else if (docType === "Voter ID") {
+                fields = {
+                  voter_id_number: doc.voter_number || "",
+                  full_name: doc.cand_full_name || "",
+                  date_of_birth: doc.cand_dob ? new Date(doc.cand_dob).toISOString().split('T')[0] : "",
+                  date_of_issue: doc.voter_issue_date ? new Date(doc.voter_issue_date).toISOString().split('T')[0] : "",
+                  nationality: doc.cand_nationality || "",
+                  gender: doc.cand_gender || ""
+                };
+                docNumber = doc.voter_number;
+              } else if (docType === "Passport") {
+                fields = {
+                  passport_number: doc.passport_number || "",
+                  date_of_birth: doc.cand_dob ? new Date(doc.cand_dob).toISOString().split('T')[0] : "",
+                  first_name: doc.pass_first_name || "",
+                  last_name: doc.pass_last_name || "",
+                  place_of_birth: doc.cand_birth_place || "",
+                  date_of_issue: doc.pass_issue_date ? new Date(doc.pass_issue_date).toISOString().split('T')[0] : "",
+                  date_of_expiry: doc.pass_expiry_date ? new Date(doc.pass_expiry_date).toISOString().split('T')[0] : "",
+                  nationality: doc.cand_nationality || "",
+                  gender: doc.cand_gender || ""
+                };
+                docNumber = doc.passport_number;
+              }
+
+              loadedData[docType] = {
+                fileName: "Existing Document",
+                size: "0.0",
+                fields: fields,
+                success: true // Force success state so it looks uploaded
+              };
+
+              // Set dummy verification status based on what was saved
+              const verStatus = doc.iden_verification_status === 1 ? "success" : 
+                                doc.iden_verification_status === 2 ? "failed" : "idle";
+              const verStateObj = { status: verStatus, registeredName: doc.cand_full_name || "" };
+              
+              if (docType === "PAN card") setPanVerification(verStateObj);
+              if (docType === "Driving license") setDlVerification(verStateObj);
+              if (docType === "Voter ID") setVoterVerification(verStateObj);
+              if (docType === "Passport") setPassportVerification(verStateObj);
+            }
+          });
+          setData(loadedData);
+        }
+      } catch (err) {
+        console.error("Error fetching existing ID docs:", err);
+      }
+    };
+    fetchExistingData();
+  }, []);
+
   const handleUpload = async (e, docType) => {
   const file = e.target.files[0];
 
