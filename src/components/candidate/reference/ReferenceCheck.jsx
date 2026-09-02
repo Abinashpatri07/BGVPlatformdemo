@@ -23,8 +23,10 @@ function ReferenceCheck({ onNext }) {
   React.useEffect(() => {
     const fetchExisting = async () => {
       try {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const candId = user.cand_id || 1;
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/1`);
+        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         if (response.data && response.data.references && response.data.references.length > 0) {
           const loadedRefs = [createEmptyRef(), createEmptyRef()];
           response.data.references.forEach(ref => {
@@ -84,8 +86,10 @@ function ReferenceCheck({ onNext }) {
     setLoading(true);
 
     try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const candId = user.cand_id || 1;
       const payload = {
-        cand_id: 1, // Assume 1 for now
+        cand_id: candId,
         references: [
           { ...references[0], type: "Organization" },
           { ...references[1], type: "Family" }

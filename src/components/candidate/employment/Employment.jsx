@@ -9,12 +9,24 @@ function Employment({ onNext }) {
   const [employments, setEmployments] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
+  const [isInternshipCandidate, setIsInternshipCandidate] = useState(false);
 
   React.useEffect(() => {
     const fetchExistingData = async () => {
       try {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const candId = user.cand_id || 1;
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/1`);
+        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
+        
+        // Determine if candidate is fresher based on candidate_experience
+        if (response.data && response.data.basicInfo) {
+          const exp = response.data.basicInfo.candidate_experience;
+          if (exp === 0 || exp === "0" || (typeof exp === 'string' && exp.toLowerCase() === 'fresher')) {
+            setIsInternshipCandidate(true);
+          }
+        }
+
         if (response.data && response.data.employment && response.data.employment.length > 0) {
           const mappedEmployments = response.data.employment.map(emp => ({
             companyName: emp.cand_emp_company || "",
@@ -23,8 +35,6 @@ function Employment({ onNext }) {
             fromDate: emp.cand_emp_from_date ? new Date(emp.cand_emp_from_date).toISOString().split('T')[0] : "",
             toDate: emp.cand_emp_to_date ? new Date(emp.cand_emp_to_date).toISOString().split('T')[0] : "",
             isInternship: emp.cand_emp_type === "Internship",
-            // Note: certificateFile path exists in DB, but we don't load the actual File object back.
-            // The backend handles NULL path updates gracefully.
           }));
           setEmployments(mappedEmployments);
           setStep("submitted");
@@ -56,9 +66,11 @@ function Employment({ onNext }) {
   const handleFinalSubmit = async () => {
     setIsSubmitting(true);
     try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const candId = user.cand_id || 1;
       const formPayload = new FormData();
-      formPayload.append("cand_id", 1);
-      formPayload.append("isInternship", "false");
+      formPayload.append("cand_id", candId);
+      formPayload.append("isInternship", isInternshipCandidate ? "true" : "false");
       
       const employmentData = [];
       
@@ -136,7 +148,7 @@ function Employment({ onNext }) {
 
       {step === "form" && (
         <EmploymentForm
-          isInternship={false}
+          isInternship={isInternshipCandidate}
           initialData={editingIndex !== null ? employments[editingIndex] : null}
           onSubmit={handleAddEmployment}
         />

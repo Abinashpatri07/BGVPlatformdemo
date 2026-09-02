@@ -66,8 +66,10 @@ export default function IdDetails({ onNext }) {
   React.useEffect(() => {
     const fetchExistingData = async () => {
       try {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const candId = user.cand_id || 1;
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/1`);
+        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         if (response.data && response.data.idDocs && response.data.idDocs.length > 0) {
           const loadedData = {};
           response.data.idDocs.forEach(doc => {
@@ -399,8 +401,10 @@ export default function IdDetails({ onNext }) {
         };
       });
 
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const candId = user.cand_id || 1;
       await submitCandidateIdDocuments({
-        cand_id: 1, // Dummy candidate ID for now
+        cand_id: candId,
         documents: documentsPayload
       });
 

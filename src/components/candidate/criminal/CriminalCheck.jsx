@@ -15,8 +15,10 @@ function CriminalCheck({ onNext }) {
   React.useEffect(() => {
     const fetchExisting = async () => {
       try {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const candId = user.cand_id || 1;
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/1`);
+        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         if (response.data && response.data.criminal) {
           const crim = response.data.criminal;
           if (crim.cand_crim_record === "Yes") {
@@ -39,8 +41,11 @@ function CriminalCheck({ onNext }) {
   const handleSkip = async () => {
     setLoading(true);
     try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const candId = user.cand_id || 1;
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       await axios.post(`${API_BASE}/api/candidate/submit/criminal`, { 
+        cand_id: candId,
         has_record: false,
         criminalStatus: "No" 
       });
@@ -80,7 +85,10 @@ function CriminalCheck({ onNext }) {
     setError(false);
     setLoading(true);
     try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const candId = user.cand_id || 1;
       const formData = new FormData();
+      formData.append("cand_id", candId);
       formData.append("criminalStatus", "Yes");
       formData.append("remarks", details);
       

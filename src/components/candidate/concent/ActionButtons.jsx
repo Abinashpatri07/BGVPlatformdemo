@@ -10,9 +10,11 @@ export default function ActionButtons() {
   const submitConsent = async (latitude, longitude) => {
     try {
       // Calling the backend API. Using dummy cand_id 1 for now as requested in other files.
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const candId = user.cand_id || 1;
       const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
       await axios.post(`${API_BASE}/api/candidate/submit/consent`, {
-        cand_id: 1,
+        cand_id: candId,
         client_id: 1,
         latitude,
         longitude

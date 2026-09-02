@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 import Header from "../../components/common/Header";
 import SidebarStepper from "../../components/candidate/candsidebar/SidebarStepper";
 import VerificationList from "../../components/candidate/concent/VerificationList";
@@ -35,6 +36,30 @@ export default function VerificationPage() {
     return [];
   });
 
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState(true);
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      try {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const candId = user.cand_id || 1;
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
+        if (response.data && response.data.basicInfo) {
+          if (response.data.basicInfo.verification_status === 2) {
+            setIsSubmitted(true);
+          }
+        }
+      } catch (err) {
+        console.error("Error checking submission status", err);
+      } finally {
+        setLoadingStatus(false);
+      }
+    };
+    checkStatus();
+  }, []);
+
   useEffect(() => {
     sessionStorage.setItem("candidate_currentStep", currentStep);
   }, [currentStep]);
@@ -60,6 +85,38 @@ export default function VerificationPage() {
       setCurrentStep((prev) => prev - 1);
     }
   };
+
+  if (loadingStatus) {
+    return (
+      <div className="min-h-screen bg-[#f4f4ff] flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-gray-500 font-medium">Loading candidate details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isSubmitted) {
+    return (
+      <div className="min-h-screen bg-[#f4f4ff] flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="bg-white rounded-2xl shadow-sm p-10 max-w-xl w-full text-center">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Application Submitted!</h1>
+            <p className="text-gray-600 mb-8">
+              You have already submitted your background verification details successfully. You can no longer edit this information.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f4f4ff]">
@@ -111,7 +168,12 @@ export default function VerificationPage() {
           {currentStep === 6 && <DrugTestStep onNext={handleNext} />}
           {currentStep === 7 && <CriminalCheck onNext={handleNext} />}
           {currentStep === 8 && <ReferenceCheck onNext={handleNext} />}
-          {currentStep === 9 && <ReviewSubmit onNext={handleNext} />}
+          {currentStep === 9 && (
+            <ReviewSubmit 
+              onNext={handleNext} 
+              onSubmit={() => setIsSubmitted(true)}
+            />
+          )}
         </div>
       </div>
     </div>

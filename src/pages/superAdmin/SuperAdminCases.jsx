@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   RefreshCw,
   ListFilter,
@@ -107,96 +108,7 @@ const PendingIcon = () => (
   </div>
 );
 
-const tableData = [
-  {
-    id: 1,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Employment Verification",
-    name: "Arjun Sharma",
-    email: "arjun.sharma@email.com",
-    phone: "1234567890",
-    tat: "2 Days",
-    status: "Assigned",
-  },
-  {
-    id: 2,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Education Verification",
-    name: "Ananya Iyer",
-    email: "ananya.iyer@email.com",
-    phone: "1234567890",
-    tat: "5 Days",
-    status: "Verified",
-  },
-  {
-    id: 3,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Address Verification",
-    name: "Rohan Malhotra",
-    email: "rohan.m@workspace.in",
-    phone: "1234567890",
-    tat: "1 Day",
-    status: "Assigned",
-  },
-  {
-    id: 4,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Criminal Check",
-    name: "Meera Deshmukh",
-    email: "meera.d@talent.io",
-    phone: "1234567890",
-    tat: "3 Days",
-    status: "Refute",
-  },
-  {
-    id: 5,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Education Verification",
-    name: "Niten Sharma",
-    email: "nitenkumar34@gmail.com",
-    phone: "1234567890",
-    tat: "2 Days",
-    status: "Verified",
-  },
-  {
-    id: 6,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Address Verification",
-    name: "Kavya Patel",
-    email: "k.patel@company.com",
-    phone: "1234567890",
-    tat: "1 Day",
-    status: "Verified",
-  },
-  {
-    id: 7,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Drug Test",
-    name: "Ishaan Verma",
-    email: "ishaan.verma@talent.io",
-    phone: "1234567890",
-    tat: "4 Days",
-    status: "Refute",
-  },
-  {
-    id: 8,
-    caseId: "CASE-9999XYZ",
-    candidateId: "CAND_999999",
-    caseType: "Employment Verification",
-    name: "Rahul Verma",
-    email: "rahul.v@email.com",
-    phone: "9876543210",
-    tat: "1 Day",
-    status: "Verified",
-  },
-];
+ 
 
 const getStatusBadge = (status) => {
   switch (status) {
@@ -237,9 +149,33 @@ function SuperAdminCases() {
   const [selectedRows, setSelectedRows] = useState([]);
   const [openDropdownId, setOpenDropdownId] = useState(null);
   const [showBulkAssignVendorModal, setShowBulkAssignVendorModal] = useState(false);
+  const [assignVendorCaseIds, setAssignVendorCaseIds] = useState([]);
+  const [tableData, setTableData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const assignedCount = tableData.filter(c => c.status === "Assigned").length;
+  const pendingCount = tableData.filter(c => c.status === "Pending").length;
+  const verifiedCount = tableData.filter(c => c.status === "Verified").length;
+  const refuteCount = tableData.filter(c => c.status === "Refute" || c.status === "Refuted").length;
+  const unverifiedCount = tableData.filter(c => c.status === "Unverified" || c.status === "Un-Verified").length;
+
+  const formatCount = (num) => (num < 10 ? `0${num}` : num);
+
   useEffect(() => {
+    const fetchCases = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get("http://localhost:5000/api/superadmin/cases/get-all");
+        setTableData(response.data);
+      } catch (error) {
+        console.error("Error fetching cases:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCases();
+
     const handleClickOutside = () => setOpenDropdownId(null);
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
@@ -254,7 +190,7 @@ function SuperAdminCases() {
   };
 
   const toggleAll = () => {
-    if (selectedRows.length === tableData.length) {
+    if (selectedRows.length === tableData.length && tableData.length > 0) {
       setSelectedRows([]);
     } else {
       setSelectedRows(tableData.map((row) => row.id));
@@ -265,11 +201,20 @@ function SuperAdminCases() {
     <>
       {showBulkAssignVendorModal && (
         <BulkAssignVendorModal
-          caseIds={selectedRows}
-          onClose={() => setShowBulkAssignVendorModal(false)}
+          caseIds={assignVendorCaseIds}
+          onClose={() => {
+            setShowBulkAssignVendorModal(false);
+            setAssignVendorCaseIds([]);
+          }}
           onSuccess={() => {
             setShowBulkAssignVendorModal(false);
+            setAssignVendorCaseIds([]);
             setSelectedRows([]);
+            // Force table reload
+            setLoading(true);
+            axios.get("http://localhost:5000/api/superadmin/cases/get-all")
+              .then(res => setTableData(res.data))
+              .finally(() => setLoading(false));
           }}
         />
       )}
@@ -286,7 +231,10 @@ function SuperAdminCases() {
             </div>
           </div>
           <button
-            onClick={() => setShowBulkAssignVendorModal(true)}
+            onClick={() => {
+              setAssignVendorCaseIds(selectedRows);
+              setShowBulkAssignVendorModal(true);
+            }}
             className="bg-white text-[#02027A] hover:bg-indigo-50 px-5 py-2.5 rounded-xl font-semibold transition cursor-pointer"
           >
             Assign Vendor
@@ -316,7 +264,7 @@ function SuperAdminCases() {
             <div className="shrink-0"><AssignedIcon /></div>
           </div>
           <div className="flex items-end justify-between mt-2">
-            <h1 className="text-3xl font-bold text-gray-900 leading-none">20</h1>
+            <h1 className="text-3xl font-bold text-gray-900 leading-none">{formatCount(assignedCount)}</h1>
             <button className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition">
               <Maximize2 className="w-3 h-3 text-gray-500" />
             </button>
@@ -332,7 +280,7 @@ function SuperAdminCases() {
             <div className="shrink-0"><PendingIcon /></div>
           </div>
           <div className="flex items-end justify-between mt-2">
-            <h1 className="text-3xl font-bold text-gray-900 leading-none">15</h1>
+            <h1 className="text-3xl font-bold text-gray-900 leading-none">{formatCount(pendingCount)}</h1>
             <button className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition">
               <Maximize2 className="w-3 h-3 text-gray-500" />
             </button>
@@ -348,7 +296,7 @@ function SuperAdminCases() {
             <div className="shrink-0"><VerifiedIcon /></div>
           </div>
           <div className="flex items-end justify-between mt-2">
-            <h1 className="text-3xl font-bold text-gray-900 leading-none">10</h1>
+            <h1 className="text-3xl font-bold text-gray-900 leading-none">{formatCount(verifiedCount)}</h1>
             <button className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition">
               <Maximize2 className="w-3 h-3 text-gray-500" />
             </button>
@@ -364,7 +312,7 @@ function SuperAdminCases() {
             <div className="shrink-0"><RefuteIcon /></div>
           </div>
           <div className="flex items-end justify-between mt-2">
-            <h1 className="text-3xl font-bold text-gray-900 leading-none">09</h1>
+            <h1 className="text-3xl font-bold text-gray-900 leading-none">{formatCount(refuteCount)}</h1>
             <button className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition">
               <Maximize2 className="w-3 h-3 text-gray-500" />
             </button>
@@ -380,7 +328,7 @@ function SuperAdminCases() {
             <div className="shrink-0"><UnverifiedIcon /></div>
           </div>
           <div className="flex items-end justify-between mt-2">
-            <h1 className="text-3xl font-bold text-gray-900 leading-none">18</h1>
+            <h1 className="text-3xl font-bold text-gray-900 leading-none">{formatCount(unverifiedCount)}</h1>
             <button className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition">
               <Maximize2 className="w-3 h-3 text-gray-500" />
             </button>
@@ -490,7 +438,8 @@ function SuperAdminCases() {
                             className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-[#EEF2FF] hover:text-[#4338CA] transition-colors last:rounded-b-md"
                             onClick={() => {
                               setOpenDropdownId(null);
-                              // Assign Vendor Action
+                              setAssignVendorCaseIds([row.id]);
+                              setShowBulkAssignVendorModal(true);
                             }}
                           >
                             <UserPlus size={16} />

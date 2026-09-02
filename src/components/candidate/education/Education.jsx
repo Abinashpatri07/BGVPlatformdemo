@@ -19,8 +19,10 @@ function Education({ onNext }) {
   React.useEffect(() => {
     const fetchExistingData = async () => {
       try {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const candId = user.cand_id || 1;
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/1`);
+        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         if (response.data && response.data.education && response.data.education.length > 0) {
           const loadedFiles = {};
           response.data.education.forEach(edu => {
@@ -125,8 +127,10 @@ function Education({ onNext }) {
   const handleSubmit = async () => {
     setLoading(true);
     try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const candId = user.cand_id || 1;
       const formData = new FormData();
-      formData.append("cand_id", 1); // Mock candidate ID
+      formData.append("cand_id", candId);
       
       const educationData = [];
       

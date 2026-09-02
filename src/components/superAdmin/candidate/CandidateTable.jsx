@@ -44,6 +44,7 @@ function CandidateTable({
   const [candidates, setCandidates]   = useState([]);
   const [loading, setLoading]         = useState(false);
   const [fetchError, setFetchError]   = useState("");
+  const [emailSending, setEmailSending] = useState(false);
 
   // ── MODAL STATE ──
   const [openMenu, setOpenMenu]                                     = useState(null);
@@ -108,6 +109,24 @@ function CandidateTable({
   useEffect(() => {
     fetchCandidates();
   }, [fetchCandidates]);
+
+  // ── SEND EMAIL ──
+  const handleSendEmail = async (candidate) => {
+    setEmailSending(true);
+    try {
+      const response = await axios.post(`${API}/send-welcome-email/${candidate.id}`);
+      if (response.data.success) {
+        setShowEmailModal(true);
+      } else {
+        alert(response.data.message || "Failed to send email");
+      }
+    } catch (error) {
+      console.error("Send email error:", error);
+      alert(error.response?.data?.message || "Error sending email");
+    } finally {
+      setEmailSending(false);
+    }
+  };
 
   // ── STATUS STYLE ──
   const getStatusStyle = (status) => {
@@ -367,7 +386,7 @@ function CandidateTable({
                             candidateStatus={item.status}
                             onView={() => { navigate(`/super-admin/view/${item.id}`); setOpenMenu(null); }}
                             onEdit={() => { navigate(`/super-admin/edit-candidate/${item.id}`); setOpenMenu(null); }}
-                            onEmail={() => { setShowEmailModal(true); setOpenMenu(null); }}
+                            onEmail={() => { handleSendEmail(item); setOpenMenu(null); }}
                             onAssignHr={() => { setAssignHRCandidate(item); setShowAssignHRModal(true); setOpenMenu(null); }}
                             onAuditLog={() => { navigate("/super-admin/audit"); setOpenMenu(null); }}
                             onHold={() => { setOnHoldCandidate(item); setShowOnHoldModal(true); setOpenMenu(null); }}

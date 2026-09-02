@@ -14,8 +14,10 @@ function ReviewSubmit({ onSubmit }) {
     const fetchData = async () => {
       try {
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        // Mock cand_id = 1 for now
-        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/1`);
+        // Fetch candId dynamically
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const candId = user.cand_id || 1;
+        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         setData(response.data);
       } catch (err) {
         console.error(err);
@@ -31,8 +33,10 @@ function ReviewSubmit({ onSubmit }) {
     if (!checked) return;
 
     try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const candId = user.cand_id || 1;
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      await axios.post(`${API_BASE}/api/candidate/submit/final`, { cand_id: 1 });
+      await axios.post(`${API_BASE}/api/candidate/submit/final`, { cand_id: candId });
       
       // show popup
       setShowModal(true);

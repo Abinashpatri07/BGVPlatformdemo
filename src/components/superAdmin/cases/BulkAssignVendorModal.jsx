@@ -34,17 +34,17 @@ function BulkAssignVendorModal({ caseIds, onClose, onSuccess }) {
     setApiError("");
 
     try {
-      // MOCK API CALL FOR NOW, assuming endpoint might not exist yet
-      // const res = await axios.patch(
-      //   `${import.meta.env.VITE_API_URL}/api/cases/bulk-assign-vendor`,
-      //   { caseIds, vendorId: selectedVendorId }
-      // );
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/superadmin/cases/assign-vendor`,
+        { caseIds, vendorId: selectedVendorId }
+      );
       
-      // Simulate network request
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      setIsSuccess(true);
-      if (onSuccess) onSuccess();
+      if (res.data.success) {
+        setIsSuccess(true);
+        if (onSuccess) onSuccess();
+      } else {
+        setApiError(res.data.message || "Failed to assign vendor.");
+      }
       
     } catch (err) {
       console.error("Bulk Assign Vendor error:", err);

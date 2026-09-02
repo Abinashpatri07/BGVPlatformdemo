@@ -16,8 +16,10 @@ function DrugTestStep({ onNext }) {
   React.useEffect(() => {
     const fetchExisting = async () => {
       try {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const candId = user.cand_id || 1;
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/1`);
+        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         if (response.data && response.data.drugTest) {
           const drug = response.data.drugTest;
           if (drug.cand_drug_test === "Yes") {
@@ -43,8 +45,11 @@ function DrugTestStep({ onNext }) {
   const handleSkip = async () => {
     setLoading(true);
     try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const candId = user.cand_id || 1;
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       await axios.post(`${API_BASE}/api/candidate/submit/drug`, { 
+        cand_id: candId,
         has_taken: false,
         drugStatus: "No" 
       });
@@ -84,7 +89,10 @@ function DrugTestStep({ onNext }) {
     setError(false);
     setLoading(true);
     try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const candId = user.cand_id || 1;
       const formData = new FormData();
+      formData.append("cand_id", candId);
       formData.append("drugStatus", "Yes");
       formData.append("drugDate", testDate);
       formData.append("remarks", details);
