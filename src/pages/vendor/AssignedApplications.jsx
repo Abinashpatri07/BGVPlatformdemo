@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   RefreshCw,
   ListFilter,
@@ -11,108 +11,9 @@ import {
   ChevronRight as ChevronRightSmall
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const tableData = [
-  {
-    id: 1,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Employment Verification",
-    name: "Arjun Sharma",
-    email: "arjun.sharma@email.com",
-    phone: "1234567890",
-    tat: "2 Days",
-    status: "Assigned",
-  },
-  {
-    id: 2,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Education Verification",
-    name: "Ananya Iyer",
-    email: "ananya.iyer@email.com",
-    phone: "1234567890",
-    tat: "5 Days",
-    status: "Assigned",
-  },
-  {
-    id: 3,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Address Verification",
-    name: "Rohan Malhotra",
-    email: "rohan.m@workspace.in",
-    phone: "1234567890",
-    tat: "1 Day",
-    status: "Assigned",
-  },
-  {
-    id: 4,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Criminal Check",
-    name: "Meera Deshmukh",
-    email: "meera.d@talent.io",
-    phone: "1234567890",
-    tat: "3 Days",
-    status: "Assigned",
-  },
-  {
-    id: 5,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Education Verification",
-    name: "Niten Sharma",
-    email: "nitenkumar34@gmail.com",
-    phone: "1234567890",
-    tat: "2 Days",
-    status: "Assigned",
-  },
-  {
-    id: 6,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Address Verification",
-    name: "Kavya Patel",
-    email: "k.patel@company.com",
-    phone: "1234567890",
-    tat: "1 Day",
-    status: "Assigned",
-  },
-  {
-    id: 7,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Drug Test",
-    name: "Ishaan Verma",
-    email: "ishaan.verma@talent.io",
-    phone: "1234567890",
-    tat: "4 Days",
-    status: "Assigned",
-  },
-  {
-    id: 8,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Address Verification",
-    name: "Niten Sharma",
-    email: "nitenkumar34@gmail.com",
-    phone: "1234567890",
-    tat: "5 Days",
-    status: "Assigned",
-  },
-  {
-    id: 9,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Education Verification",
-    name: "Ishaan Verma",
-    email: "ishaan.verma@talent.io",
-    phone: "1234567890",
-    tat: "3 Days",
-    status: "Assigned",
-  },
-];
+
 
 const getStatusBadge = (status) => {
   return (
@@ -136,6 +37,32 @@ const getDetailsLink = (caseType) => {
 function AssignedApplications() {
   const navigate = useNavigate();
   const [selectedRows, setSelectedRows] = useState([]);
+  const [cases, setCases] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchCases = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("vendorToken");
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/vendor/cases/assigned`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        // Filter out cases that are specifically assigned (status 2) or show all uncompleted cases. 
+        // For 'Assigned Applications', maybe show everything or just status Assigned/In Progress. 
+        // We'll show all assigned cases for now.
+        setCases(res.data.data.filter(c => c.status === "Assigned" || c.status === "In Progress" || c.status === "Unverified" || c.status === "Pending"));
+      }
+    } catch (err) {
+      console.error("Failed to fetch cases:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCases();
+  }, []);
 
   const toggleRow = (id) => {
     if (selectedRows.includes(id)) {
@@ -146,10 +73,10 @@ function AssignedApplications() {
   };
 
   const toggleAll = () => {
-    if (selectedRows.length === tableData.length) {
+    if (selectedRows.length === cases.length) {
       setSelectedRows([]);
     } else {
-      setSelectedRows(tableData.map((row) => row.id));
+      setSelectedRows(cases.map((row) => row.id));
     }
   };
 
@@ -173,7 +100,7 @@ function AssignedApplications() {
           <button className="px-6 py-2 bg-gray-100 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition shadow-sm">
             All
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm">
+          <button onClick={fetchCases} className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm">
             <RefreshCw size={16} />
             Refresh
           </button>
@@ -209,37 +136,46 @@ function AssignedApplications() {
       {/* TABLE SECTION */}
       <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm mt-4">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-base">
+          <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 text-gray-700 font-semibold border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4 w-12">
+                <th className="px-3 py-1.5 w-12">
                   <input
                     type="checkbox"
                     className="w-4 h-4 rounded border-gray-300 text-[#4338CA] focus:ring-[#4338CA]"
                     checked={
-                      selectedRows.length === tableData.length &&
-                      tableData.length > 0
+                      selectedRows.length === cases.length &&
+                      cases.length > 0
                     }
                     onChange={toggleAll}
                   />
                 </th>
-                <th className="px-6 py-4">Case ID</th>
-                <th className="px-6 py-4">Candidate ID</th>
-                <th className="px-6 py-4">Case Type</th>
-                <th className="px-6 py-4">Name</th>
-                <th className="px-6 py-4">Phone</th>
-                <th className="px-6 py-4">TAT</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-center">Action</th>
+                <th className="px-3 py-1.5">Case ID</th>
+                <th className="px-3 py-1.5">Candidate ID</th>
+                <th className="px-3 py-1.5">Case Type</th>
+                <th className="px-3 py-1.5">Name</th>
+                <th className="px-3 py-1.5">Phone</th>
+                <th className="px-3 py-1.5">TAT</th>
+                <th className="px-3 py-1.5">Status</th>
+                <th className="px-3 py-1.5 text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {tableData.map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-gray-50 transition-colors duration-150"
-                >
-                  <td className="px-6 py-4">
+              {loading ? (
+                <tr>
+                  <td colSpan="9" className="text-center py-10 text-gray-500">Loading cases...</td>
+                </tr>
+              ) : cases.length === 0 ? (
+                <tr>
+                  <td colSpan="9" className="text-center py-10 text-gray-500">No assigned cases found.</td>
+                </tr>
+              ) : (
+                cases.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="hover:bg-gray-50 transition-colors duration-150"
+                  >
+                  <td className="px-3 py-1.5">
                     <input
                       type="checkbox"
                       className="w-4 h-4 rounded border-gray-300 text-[#4338CA] focus:ring-[#4338CA]"
@@ -247,11 +183,11 @@ function AssignedApplications() {
                       onChange={() => toggleRow(row.id)}
                     />
                   </td>
-                  <td className="px-6 py-4 font-medium text-gray-900">
+                  <td className="px-3 py-1.5 font-medium text-gray-900">
                     {row.caseId}
                   </td>
-                  <td className="px-6 py-4 text-gray-700">{row.candidateId}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-3 py-1.5 text-gray-700">{row.candidateId}</td>
+                  <td className="px-3 py-1.5">
                     <div className="text-gray-900 font-medium">
                       {row.caseType.split(" ")[0]}
                     </div>
@@ -261,28 +197,28 @@ function AssignedApplications() {
                       </div>
                     )}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-3 py-1.5">
                     <div className="text-gray-900 font-medium">{row.name}</div>
                     <div className="text-gray-500 text-xs">{row.email}</div>
                   </td>
-                  <td className="px-6 py-4 text-gray-700">+91 {row.phone}</td>
-                  <td className="px-6 py-4 text-gray-700">{row.tat}</td>
-                  <td className="px-6 py-4">{getStatusBadge(row.status)}</td>
-                  <td className="px-6 py-4 text-gray-400">
+                  <td className="px-3 py-1.5 text-gray-700">+91 {row.phone}</td>
+                  <td className="px-3 py-1.5 text-gray-700">{row.tat}</td>
+                  <td className="px-3 py-1.5">{getStatusBadge(row.status)}</td>
+                  <td className="px-3 py-1.5 text-gray-400">
                     <button 
                       className="p-1 hover:bg-gray-200 rounded transition inline-flex justify-center items-center"
                       onClick={() => {
                         const mode = "edit";
                         if (row.caseType.includes("Employment Verification")) {
-                          navigate(`/vendor/employment-details?mode=${mode}`);
+                          navigate(`/vendor/employment-details?mode=${mode}&caseId=${row.id}`);
                         } else if (row.caseType.includes("Address Verification")) {
-                          navigate(`/vendor/address-details?mode=${mode}`);
+                          navigate(`/vendor/address-details?mode=${mode}&caseId=${row.id}`);
                         } else if (row.caseType.includes("Drug Test")) {
-                          navigate(`/vendor/drug-test-details?mode=${mode}`);
+                          navigate(`/vendor/drug-test-details?mode=${mode}&caseId=${row.id}`);
                         } else if (row.caseType.includes("Education Verification")) {
-                          navigate(`/vendor/education-details?mode=${mode}`);
+                          navigate(`/vendor/education-details?mode=${mode}&caseId=${row.id}`);
                         } else if (row.caseType.includes("Criminal Check")) {
-                          navigate(`/vendor/criminal-details?mode=${mode}`);
+                          navigate(`/vendor/criminal-details?mode=${mode}&caseId=${row.id}`);
                         }
                       }}
                     >
@@ -290,7 +226,8 @@ function AssignedApplications() {
                     </button>
                   </td>
                 </tr>
-              ))}
+                ))
+              )}
             </tbody>
           </table>
         </div>

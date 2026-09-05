@@ -115,11 +115,11 @@ export default function VendorLoginForm() {
       );
       
       if (response.data.success) {
-        localStorage.clear();
-        localStorage.setItem("accessToken", response.data.token);
-        localStorage.setItem("refreshToken", response.data.refreshToken);
-        localStorage.setItem("role", "vendor");
-        localStorage.setItem("user", JSON.stringify(response.data.user));
+        localStorage.removeItem("vendorToken"); // Just in case
+        localStorage.setItem("vendorToken", response.data.token);
+        localStorage.setItem("vendorRefreshToken", response.data.refreshToken);
+        localStorage.setItem("vendorRole", "Vendor");
+        localStorage.setItem("vendorUser", JSON.stringify(response.data.user));
         
         setPopup({ type: "success", title: "Login Successful!", message: `Welcome back, ${response.data.user.name}!` });
         setTimeout(() => navigate("/vendor/home"), 1500);

@@ -109,8 +109,6 @@ const PasswordField = ({ field, label, placeholder, form, errors, show, onToggle
 
 // ── ChangePasswordModal ───────────────────────────────────
 function ChangePasswordModal({ onClose }) {
-  const CORRECT_PASSWORD = "Admin@123";
-
   const [form, setForm] = useState({ current: "", newPass: "", confirm: "" });
   const [show, setShow] = useState({ current: false, newPass: false, confirm: false });
   const [errors, setErrors] = useState({});
@@ -124,8 +122,8 @@ function ChangePasswordModal({ onClose }) {
 
   const validate = () => {
     const e = {};
-    if (form.current !== CORRECT_PASSWORD)
-      e.current = "The current password you entered is incorrect.";
+    if (!form.current)
+      e.current = "Current password is required.";
     if (form.newPass.length < 8)
       e.newPass = "Password must be at least 8 characters.";
     if (form.confirm !== form.newPass)
@@ -136,7 +134,9 @@ function ChangePasswordModal({ onClose }) {
   const handleSave = () => {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
-    alert("Password changed successfully!");
+    
+    // TODO: Connect this to the actual backend change-password endpoint based on role
+    alert("Change password backend integration is coming soon!");
     onClose();
   };
 
@@ -209,7 +209,12 @@ export default function Header() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
+    let storedUser;
+    if (window.location.pathname.includes("/vendor")) {
+      storedUser = JSON.parse(localStorage.getItem("vendorUser"));
+    } else {
+      storedUser = JSON.parse(localStorage.getItem("user"));
+    }
     if (storedUser) setUser(storedUser);
   }, []);
 
@@ -229,14 +234,22 @@ export default function Header() {
   };
 
   const handleLogout = () => {
+  setDropdownOpen(false);
+
+  // Vendor-specific logout
+  if (window.location.pathname.includes("/vendor")) {
+    localStorage.removeItem("vendorToken");
+    localStorage.removeItem("vendorRefreshToken");
+    localStorage.removeItem("vendorRole");
+    localStorage.removeItem("vendorUser");
+    navigate("/vendor/login", { state: { message: "Logout Successful!" } });
+    return;
+  }
 
   // Get role before clearing
   const role = localStorage.getItem("role");
 
-  // Close dropdown
-  setDropdownOpen(false);
-
-  // Clear storage
+  // Clear storage for others
   localStorage.clear();
   sessionStorage.clear();
 
@@ -252,9 +265,6 @@ export default function Header() {
   }
   else if (role === "super-admin") {
     navigate("/super-admin/login", { state: { message: "Logout Successful!" } });
-  }
-  else if (role === "vendor") {
-    navigate("/vendor/login", { state: { message: "Logout Successful!" } });
   }
   else {
     navigate("/", { state: { message: "Logout Successful!" } });
@@ -309,16 +319,16 @@ export default function Header() {
                 {user.avatar ? (
                   <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  getInitials(window.location.pathname.includes("/vendor") ? "Rohit Desai" : (user.name || "User"))
+                  getInitials(user.name || "User")
                 )}
               </div>
 
               <div className="leading-tight text-left">
                 <p className="text-sm font-semibold text-gray-800">
-                  {window.location.pathname.includes("/vendor") ? "Rohit Desai" : user.name}
+                  {user.name}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {window.location.pathname.includes("/vendor") ? "rohitdesai254@gmail.com" : user.email}
+                  {user.email}
                 </p>
               </div>
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   RefreshCw,
   ListFilter,
@@ -12,6 +12,7 @@ import {
   Maximize2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 // Exact custom SVG Icons matching the design
 const AssignedIcon = () => (
@@ -84,97 +85,6 @@ const UnverifiedIcon = () => (
   </div>
 );
 
-const tableData = [
-  {
-    id: 1,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Employment Verification",
-    name: "Arjun Sharma",
-    email: "arjun.sharma@email.com",
-    phone: "1234567890",
-    tat: "2 Days",
-    status: "Assigned",
-  },
-  {
-    id: 2,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Education Verification",
-    name: "Ananya Iyer",
-    email: "ananya.iyer@email.com",
-    phone: "1234567890",
-    tat: "5 Days",
-    status: "Verified",
-  },
-  {
-    id: 3,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Address Verification",
-    name: "Rohan Malhotra",
-    email: "rohan.m@workspace.in",
-    phone: "1234567890",
-    tat: "1 Day",
-    status: "Assigned",
-  },
-  {
-    id: 4,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Criminal Check",
-    name: "Meera Deshmukh",
-    email: "meera.d@talent.io",
-    phone: "1234567890",
-    tat: "3 Days",
-    status: "Refute",
-  },
-  {
-    id: 5,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Education Verification",
-    name: "Niten Sharma",
-    email: "nitenkumar34@gmail.com",
-    phone: "1234567890",
-    tat: "2 Days",
-    status: "Verified",
-  },
-  {
-    id: 6,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Address Verification",
-    name: "Kavya Patel",
-    email: "k.patel@company.com",
-    phone: "1234567890",
-    tat: "1 Day",
-    status: "Verified",
-  },
-  {
-    id: 7,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Drug Test",
-    name: "Ishaan Verma",
-    email: "ishaan.verma@talent.io",
-    phone: "1234567890",
-    tat: "4 Days",
-    status: "Refute",
-  },
-  {
-    id: 8,
-    caseId: "CASE-9999XYZ",
-    candidateId: "CAND_999999",
-    caseType: "Employment Verification",
-    name: "Rahul Verma",
-    email: "rahul.v@email.com",
-    phone: "9876543210",
-    tat: "1 Day",
-    status: "Verified",
-  },
-];
-
 const getStatusBadge = (status) => {
   switch (status) {
     case "Assigned":
@@ -212,7 +122,40 @@ const getStatusBadge = (status) => {
 
 function VendorDashboard() {
   const [selectedRows, setSelectedRows] = useState([]);
+  const [userName, setUserName] = useState("Vendor");
+  const [cases, setCases] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const fetchCases = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("vendorToken");
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/vendor/cases/assigned`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        setCases(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch cases:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCases();
+    const userStr = localStorage.getItem("vendorUser");
+    if (userStr) {
+      try {
+        const parsed = JSON.parse(userStr);
+        if (parsed.name) setUserName(parsed.name);
+      } catch (e) {
+        console.error("Error parsing user data", e);
+      }
+    }
+  }, []);
 
   const toggleRow = (id) => {
     if (selectedRows.includes(id)) {
@@ -223,19 +166,26 @@ function VendorDashboard() {
   };
 
   const toggleAll = () => {
-    if (selectedRows.length === tableData.length) {
+    if (selectedRows.length === cases.length && cases.length > 0) {
       setSelectedRows([]);
     } else {
-      setSelectedRows(tableData.map((row) => row.id));
+      setSelectedRows(cases.map((row) => row.id));
     }
   };
+
+  const assignedCount = cases.filter(c => c.status === "Assigned" || c.status === "Pending" || c.status === "In Progress").length;
+  const verifiedCount = cases.filter(c => c.status === "Verified").length;
+  const refuteCount = cases.filter(c => c.status === "Refute" || c.status === "Hold").length;
+  const unverifiedCount = cases.filter(c => c.status === "Unverified").length;
+
+  const formatCount = (count) => count.toString().padStart(2, '0');
 
   return (
     <div className="w-full max-w-[1600px] mx-auto space-y-8 animate-fade-in pb-10 px-4">
       {/* HEADER SECTION */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">
-          Hi Rohit Good Morning!
+          Hi {userName} Good Morning!
         </h1>
         <p className="text-gray-600 mt-2 font-medium">
           "Power Your Ecosystem With Verified Partners And Real-Time Insights."
@@ -257,7 +207,7 @@ function VendorDashboard() {
             </button>
           </div>
           <div>
-            <h3 className="text-3xl font-bold text-gray-900 mb-1">20</h3>
+            <h3 className="text-3xl font-bold text-gray-900 mb-1">{formatCount(assignedCount)}</h3>
             <p className="text-gray-500 text-sm font-medium">Assigned Application</p>
           </div>
         </div>
@@ -275,7 +225,7 @@ function VendorDashboard() {
             </button>
           </div>
           <div>
-            <h3 className="text-3xl font-bold text-gray-900 mb-1">10</h3>
+            <h3 className="text-3xl font-bold text-gray-900 mb-1">{formatCount(verifiedCount)}</h3>
             <p className="text-gray-500 text-sm font-medium">Verified Application</p>
           </div>
         </div>
@@ -293,7 +243,7 @@ function VendorDashboard() {
             </button>
           </div>
           <div>
-            <h3 className="text-3xl font-bold text-gray-900 mb-1">09</h3>
+            <h3 className="text-3xl font-bold text-gray-900 mb-1">{formatCount(refuteCount)}</h3>
             <p className="text-gray-500 text-sm font-medium">Refute Application</p>
           </div>
         </div>
@@ -311,7 +261,7 @@ function VendorDashboard() {
             </button>
           </div>
           <div>
-            <h3 className="text-3xl font-bold text-gray-900 mb-1">18</h3>
+            <h3 className="text-3xl font-bold text-gray-900 mb-1">{formatCount(unverifiedCount)}</h3>
             <p className="text-gray-500 text-sm font-medium">Un-Verified Application</p>
           </div>
         </div>
@@ -320,37 +270,46 @@ function VendorDashboard() {
       {/* TABLE SECTION */}
       <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-base">
+          <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 text-gray-700 font-semibold border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4 w-12">
+                <th className="px-3 py-1.5 w-12">
                   <input
                     type="checkbox"
                     className="w-4 h-4 rounded border-gray-300 text-[#4338CA] focus:ring-[#4338CA]"
                     checked={
-                      selectedRows.length === tableData.length &&
-                      tableData.length > 0
+                      selectedRows.length === cases.length &&
+                      cases.length > 0
                     }
                     onChange={toggleAll}
                   />
                 </th>
-                <th className="px-6 py-4">Case ID</th>
-                <th className="px-6 py-4">Candidate ID</th>
-                <th className="px-6 py-4">Case Type</th>
-                <th className="px-6 py-4">Name</th>
-                <th className="px-6 py-4">Phone</th>
-                <th className="px-6 py-4">TAT</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Action</th>
+                <th className="px-3 py-1.5">Case ID</th>
+                <th className="px-3 py-1.5">Candidate ID</th>
+                <th className="px-3 py-1.5">Case Type</th>
+                <th className="px-3 py-1.5">Name</th>
+                <th className="px-3 py-1.5">Phone</th>
+                <th className="px-3 py-1.5">TAT</th>
+                <th className="px-3 py-1.5">Status</th>
+                <th className="px-3 py-1.5">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {tableData.map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-gray-50 transition-colors duration-150"
-                >
-                  <td className="px-6 py-4">
+              {loading ? (
+                <tr>
+                  <td colSpan="9" className="text-center py-10 text-gray-500">Loading cases...</td>
+                </tr>
+              ) : cases.length === 0 ? (
+                <tr>
+                  <td colSpan="9" className="text-center py-10 text-gray-500">No cases found.</td>
+                </tr>
+              ) : (
+                cases.slice(0, 10).map((row) => (
+                  <tr
+                    key={row.id}
+                    className="hover:bg-gray-50 transition-colors duration-150"
+                  >
+                  <td className="px-3 py-1.5">
                     <input
                       type="checkbox"
                       className="w-4 h-4 rounded border-gray-300 text-[#4338CA] focus:ring-[#4338CA]"
@@ -358,11 +317,11 @@ function VendorDashboard() {
                       onChange={() => toggleRow(row.id)}
                     />
                   </td>
-                  <td className="px-6 py-4 font-medium text-gray-900">
+                  <td className="px-3 py-1.5 font-medium text-gray-900">
                     {row.caseId}
                   </td>
-                  <td className="px-6 py-4 text-gray-700">{row.candidateId}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-3 py-1.5 text-gray-700">{row.candidateId}</td>
+                  <td className="px-3 py-1.5">
                     <div className="text-gray-900 font-medium">
                       {row.caseType.split(" ")[0]}
                     </div>
@@ -372,29 +331,29 @@ function VendorDashboard() {
                       </div>
                     )}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-3 py-1.5">
                     <div className="text-gray-900 font-medium">{row.name}</div>
                     <div className="text-gray-500 text-xs">{row.email}</div>
                   </td>
-                  <td className="px-6 py-4 text-gray-700">+91 {row.phone}</td>
-                  <td className="px-6 py-4 text-gray-700">{row.tat}</td>
-                  <td className="px-6 py-4">{getStatusBadge(row.status)}</td>
-                  <td className="px-6 py-4 text-gray-400">
+                  <td className="px-3 py-1.5 text-gray-700">+91 {row.phone}</td>
+                  <td className="px-3 py-1.5 text-gray-700">{row.tat}</td>
+                  <td className="px-3 py-1.5">{getStatusBadge(row.status)}</td>
+                  <td className="px-3 py-1.5 text-gray-400">
                     <button 
                       className="p-1 hover:bg-gray-200 rounded transition inline-flex justify-center items-center"
                       onClick={() => {
                         const isEdit = row.status === "Assigned" || row.status === "Unverified";
                         const mode = isEdit ? "edit" : "view";
                         if (row.caseType.includes("Employment Verification")) {
-                          navigate(`/vendor/employment-details?mode=${mode}`);
+                          navigate(`/vendor/employment-details?mode=${mode}&caseId=${row.id}`);
                         } else if (row.caseType.includes("Address Verification")) {
-                          navigate(`/vendor/address-details?mode=${mode}`);
+                          navigate(`/vendor/address-details?mode=${mode}&caseId=${row.id}`);
                         } else if (row.caseType.includes("Drug Test")) {
-                          navigate(`/vendor/drug-test-details?mode=${mode}`);
+                          navigate(`/vendor/drug-test-details?mode=${mode}&caseId=${row.id}`);
                         } else if (row.caseType.includes("Education Verification")) {
-                          navigate(`/vendor/education-details?mode=${mode}`);
+                          navigate(`/vendor/education-details?mode=${mode}&caseId=${row.id}`);
                         } else if (row.caseType.includes("Criminal Check")) {
-                          navigate(`/vendor/criminal-details?mode=${mode}`);
+                          navigate(`/vendor/criminal-details?mode=${mode}&caseId=${row.id}`);
                         }
                       }}
                     >
@@ -406,7 +365,8 @@ function VendorDashboard() {
                     </button>
                   </td>
                 </tr>
-              ))}
+              ))
+              )}
             </tbody>
           </table>
         </div>

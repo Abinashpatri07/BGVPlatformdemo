@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   RefreshCw,
   ListFilter,
@@ -9,121 +9,10 @@ import {
   Eye,
   ChevronLeft,
   ChevronRight,
+  Maximize2
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-
-const tableData = [
-  {
-    id: 1,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Employment Verification",
-    name: "Arjun Sharma",
-    email: "arjun.sharma@email.com",
-    phone: "1234567890",
-    tat: "2 Days",
-    status: "Assigned",
-  },
-  {
-    id: 2,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Education Verification",
-    name: "Ananya Iyer",
-    email: "ananya.iyer@email.com",
-    phone: "1234567890",
-    tat: "5 Days",
-    status: "Verified",
-  },
-  {
-    id: 3,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Address Verification",
-    name: "Rohan Malhotra",
-    email: "rohan.m@workspace.in",
-    phone: "1234567890",
-    tat: "1 Day",
-    status: "Assigned",
-  },
-  {
-    id: 4,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Criminal Check",
-    name: "Meera Deshmukh",
-    email: "meera.d@talent.io",
-    phone: "1234567890",
-    tat: "3 Days",
-    status: "Refute",
-  },
-  {
-    id: 5,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Education Verification",
-    name: "Niten Sharma",
-    email: "nitenkumar34@gmail.com",
-    phone: "1234567890",
-    tat: "2 Days",
-    status: "Verified",
-  },
-  {
-    id: 6,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Address Verification",
-    name: "Kavya Patel",
-    email: "k.patel@company.com",
-    phone: "1234567890",
-    tat: "1 Day",
-    status: "Verified",
-  },
-  {
-    id: 7,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Drug Test",
-    name: "Ishaan Verma",
-    email: "ishaan.verma@talent.io",
-    phone: "1234567890",
-    tat: "4 Days",
-    status: "Refute",
-  },
-  {
-    id: 8,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Address Verification",
-    name: "Niten Sharma",
-    email: "nitenkumar34@gmail.com",
-    phone: "1234567890",
-    tat: "5 Days",
-    status: "Assigned",
-  },
-  {
-    id: 9,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Education Verification",
-    name: "Ishaan Verma",
-    email: "ishaan.verma@talent.io",
-    phone: "1234567890",
-    tat: "3 Days",
-    status: "Unverified",
-  },
-  {
-    id: 10,
-    caseId: "CASE-9999XYZ",
-    candidateId: "CAND_999999",
-    caseType: "Employment Verification",
-    name: "Rahul Verma",
-    email: "rahul.v@email.com",
-    phone: "9876543210",
-    tat: "1 Day",
-    status: "Verified",
-  },
-];
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const getStatusBadge = (status) => {
   switch (status) {
@@ -162,7 +51,40 @@ const getStatusBadge = (status) => {
 
 function VendorHome() {
   const [selectedRows, setSelectedRows] = useState([]);
+  const [userName, setUserName] = useState("Vendor");
+  const [cases, setCases] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const fetchCases = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("vendorToken");
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/vendor/cases/assigned`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        setCases(res.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch cases:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCases();
+    const userStr = localStorage.getItem("vendorUser");
+    if (userStr) {
+      try {
+        const parsed = JSON.parse(userStr);
+        if (parsed.name) setUserName(parsed.name);
+      } catch (e) {
+        console.error("Error parsing user data", e);
+      }
+    }
+  }, []);
 
   const toggleRow = (id) => {
     if (selectedRows.includes(id)) {
@@ -173,10 +95,10 @@ function VendorHome() {
   };
 
   const toggleAll = () => {
-    if (selectedRows.length === tableData.length) {
+    if (selectedRows.length === cases.length && cases.length > 0) {
       setSelectedRows([]);
     } else {
-      setSelectedRows(tableData.map((row) => row.id));
+      setSelectedRows(cases.map((row) => row.id));
     }
   };
 
@@ -185,7 +107,7 @@ function VendorHome() {
       {/* HEADER SECTION */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">
-          Hi Rohit Good Morning!
+          Hi {userName} Good Morning!
         </h1>
         <p className="text-gray-600 mt-2 font-medium">
           "Power Your Ecosystem With Verified Partners And Real-Time Insights."
@@ -198,7 +120,7 @@ function VendorHome() {
           <button className="px-5 py-2 bg-gray-100 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition">
             All
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+          <button onClick={fetchCases} className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm">
             <RefreshCw size={16} />
             Refresh
           </button>
@@ -234,37 +156,46 @@ function VendorHome() {
       {/* TABLE SECTION */}
       <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-base">
+          <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 text-gray-700 font-semibold border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4 w-12">
+                <th className="px-3 py-1.5 w-12">
                   <input
                     type="checkbox"
                     className="w-4 h-4 rounded border-gray-300 text-[#4338CA] focus:ring-[#4338CA]"
                     checked={
-                      selectedRows.length === tableData.length &&
-                      tableData.length > 0
+                      selectedRows.length === cases.length &&
+                      cases.length > 0
                     }
                     onChange={toggleAll}
                   />
                 </th>
-                <th className="px-6 py-4">Case ID</th>
-                <th className="px-6 py-4">Candidate ID</th>
-                <th className="px-6 py-4">Case Type</th>
-                <th className="px-6 py-4">Name</th>
-                <th className="px-6 py-4">Phone</th>
-                <th className="px-6 py-4">TAT</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Action</th>
+                <th className="px-3 py-1.5">Case ID</th>
+                <th className="px-3 py-1.5">Candidate ID</th>
+                <th className="px-3 py-1.5">Case Type</th>
+                <th className="px-3 py-1.5">Name</th>
+                <th className="px-3 py-1.5">Phone</th>
+                <th className="px-3 py-1.5">TAT</th>
+                <th className="px-3 py-1.5">Status</th>
+                <th className="px-3 py-1.5">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {tableData.map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-gray-50 transition-colors duration-150"
-                >
-                  <td className="px-6 py-4">
+              {loading ? (
+                <tr>
+                  <td colSpan="9" className="text-center py-10 text-gray-500">Loading cases...</td>
+                </tr>
+              ) : cases.length === 0 ? (
+                <tr>
+                  <td colSpan="9" className="text-center py-10 text-gray-500">No cases found.</td>
+                </tr>
+              ) : (
+                cases.slice(0, 10).map((row) => (
+                  <tr
+                    key={row.id}
+                    className="hover:bg-gray-50 transition-colors duration-150"
+                  >
+                  <td className="px-3 py-1.5">
                     <input
                       type="checkbox"
                       className="w-4 h-4 rounded border-gray-300 text-[#4338CA] focus:ring-[#4338CA]"
@@ -272,11 +203,11 @@ function VendorHome() {
                       onChange={() => toggleRow(row.id)}
                     />
                   </td>
-                  <td className="px-6 py-4 font-medium text-gray-900">
+                  <td className="px-3 py-1.5 font-medium text-gray-900">
                     {row.caseId}
                   </td>
-                  <td className="px-6 py-4 text-gray-700">{row.candidateId}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-3 py-1.5 text-gray-700">{row.candidateId}</td>
+                  <td className="px-3 py-1.5">
                     <div className="text-gray-900 font-medium">
                       {row.caseType.split(" ")[0]}
                     </div>
@@ -286,14 +217,14 @@ function VendorHome() {
                       </div>
                     )}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-3 py-1.5">
                     <div className="text-gray-900 font-medium">{row.name}</div>
                     <div className="text-gray-500 text-xs">{row.email}</div>
                   </td>
-                  <td className="px-6 py-4 text-gray-700">+91 {row.phone}</td>
-                  <td className="px-6 py-4 text-gray-700">{row.tat}</td>
-                  <td className="px-6 py-4">{getStatusBadge(row.status)}</td>
-                  <td className="px-6 py-4 text-gray-400">
+                  <td className="px-3 py-1.5 text-gray-700">+91 {row.phone}</td>
+                  <td className="px-3 py-1.5 text-gray-700">{row.tat}</td>
+                  <td className="px-3 py-1.5">{getStatusBadge(row.status)}</td>
+                  <td className="px-3 py-1.5 text-gray-400">
                     <button 
                       className="p-1 hover:bg-gray-200 rounded transition inline-flex justify-center items-center"
                       onClick={() => {
@@ -320,7 +251,8 @@ function VendorHome() {
                     </button>
                   </td>
                 </tr>
-              ))}
+              ))
+              )}
             </tbody>
           </table>
         </div>
