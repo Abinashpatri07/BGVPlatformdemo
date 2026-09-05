@@ -77,6 +77,24 @@ export default function ClientListPage() {
     }
   };
 
+  /* ───────────────── SEND EMAIL ───────────────── */
+  const handleSendEmail = async (clientId) => {
+    try {
+      setPopupMessage(null); // Clear previous popup
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/client/send-welcome-email/${clientId}`);
+      if (res.data.success) {
+        setPopupMessage({ type: "success", text: "Welcome email sent successfully." });
+      }
+    } catch (error) {
+      console.error("Error sending email:", error);
+      setPopupMessage({ 
+        type: "error", 
+        text: error.response?.data?.message || "Failed to send email." 
+      });
+    }
+    setTimeout(() => setPopupMessage(null), 3000);
+  };
+
   /* ───────────────── EXPORT ───────────────── */
   const handleExport = (type) => {
     if (clients.length === 0) {
@@ -163,7 +181,7 @@ export default function ClientListPage() {
         isLoading={isLoading}
         onView={(row) => navigate(`/super-admin/clients/view/${row.id}`)}
         onEdit={(row) => navigate(`/super-admin/clients/edit/${row.id}`)}
-        onEmail={(row) => console.log("Send email to", row.pocEmail)}
+        onEmail={(row) => handleSendEmail(row.id)}
         onSuspend={() => fetchClients()}
       />
 

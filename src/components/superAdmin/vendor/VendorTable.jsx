@@ -292,6 +292,17 @@ export default function VendorTable({ onStatsFetched }) {
     }
   };
 
+  const handleSendEmail = async (v) => {
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/vendor/send-welcome-email/${v.dbId}`);
+      if (res.data.success) {
+        setEmailSuccess(true);
+      }
+    } catch (err) {
+      console.error("Failed to send welcome email:", err);
+    }
+  };
+
   return (
     <>
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
@@ -353,11 +364,11 @@ export default function VendorTable({ onStatsFetched }) {
                     />
                   </td>
                   <td className="px-4 py-4 text-sm text-gray-700">{v.id}</td>
-                  <td className="px-4 py-4 text-sm text-gray-700">
+                  <td className="px-4 py-4 text-sm font-semibold text-gray-900">
                     {v.vendorName}
                   </td>
                   <td className="px-4 py-4">
-                    <p className="text-sm text-gray-700">{v.poc}</p>
+                    <p className="text-sm font-semibold text-gray-900">{v.poc}</p>
                     <p className="text-xs text-indigo-400">{v.email}</p>
                   </td>
                   <td className="px-4 py-4 text-sm text-gray-700">{v.gst}</td>
@@ -369,7 +380,7 @@ export default function VendorTable({ onStatsFetched }) {
                       vendor={v}
                       onView={() => navigate(`/super-admin/view-vendor/${v.dbId}`)}
                       onEdit={() => navigate(`/super-admin/edit-vendor/${v.dbId}`)}
-                      onSendEmail={() => setEmailSuccess(true)}
+                      onSendEmail={() => handleSendEmail(v)}
                       onTerminate={() => setTerminateTarget(v)}
                     />
                   </td>
