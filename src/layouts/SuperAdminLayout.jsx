@@ -11,7 +11,8 @@ function SuperAdminLayout() {
   useEffect(() => {
     const fetchPendingCases = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/superadmin/cases/get-all");
+        const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+        const response = await axios.get(`${API_BASE}/api/superadmin/cases/get-all`);
         const pendingCount = response.data.filter(c => c.status === "Pending").length;
         
         setMenu(prevMenu => prevMenu.map(item => 

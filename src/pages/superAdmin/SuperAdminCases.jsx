@@ -166,7 +166,8 @@ function SuperAdminCases() {
     const fetchCases = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:5000/api/superadmin/cases/get-all");
+        const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+        const response = await axios.get(`${API_BASE}/api/superadmin/cases/get-all`);
         setTableData(response.data);
       } catch (error) {
         console.error("Error fetching cases:", error);
@@ -212,7 +213,8 @@ function SuperAdminCases() {
             setSelectedRows([]);
             // Force table reload
             setLoading(true);
-            axios.get("http://localhost:5000/api/superadmin/cases/get-all")
+            const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+            axios.get(`${API_BASE}/api/superadmin/cases/get-all`)
               .then(res => setTableData(res.data))
               .finally(() => setLoading(false));
           }}
