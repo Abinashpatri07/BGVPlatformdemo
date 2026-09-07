@@ -56,6 +56,9 @@ function VendorHome() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+
   const fetchCases = async () => {
     try {
       setLoading(true);
@@ -102,6 +105,69 @@ function VendorHome() {
     }
   };
 
+  // Filtering
+  const filteredCases = cases.filter(c => {
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
+    return (
+      (c.caseId && c.caseId.toLowerCase().includes(term)) ||
+      (c.candidateId && c.candidateId.toLowerCase().includes(term)) ||
+      (c.name && c.name.toLowerCase().includes(term)) ||
+      (c.caseType && c.caseType.toLowerCase().includes(term)) ||
+      (c.phone && c.phone.toLowerCase().includes(term)) ||
+      (c.status && c.status.toLowerCase().includes(term))
+    );
+  });
+
+  // Sorting
+  const sortedCases = [...filteredCases].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    let aValue = a[sortConfig.key];
+    let bValue = b[sortConfig.key];
+    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const handleSortByName = () => {
+    let direction = 'asc';
+    if (sortConfig.key === 'name' && sortConfig.direction === 'asc') direction = 'desc';
+    setSortConfig({ key: 'name', direction });
+  };
+
+  const handleSortByDate = () => {
+    let direction = 'asc';
+    if (sortConfig.key === 'id' && sortConfig.direction === 'asc') direction = 'desc';
+    setSortConfig({ key: 'id', direction });
+  };
+
+  const handleExport = () => {
+    if (sortedCases.length === 0) return alert("No data to export");
+    const headers = ["Case ID", "Candidate ID", "Case Type", "Name", "Phone", "TAT", "Status"];
+    const csvRows = [headers.join(",")];
+    
+    sortedCases.forEach(row => {
+      const values = [
+        row.caseId,
+        row.candidateId,
+        row.caseType,
+        `"${row.name}"`,
+        row.phone,
+        row.tat,
+        row.status
+      ];
+      csvRows.push(values.join(","));
+    });
+
+    const blob = new Blob([csvRows.join("\n")], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Vendor_Cases_${new Date().getTime()}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="w-full max-w-[1600px] mx-auto space-y-4 animate-fade-in pb-6">
       {/* HEADER SECTION */}
@@ -117,18 +183,18 @@ function VendorHome() {
       {/* CONTROLS SECTION */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <button className="px-5 py-2 bg-gray-100 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition">
+          <button onClick={() => { setSearchTerm(""); setSortConfig({ key: null, direction: 'asc' }); }} className="px-5 py-2 bg-gray-100 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition">
             All
           </button>
           <button onClick={fetchCases} className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm">
             <RefreshCw size={16} />
             Refresh
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+          <button onClick={handleSortByName} className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
             <ListFilter size={16} />
             Sort by Name
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+          <button onClick={handleSortByDate} className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
             <Calendar size={16} />
             Sort by Date
           </button>
@@ -143,10 +209,12 @@ function VendorHome() {
             <input
               type="text"
               placeholder="Search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#4338CA]/30 w-64"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 border border-[#4338CA] text-[#4338CA] rounded-lg text-sm font-medium hover:bg-indigo-50 transition">
+          <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2 border border-[#4338CA] text-[#4338CA] rounded-lg text-sm font-medium hover:bg-indigo-50 transition">
             <Upload size={16} />
             Export
           </button>
@@ -175,12 +243,12 @@ function VendorHome() {
                 <tr>
                   <td colSpan="8" className="text-center py-10 text-gray-500">Loading cases...</td>
                 </tr>
-              ) : cases.length === 0 ? (
+              ) : sortedCases.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="text-center py-10 text-gray-500">No cases found.</td>
                 </tr>
               ) : (
-                cases.slice(0, 10).map((row) => (
+                sortedCases.slice(0, 10).map((row) => (
                   <tr
                     key={row.id}
                     className="hover:bg-gray-50 transition-colors duration-150"
