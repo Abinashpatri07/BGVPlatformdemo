@@ -268,8 +268,8 @@ function VendorDashboard() {
       </div>
 
       {/* TABLE SECTION */}
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm flex flex-col min-h-[500px]">
+        <div className="overflow-x-auto flex-1">
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 text-gray-700 font-semibold border-b border-gray-200">
               <tr>

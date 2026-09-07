@@ -339,8 +339,8 @@ function SuperAdminCases() {
       </div>
 
       {/* TABLE SECTION */}
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-visible shadow-sm">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-2xl border border-gray-200 overflow-visible shadow-sm flex flex-col min-h-[500px]">
+        <div className="overflow-x-auto flex-1">
           <table className="w-full border-collapse">
             <thead className="bg-[#FAFAFA] border-b border-gray-200">
               <tr>
