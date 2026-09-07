@@ -250,7 +250,7 @@ function VendorDashboard() {
 
         <div 
           onClick={() => navigate('/vendor/unverified-applications')}
-          className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm relative flex flex-col justify-between h-[110px] cursor-pointer hover:shadow-md transition-shadow"
+          className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm relative flex flex-col justify-between h-[125px] cursor-pointer hover:shadow-md transition-shadow"
         >
           <div className="flex justify-between items-start">
             <div>
