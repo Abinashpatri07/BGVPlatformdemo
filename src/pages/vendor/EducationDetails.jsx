@@ -35,10 +35,10 @@ function EducationDetails() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    console.log("EducationDetails: caseId =", caseId);
+    // console.log("EducationDetails: caseId =", caseId);
     if (!caseId) { setLoading(false); setError("No case ID found in URL."); return; }
     const token = localStorage.getItem("vendorToken") || localStorage.getItem("accessToken");
-    console.log("EducationDetails: token =", token ? "found" : "NOT FOUND");
+    // console.log("EducationDetails: token =", token ? "found" : "NOT FOUND");
     if (!token) {
       // No token - redirect to login
       window.location.href = "/vendor/login";
@@ -47,7 +47,7 @@ function EducationDetails() {
     axios.get(`${API}/api/vendor/cases/education/${caseId}`, {
       headers: { Authorization: `Bearer ${token}` }
     }).then(res => {
-      console.log("Education API response:", res.data);
+      // console.log("Education API response:", res.data);
       if (res.data.success) {
         setCandidate(res.data.candidate || {});
         setEducation(res.data.education || []);
