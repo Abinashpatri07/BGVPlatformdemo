@@ -103,13 +103,13 @@ function VendorHome() {
   };
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto space-y-8 animate-fade-in pb-10 px-4">
+    <div className="w-full max-w-[1600px] mx-auto space-y-4 animate-fade-in pb-6 px-4 mt-4">
       {/* HEADER SECTION */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-gray-900">
           Hi {userName} Good Morning!
         </h1>
-        <p className="text-gray-600 mt-2 font-medium">
+        <p className="text-gray-600 mt-1 font-medium">
           "Power Your Ecosystem With Verified Partners And Real-Time Insights."
         </p>
       </div>
