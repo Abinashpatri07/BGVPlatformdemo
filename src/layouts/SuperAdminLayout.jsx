@@ -39,7 +39,7 @@ function SuperAdminLayout() {
         <Sidebar menu={menu} />
 
         {/* CONTENT */}
-        <div className="flex-1 p-6 overflow-y-auto">
+        <div className="flex-1 p-3 overflow-y-auto">
           <Outlet />
         </div>
 

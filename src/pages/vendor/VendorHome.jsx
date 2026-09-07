@@ -103,7 +103,7 @@ function VendorHome() {
   };
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto space-y-4 animate-fade-in pb-6 px-4 mt-4">
+    <div className="w-full max-w-[1600px] mx-auto space-y-4 animate-fade-in pb-6">
       {/* HEADER SECTION */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
