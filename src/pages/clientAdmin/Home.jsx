@@ -4,7 +4,7 @@ import CandidateOverview from "../../components/clientAdmin/home/CandidateOvervi
 import VerificationCredits from "../../components/clientAdmin/home/VerificationCredits";
 import RecentProfiles from "../../components/clientAdmin/home/RecentProfiles";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 
 function Home() {
   const [hrStats, setHrStats] = useState(null);
@@ -14,7 +14,10 @@ function Home() {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/client-admin/dashboard/metrics`);
+        const token = localStorage.getItem("accessToken");
+        const res = await axiosInstance.get(`${import.meta.env.VITE_API_URL}/api/client-admin/dashboard/metrics`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
         if (res.data.success) {
           setHrStats(res.data.data.hrStats);
           setCandidateStats(res.data.data.candidateStats);

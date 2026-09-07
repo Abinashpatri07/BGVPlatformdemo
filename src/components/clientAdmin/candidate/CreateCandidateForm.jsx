@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../../../API/axiosInstance";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle } from "lucide-react";
@@ -31,7 +31,7 @@ function CreateCandidateForm() {
 
     try {
       const createdById = 2; // mock admin ID
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         `${import.meta.env.VITE_API_URL}/api/client-admin/candidate/create`,
         {
           firstName:     data.firstName,

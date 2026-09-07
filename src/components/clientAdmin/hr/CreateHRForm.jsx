@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../../../API/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
@@ -56,7 +56,7 @@ function CreateHRForm() {
     try {
       // Default to clientId 1 for development as mentioned in the plan
       const payload = { ...formData, clientId: 1 };
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/client-admin/hr/create`, payload);
+      const res = await axiosInstance.post(`${import.meta.env.VITE_API_URL}/api/client-admin/hr/create`, payload);
       if (res.data.success) {
         setShowSuccessModal(true);
       }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../../../API/axiosInstance";
 
 function TerminateModal({ hrId, candidateId = "this HR", onCancel, onSuccess }) {
   const [step, setStep] = useState("confirm"); // "confirm" | "success"
@@ -12,7 +12,7 @@ function TerminateModal({ hrId, candidateId = "this HR", onCancel, onSuccess }) 
     setLoading(true);
     setError("");
     try {
-      const res = await axios.patch(
+      const res = await axiosInstance.patch(
         `${import.meta.env.VITE_API_URL}/api/client-admin/hr/terminate/${hrId}`,
         { reason: reason.trim() }
       );

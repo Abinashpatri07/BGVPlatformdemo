@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { UserPlus, Loader2, CheckCircle } from "lucide-react";
-import axios from "axios";
+import axiosInstance from "../../../../API/axiosInstance";
 
 function AssignHRModal({ candidate, onClose, onSuccess }) {
   const [hrs, setHrs] = useState([]);
@@ -13,7 +13,7 @@ function AssignHRModal({ candidate, onClose, onSuccess }) {
   useEffect(() => {
     const fetchHRs = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/hr/get-all?limit=1000`);
+        const res = await axiosInstance.get(`${import.meta.env.VITE_API_URL}/api/hr/get-all?limit=1000`);
         if (res.data.success) {
           setHrs(res.data.data || []);
         }
@@ -34,7 +34,7 @@ function AssignHRModal({ candidate, onClose, onSuccess }) {
     setApiError("");
 
     try {
-      const res = await axios.patch(
+      const res = await axiosInstance.patch(
         `${import.meta.env.VITE_API_URL}/api/client-admin/candidate/assign-hr/${candidate?.id}`,
         { hrId: selectedHrId }
       );

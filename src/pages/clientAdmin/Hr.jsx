@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -22,7 +22,7 @@ const Hr = () => {
   const fetchData = async (currentPage) => {
     setLoading(true);
     try {
-      const hrRes = await axios.get(
+      const hrRes = await axiosInstance.get(
         `${import.meta.env.VITE_API_URL}/api/client-admin/hr/get-all?page=${currentPage}&limit=10`
       );
       if (hrRes.data.success) {

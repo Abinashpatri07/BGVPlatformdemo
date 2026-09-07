@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -45,8 +45,10 @@ const Candidates = () => {
   const handleExport = async (type) => {
     setExportState({ status: "loading", message: `Preparing ${type} export...` });
     try {
-      const { data: res } = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/client-admin/candidate/list?limit=100000`
+      const token = localStorage.getItem("accessToken");
+      const { data: res } = await axiosInstance.get(
+        `${import.meta.env.VITE_API_URL}/api/client-admin/candidate/list?limit=100000`,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (!res.success || !res.data || res.data.length === 0) {

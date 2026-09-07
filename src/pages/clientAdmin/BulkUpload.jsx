@@ -1,7 +1,7 @@
 import { CheckCircle, XCircle, Download, FileText } from "lucide-react";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import * as XLSX from "xlsx";
 
 const BulkUpload = () => {
@@ -83,7 +83,7 @@ const BulkUpload = () => {
       formData.append("file", file);
       formData.append("clientAdminId", 2);
 
-      const res = await axios.post(
+      const res = await axiosInstance.post(
         `${import.meta.env.VITE_API_URL}/api/client-admin/candidate/bulk-create`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }

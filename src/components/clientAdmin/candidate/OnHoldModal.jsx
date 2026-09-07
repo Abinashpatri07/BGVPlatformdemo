@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Square } from "lucide-react";
-import axios from "axios";
+import axiosInstance from "../../../../API/axiosInstance";
 
 function OnHoldModal({ candidate, onClose, onSuccess }) {
   const [reason, setReason] = useState("");
@@ -18,7 +18,7 @@ function OnHoldModal({ candidate, onClose, onSuccess }) {
     try {
       setIsLoading(true);
       const candId = candidate?.id || candidate?.cand_id;
-      const res = await axios.patch(
+      const res = await axiosInstance.patch(
         `${import.meta.env.VITE_API_URL}/api/client-admin/candidate/on-hold/${candId}`,
         { reason }
       );

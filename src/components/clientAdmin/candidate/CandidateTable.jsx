@@ -13,7 +13,7 @@ import {
   useCallback,
 } from "react";
 
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
 import ActionDropdown from "../candidate/ActionDropdown";
@@ -81,7 +81,10 @@ function CandidateTable({
       if (searchQuery.trim()) params.append("search", searchQuery.trim());
       if (activeFilter && activeFilter !== "All") params.append("status", activeFilter);
 
-      const { data: res } = await axios.get(`${API}/list?${params.toString()}`);
+      const token = localStorage.getItem("accessToken");
+      const { data: res } = await axios.get(`${API}/list?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
       if (res.success) {
         let data = res.data || [];
