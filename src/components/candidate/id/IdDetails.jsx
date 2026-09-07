@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import UploadCard from "./UploadCard";
 import DocumentFields from "./DocumentFields";
 import { uploadOCR, verifyPanSource, verifyDlSource, verifyVoterSource, verifyPassportSource, pollTaskStatus, submitCandidateIdDocuments } from "../../../API/ocrApi";

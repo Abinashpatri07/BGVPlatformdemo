@@ -14,10 +14,7 @@ function Home() {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const token = localStorage.getItem("accessToken");
-        const res = await axiosInstance.get(`${import.meta.env.VITE_API_URL}/api/client-admin/dashboard/metrics`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await axiosInstance.get(`${import.meta.env.VITE_API_URL}/api/client-admin/dashboard/metrics`);
         if (res.data.success) {
           setHrStats(res.data.data.hrStats);
           setCandidateStats(res.data.data.candidateStats);

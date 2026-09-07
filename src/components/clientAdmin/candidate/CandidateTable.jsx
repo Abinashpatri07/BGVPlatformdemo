@@ -81,10 +81,7 @@ function CandidateTable({
       if (searchQuery.trim()) params.append("search", searchQuery.trim());
       if (activeFilter && activeFilter !== "All") params.append("status", activeFilter);
 
-      const token = localStorage.getItem("accessToken");
-      const { data: res } = await axios.get(`${API}/list?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const { data: res } = await axiosInstance.get(`${API}/list?${params.toString()}`);
 
       if (res.success) {
         let data = res.data || [];
@@ -117,7 +114,7 @@ function CandidateTable({
   const handleSendEmail = async (candidate) => {
     setEmailSending(true);
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/client-admin/candidate/send-welcome-email/${candidate.id}`);
+      const response = await axiosInstance.post(`${import.meta.env.VITE_API_URL}/api/client-admin/candidate/send-welcome-email/${candidate.id}`);
       if (response.data.success) {
         setShowEmailModal(true);
       } else {
