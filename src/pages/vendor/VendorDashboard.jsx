@@ -196,7 +196,7 @@ function VendorDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div 
           onClick={() => navigate('/vendor/assigned-applications')}
-          className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm relative flex flex-col justify-between h-[110px] cursor-pointer hover:shadow-md transition-shadow"
+          className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm relative flex flex-col justify-between h-[125px] cursor-pointer hover:shadow-md transition-shadow"
         >
           <div className="flex justify-between items-start">
             <div>
@@ -214,7 +214,7 @@ function VendorDashboard() {
 
         <div 
           onClick={() => navigate('/vendor/verified-applications')}
-          className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm relative flex flex-col justify-between h-[110px] cursor-pointer hover:shadow-md transition-shadow"
+          className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm relative flex flex-col justify-between h-[125px] cursor-pointer hover:shadow-md transition-shadow"
         >
           <div className="flex justify-between items-start">
             <div>
@@ -232,7 +232,7 @@ function VendorDashboard() {
 
         <div 
           onClick={() => navigate('/vendor/refute-applications')}
-          className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm relative flex flex-col justify-between h-[110px] cursor-pointer hover:shadow-md transition-shadow"
+          className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm relative flex flex-col justify-between h-[125px] cursor-pointer hover:shadow-md transition-shadow"
         >
           <div className="flex justify-between items-start">
             <div>
