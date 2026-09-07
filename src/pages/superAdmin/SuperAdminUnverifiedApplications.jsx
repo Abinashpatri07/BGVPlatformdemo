@@ -274,15 +274,15 @@ function SuperAdminUnverifiedApplications() {
                       onClick={() => {
                         const mode = "edit";
                         if (row.caseType.includes("Employment Verification")) {
-                          navigate(`/super-admin/cases/employment-details?mode=${mode}`);
+                          navigate(`/super-admin/cases/employment-details?mode=${mode}&caseId=${row.id}`);
                         } else if (row.caseType.includes("Address Verification")) {
-                          navigate(`/super-admin/cases/address-details?mode=${mode}`);
+                          navigate(`/super-admin/cases/address-details?mode=${mode}&caseId=${row.id}`);
                         } else if (row.caseType.includes("Drug Test")) {
-                          navigate(`/super-admin/cases/drug-test-details?mode=${mode}`);
+                          navigate(`/super-admin/cases/drug-test-details?mode=${mode}&caseId=${row.id}`);
                         } else if (row.caseType.includes("Education Verification")) {
-                          navigate(`/super-admin/cases/education-details?mode=${mode}`);
+                          navigate(`/super-admin/cases/education-details?mode=${mode}&caseId=${row.id}`);
                         } else if (row.caseType.includes("Criminal Check")) {
-                          navigate(`/super-admin/cases/criminal-details?mode=${mode}`);
+                          navigate(`/super-admin/cases/criminal-details?mode=${mode}&caseId=${row.id}`);
                         }
                       }}
                     >

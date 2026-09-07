@@ -421,15 +421,15 @@ function SuperAdminCases() {
                               const isEdit = row.status === "Assigned" || row.status === "Unverified";
                               const mode = isEdit ? "edit" : "view";
                               if (row.caseType.includes("Employment Verification")) {
-                                navigate(`/super-admin/employment-details?mode=${mode}`);
+                                navigate(`/super-admin/employment-details?mode=${mode}&caseId=${row.id}`);
                               } else if (row.caseType.includes("Address Verification")) {
-                                navigate(`/super-admin/address-details?mode=${mode}`);
+                                navigate(`/super-admin/address-details?mode=${mode}&caseId=${row.id}`);
                               } else if (row.caseType.includes("Drug Test")) {
-                                navigate(`/super-admin/drug-test-details?mode=${mode}`);
+                                navigate(`/super-admin/drug-test-details?mode=${mode}&caseId=${row.id}`);
                               } else if (row.caseType.includes("Education Verification")) {
-                                navigate(`/super-admin/education-details?mode=${mode}`);
+                                navigate(`/super-admin/education-details?mode=${mode}&caseId=${row.id}`);
                               } else if (row.caseType.includes("Criminal Check")) {
-                                navigate(`/super-admin/criminal-details?mode=${mode}`);
+                                navigate(`/super-admin/criminal-details?mode=${mode}&caseId=${row.id}`);
                               }
                             }}
                           >

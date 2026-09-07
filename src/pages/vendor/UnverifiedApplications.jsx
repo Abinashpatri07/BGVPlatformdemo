@@ -274,15 +274,15 @@ function UnverifiedApplications() {
                       onClick={() => {
                         const mode = "edit";
                         if (row.caseType.includes("Employment Verification")) {
-                          navigate(`/vendor/employment-details?mode=${mode}`);
+                          navigate(`/vendor/employment-details?mode=${mode}&caseId=${row.id}`);
                         } else if (row.caseType.includes("Address Verification")) {
-                          navigate(`/vendor/address-details?mode=${mode}`);
+                          navigate(`/vendor/address-details?mode=${mode}&caseId=${row.id}`);
                         } else if (row.caseType.includes("Drug Test")) {
-                          navigate(`/vendor/drug-test-details?mode=${mode}`);
+                          navigate(`/vendor/drug-test-details?mode=${mode}&caseId=${row.id}`);
                         } else if (row.caseType.includes("Education Verification")) {
-                          navigate(`/vendor/education-details?mode=${mode}`);
+                          navigate(`/vendor/education-details?mode=${mode}&caseId=${row.id}`);
                         } else if (row.caseType.includes("Criminal Check")) {
-                          navigate(`/vendor/criminal-details?mode=${mode}`);
+                          navigate(`/vendor/criminal-details?mode=${mode}&caseId=${row.id}`);
                         }
                       }}
                     >
