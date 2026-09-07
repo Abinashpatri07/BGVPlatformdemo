@@ -273,17 +273,7 @@ function VendorDashboard() {
           <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 text-gray-700 font-semibold border-b border-gray-200">
               <tr>
-                <th className="px-3 py-1.5 w-12">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded border-gray-300 text-[#4338CA] focus:ring-[#4338CA]"
-                    checked={
-                      selectedRows.length === cases.length &&
-                      cases.length > 0
-                    }
-                    onChange={toggleAll}
-                  />
-                </th>
+
                 <th className="px-3 py-1.5">Case ID</th>
                 <th className="px-3 py-1.5">Candidate ID</th>
                 <th className="px-3 py-1.5">Case Type</th>
@@ -297,11 +287,11 @@ function VendorDashboard() {
             <tbody className="divide-y divide-gray-100">
               {loading ? (
                 <tr>
-                  <td colSpan="9" className="text-center py-10 text-gray-500">Loading cases...</td>
+                  <td colSpan="8" className="text-center py-10 text-gray-500">Loading cases...</td>
                 </tr>
               ) : cases.length === 0 ? (
                 <tr>
-                  <td colSpan="9" className="text-center py-10 text-gray-500">No cases found.</td>
+                  <td colSpan="8" className="text-center py-10 text-gray-500">No cases found.</td>
                 </tr>
               ) : (
                 cases.slice(0, 10).map((row) => (
@@ -309,14 +299,7 @@ function VendorDashboard() {
                     key={row.id}
                     className="hover:bg-gray-50 transition-colors duration-150"
                   >
-                  <td className="px-3 py-1.5">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 rounded border-gray-300 text-[#4338CA] focus:ring-[#4338CA]"
-                      checked={selectedRows.includes(row.id)}
-                      onChange={() => toggleRow(row.id)}
-                    />
-                  </td>
+
                   <td className="px-3 py-1.5 font-medium text-gray-900">
                     {row.caseId}
                   </td>
