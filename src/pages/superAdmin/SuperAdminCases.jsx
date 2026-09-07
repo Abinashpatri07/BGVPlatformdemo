@@ -244,13 +244,13 @@ function SuperAdminCases() {
         </div>
       )}
 
-      <div className="w-full max-w-[1600px] mx-auto flex flex-col gap-5 pb-10 px-4 mt-4">
+      <div className="w-full max-w-[1600px] mx-auto flex flex-col gap-4 pb-6">
       {/* HEADER SECTION */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">
           Hi Super Admin Good Morning!
         </h1>
-        <p className="text-gray-500 text-sm mt-1 font-medium">
+        <p className="text-gray-500 mt-1 font-medium text-sm">
           "Power Your Ecosystem With Verified Partners And Real-Time Insights."
         </p>
       </div>
