@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import axiosInstance from "../../../../API/axiosInstance";
+import axiosInstance from "../../../API/axiosInstance";
 import {
   User,
   MapPin,

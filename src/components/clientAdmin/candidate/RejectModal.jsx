@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X } from "lucide-react";
-import axiosInstance from "../../../../API/axiosInstance";
+import axiosInstance from "../../../API/axiosInstance";
 
 function RejectModal({ candidate, onClose, onSuccess }) {
   const [reason, setReason] = useState("");

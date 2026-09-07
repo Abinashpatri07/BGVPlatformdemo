@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axiosInstance from "../../../../API/axiosInstance";
+import axiosInstance from "../../../API/axiosInstance";
 
 function TerminateModal({ hrId, candidateId = "this HR", onCancel, onSuccess }) {
   const [step, setStep] = useState("confirm"); // "confirm" | "success"

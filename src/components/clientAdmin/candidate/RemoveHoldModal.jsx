@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { PlayCircle, CheckCircle } from "lucide-react";
-import axiosInstance from "../../../../API/axiosInstance";
+import axiosInstance from "../../../API/axiosInstance";
 
 function RemoveHoldModal({ candidate, onClose, onSuccess }) {
   const [isLoading, setIsLoading] = useState(false);

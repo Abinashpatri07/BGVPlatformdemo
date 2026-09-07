@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { UserPlus, Loader2, CheckCircle } from "lucide-react";
-import axiosInstance from "../../../../API/axiosInstance";
+import axiosInstance from "../../../API/axiosInstance";
 
 function AssignHRModal({ candidate, onClose, onSuccess }) {
   const [hrs, setHrs] = useState([]);
