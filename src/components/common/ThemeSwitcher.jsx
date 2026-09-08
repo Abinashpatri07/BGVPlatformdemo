@@ -41,11 +41,11 @@ const ThemeSwitcher = () => {
       }}
       className={`w-full flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 transition ${theme === t.id ? 'bg-gray-50' : ''}`}
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 min-w-0">
         <div className={`w-8 h-8 rounded-lg ${t.gradient} shadow-sm shrink-0`} />
-        <div className="text-left">
-          <div className="text-sm font-semibold text-gray-800">{t.name}</div>
-          <div className="text-[11px] text-gray-500 truncate max-w-[140px]">{t.desc}</div>
+        <div className="text-left min-w-0">
+          <div className="text-sm font-semibold text-gray-800 truncate">{t.name}</div>
+          <div className="text-[11px] text-gray-500 truncate">{t.desc}</div>
         </div>
       </div>
       {theme === t.id && <Check size={16} className="text-[#059669] shrink-0" />}
@@ -63,7 +63,7 @@ const ThemeSwitcher = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-12 mt-2 w-80 bg-white border border-gray-100 shadow-xl rounded-2xl p-4 z-50 flex gap-4">
+        <div className="absolute right-0 top-12 mt-2 w-[480px] bg-white border border-gray-100 shadow-xl rounded-2xl p-4 z-50 flex gap-4">
           <div className="flex-1">
             <h3 className="text-xs font-bold text-gray-400 mb-3 tracking-wider">LIGHT</h3>
             <div className="space-y-1">
