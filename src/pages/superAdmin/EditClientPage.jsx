@@ -7,9 +7,14 @@ import {
   Lock,
   ShieldCheck,
   Loader2,
+  Save,
 } from "lucide-react";
 import axios from "axios";
 import PageHeader from "../../components/superAdmin/client/PageHeader";
+import PhoneInputPkg from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+
+const PhoneInput = PhoneInputPkg.default || PhoneInputPkg;
 
 /* FIELD */
 function Field({ label, children }) {
@@ -355,12 +360,31 @@ export default function EditClientPage() {
                   {errors.contactEmail && <p className="text-xs text-red-500 mt-1">{errors.contactEmail}</p>}
                 </Field>
                 <Field label="Phone Number (10 digits)">
-                  <input
-                    value={form.contactPhone}
-                    onChange={handleChange("contactPhone")}
-                    placeholder="9876543210"
-                    className={inputCls}
-                  />
+                  <div className={`border rounded-lg transition ${
+                    errors.contactPhone ? "border-red-300" : "border-gray-300"
+                  }`}>
+                    <PhoneInput
+                      country={'in'}
+                      value={form.contactPhone}
+                      onChange={(phone) => handleChange("contactPhone")({ target: { value: phone } })}
+                      enableSearch={true}
+                      disableSearchIcon={true}
+                      inputStyle={{
+                        width: '100%',
+                        height: '38px',
+                        border: 'none',
+                        background: 'transparent',
+                        fontSize: '14px',
+                        paddingLeft: '48px'
+                      }}
+                      buttonStyle={{
+                        border: 'none',
+                        background: '#f9fafb',
+                        padding: '0 4px',
+                        borderRight: '1px solid #e5e7eb'
+                      }}
+                    />
+                  </div>
                   {errors.contactPhone && <p className="text-xs text-red-500 mt-1">{errors.contactPhone}</p>}
                 </Field>
               </div>

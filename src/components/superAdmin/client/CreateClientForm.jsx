@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { Building2, UserCircle, CreditCard, CheckCircle2 } from "lucide-react";
 import axios from "axios";
+import PhoneInputPkg from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+
+const PhoneInput = PhoneInputPkg.default || PhoneInputPkg;
 
 function Field({ label, required, hint, error, children }) {
   return (
@@ -210,18 +214,32 @@ const handleSubmit = async () => {
                   value={form.email} onChange={handle("email")} />
               </Field>
               <Field label="Phone Number" required error={errors.phone} hint="Must be a unique active number.">
-                <div className="flex items-center">
-                  <span className="px-4 py-2.5 bg-[#F8FAFF] border border-[#B3C9FF] border-r-0 rounded-l-xl text-gray-500 text-sm">
-                    +91
-                  </span>
-                  <input
-                    className="w-full px-4 py-2.5 bg-[#F8FAFF] border border-[#B3C9FF] rounded-r-xl outline-none focus:ring-2 focus:ring-indigo-400 transition placeholder-gray-400 text-gray-700"
-                    placeholder="8485214690"
-                    maxLength={10}
+                <div className={`border rounded-xl transition ${
+                  errors.phone ? "border-red-300" : "border-[#B3C9FF]"
+                }`}>
+                  <PhoneInput
+                    country={'in'}
                     value={form.phone}
-                    onChange={handle("phone")}
-                    onInput={(e) => {
-                      e.target.value = e.target.value.replace(/\D/g, "");
+                    onChange={(phone) => handle("phone")({ target: { value: phone } })}
+                    enableSearch={true}
+                    disableSearchIcon={true}
+                    inputStyle={{
+                      width: '100%',
+                      height: '44px',
+                      border: 'none',
+                      background: '#F8FAFF',
+                      fontSize: '14px',
+                      paddingLeft: '48px',
+                      borderTopRightRadius: '0.75rem',
+                      borderBottomRightRadius: '0.75rem'
+                    }}
+                    buttonStyle={{
+                      border: 'none',
+                      background: '#F8FAFF',
+                      padding: '0 4px',
+                      borderTopLeftRadius: '0.75rem',
+                      borderBottomLeftRadius: '0.75rem',
+                      borderRight: '1px solid #B3C9FF'
                     }}
                   />
                 </div>

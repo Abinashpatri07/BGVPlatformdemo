@@ -5,6 +5,10 @@ import {
   User, MapPin, IdCard, GraduationCap, Briefcase,
   ShieldCheck, Users, CheckCircle, Eye, Trash2, Pencil, Loader2
 } from "lucide-react";
+import PhoneInputPkg from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+
+const PhoneInput = PhoneInputPkg.default || PhoneInputPkg;
 
 const BASE = `${import.meta.env.VITE_API_URL}/api/candidates`;
 
@@ -46,13 +50,39 @@ const Field = ({ label, value }) => (
 const EditField = ({ label, name, value, onChange, type = "text" }) => (
   <div>
     <label className="block text-sm text-gray-600 mb-1">{label}</label>
-    <input
-      type={type}
-      name={name}
-      value={value ?? ""}
-      onChange={onChange}
-      className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#01026E]"
-    />
+    {name === "phone" ? (
+      <div className="border rounded-lg transition border-gray-300">
+        <PhoneInput
+          country={'in'}
+          value={value}
+          onChange={(phone) => onChange({ target: { name: "phone", value: phone } })}
+          enableSearch={true}
+          disableSearchIcon={true}
+          inputStyle={{
+            width: '100%',
+            height: '38px',
+            border: 'none',
+            background: 'transparent',
+            fontSize: '14px',
+            paddingLeft: '48px'
+          }}
+          buttonStyle={{
+            border: 'none',
+            background: '#f9fafb',
+            padding: '0 4px',
+            borderRight: '1px solid #e5e7eb'
+          }}
+        />
+      </div>
+    ) : (
+      <input
+        type={type}
+        name={name}
+        value={value ?? ""}
+        onChange={onChange}
+        className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#01026E]"
+      />
+    )}
   </div>
 );
 

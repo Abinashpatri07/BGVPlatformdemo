@@ -1,24 +1,38 @@
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import {
-  User,
-  MapPin,
-  IdCard,
-  GraduationCap,
-  Briefcase,
-  ShieldCheck,
-  Users,
-  CheckCircle,
-  Pencil, Eye, Trash2 
+  User, MapPin, IdCard, GraduationCap, Briefcase,
+  ShieldCheck, Users, CheckCircle, Eye, Trash2, Pencil, Loader2, Save
 } from "lucide-react";
+import PhoneInputPkg from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
-const InputField = ({ label, value }) => (
+const PhoneInput = PhoneInputPkg.default || PhoneInputPkg;
+
+const InputField = ({ label, name, value, onChange, type = "text" }) => (
   <div>
     <label className="block text-sm text-gray-600 mb-1">{label}</label>
-    <input
-      defaultValue={value}
-      className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#01026E]"
-    />
+    {name === "phone" ? (
+      <div className="border rounded-lg transition border-gray-300">
+        <PhoneInput
+          country={'in'}
+          value={value}
+          onChange={(phone) => onChange({ target: { name: "phone", value: phone } })}
+          enableSearch={true}
+          disableSearchIcon={true}
+          inputStyle={{ width: '100%', height: '38px', border: 'none', background: 'transparent', fontSize: '14px', paddingLeft: '48px' }}
+          buttonStyle={{ border: 'none', background: '#f9fafb', padding: '0 4px', borderRight: '1px solid #e5e7eb' }}
+        />
+      </div>
+    ) : (
+      <input
+        type={type}
+        name={name}
+        value={value ?? ""}
+        onChange={onChange}
+        className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#01026E]"
+      />
+    )}
   </div>
 );
 
@@ -95,7 +109,7 @@ const EditCandidate = () => {
               <div className="grid grid-cols-2 gap-5">
 
                 <InputField label="Name" value="Ramesh Kumar Mishra" />
-                <InputField label="Phone no" value="+91 1234567890" />
+                <InputField label="Phone no" name="phone" value="1234567890" />
 
                 <InputField label="Email" value="abcdsew67@mail.com" />
                 <InputField label="Date Of Birth" value="5/10/1998" />

@@ -11,6 +11,10 @@ import {
   X,
   CheckCircle2,
 } from "lucide-react";
+import PhoneInputPkg from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+
+const PhoneInput = PhoneInputPkg.default || PhoneInputPkg;
 
 const ALL_SERVICES = [
   "Criminal Background Check",
@@ -146,7 +150,7 @@ export default function EditVendor() {
             gst: v.gst_number || "",
             fullName: `${v.poc_first_name} ${v.poc_last_name}`,
             email: v.poc_email || "",
-            phone: v.poc_mobile ? v.poc_mobile.replace("+91", "") : "",
+            phone: v.poc_mobile || "",
           });
 
           // Map coverage states
@@ -339,12 +343,31 @@ export default function EditVendor() {
                 />
               </Field>
               <Field label={<>Phone Number <span className="text-red-500">*</span></>} error={errors.phone} hint="Must be a unique active number.">
-                <input
-                  value={form.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
-                  placeholder="+91 848 521 4690"
-                  className={inputClass(errors.phone)}
-                />
+                <div className={`border rounded-lg transition ${
+                  errors.phone ? "border-red-300" : "border-gray-300"
+                }`}>
+                  <PhoneInput
+                    country={'in'}
+                    value={form.phone}
+                    onChange={(phone) => handleChange("phone", phone)}
+                    enableSearch={true}
+                    disableSearchIcon={true}
+                    inputStyle={{
+                      width: '100%',
+                      height: '38px',
+                      border: 'none',
+                      background: 'transparent',
+                      fontSize: '14px',
+                      paddingLeft: '48px'
+                    }}
+                    buttonStyle={{
+                      border: 'none',
+                      background: '#f9fafb',
+                      padding: '0 4px',
+                      borderRight: '1px solid #e5e7eb'
+                    }}
+                  />
+                </div>
               </Field>
             </div>
           </div>
