@@ -124,7 +124,7 @@ function TableToolbar() {
                     console.log("Download:", selectedType);
                     setShowExportModal(false);
                   }}
-                  className="bg-theme-primary text-white px-4 py-1.5 rounded-lg text-sm hover:opacity-90"
+                  className="bg-[#01026E] text-white px-4 py-1.5 rounded-lg text-sm hover:opacity-90"
                 >
                   Download
                 </button>

@@ -140,7 +140,7 @@ const BulkUpload = () => {
 
         {/* HEADER */}
         <div>
-          <h2 className="text-3xl font-bold text-theme-text">
+          <h2 className="text-3xl font-bold text-[#2B3674]">
             Bulk Upload Candidates
           </h2>
 
@@ -157,7 +157,7 @@ const BulkUpload = () => {
               <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
                 <CheckCircle size={36} className="text-green-500" />
               </div>
-              <h3 className="text-theme-primary font-bold text-xl mb-2">
+              <h3 className="text-[#01026E] font-bold text-xl mb-2">
                 {uploadResult.created} Successful Candidates Added
               </h3>
               <p className="text-gray-600 text-sm mb-6">
@@ -168,7 +168,7 @@ const BulkUpload = () => {
                   handleReset();
                   navigate("/admin/candidates");
                 }}
-                className="px-8 py-3 bg-theme-primary text-white rounded-xl text-base hover:bg-theme-primary-hover transition font-medium w-full"
+                className="px-8 py-3 bg-[#01026E] text-white rounded-xl text-base hover:bg-[#02038a] transition font-medium w-full"
               >
                 Done
               </button>
@@ -192,7 +192,7 @@ const BulkUpload = () => {
 
               <button
                 onClick={handleDownloadTemplate}
-                className="flex items-center gap-2 bg-theme-primary hover:bg-theme-primary-hover text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shrink-0 ml-4"
+                className="flex items-center gap-2 bg-[#02027A] hover:bg-[#00005E] text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shrink-0 ml-4"
               >
                 <Download size={18} />
                 Download CSV Template
@@ -265,7 +265,7 @@ const BulkUpload = () => {
                   </div>
 
                   <p className="text-base text-gray-600">
-                    <span className="text-theme-primary font-bold">
+                    <span className="text-[#01026E] font-bold">
                       Click Here
                     </span>{" "}
                     to upload your File or Drag
@@ -354,7 +354,7 @@ const BulkUpload = () => {
                 <button
                   onClick={handleNext}
                   disabled={!file}
-                  className="px-10 py-2.5 bg-theme-primary text-white rounded-xl text-sm hover:bg-theme-primary-hover disabled:opacity-50 transition font-semibold"
+                  className="px-10 py-2.5 bg-[#02027A] text-white rounded-xl text-sm hover:bg-[#02038a] disabled:opacity-50 transition font-semibold"
                 >
                   Next
                 </button>
@@ -503,7 +503,7 @@ const BulkUpload = () => {
               <button 
                 onClick={handleUpload}
                 disabled={uploading}
-                className="px-7 py-3 bg-theme-primary text-white rounded-xl text-base hover:bg-theme-primary-hover transition font-medium disabled:opacity-60"
+                className="px-7 py-3 bg-[#01026E] text-white rounded-xl text-base hover:bg-[#02038a] transition font-medium disabled:opacity-60"
               >
                 {uploading ? "Uploading..." : "Upload"}
               </button>
@@ -524,7 +524,7 @@ const BulkUpload = () => {
               </span>
             </div>
 
-            <h3 className="text-theme-primary font-semibold text-xl mb-2">
+            <h3 className="text-[#01026E] font-semibold text-xl mb-2">
               10 Duplicate Records Found
             </h3>
 
@@ -547,7 +547,7 @@ const BulkUpload = () => {
                 onClick={() =>
                   setShowDuplicateModal(false)
                 }
-                className="px-6 py-3 bg-theme-primary text-white rounded-xl text-base hover:bg-theme-primary-hover transition font-medium"
+                className="px-6 py-3 bg-[#01026E] text-white rounded-xl text-base hover:bg-[#02038a] transition font-medium"
               >
                 Delete Duplicate Records
               </button>

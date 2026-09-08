@@ -67,7 +67,7 @@ const EditCandidate = () => {
                 onClick={() => setActiveTab(tab.name)}
                 className={`flex items-center gap-2 px-4 py-1.5 rounded-full whitespace-nowrap transition ${
                   isActive
-                    ? "bg-theme-primary text-white"
+                    ? "bg-[#01026E] text-white"
                     : "text-gray-600 hover:text-black"
                 }`}
               >
@@ -163,7 +163,7 @@ const EditCandidate = () => {
                 {/* Passport */}
                 <div className="border rounded-xl p-4 shadow-sm">
                     <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-theme-primary">Passport</h4>
+                    <h4 className="font-medium text-[#01026E]">Passport</h4>
                     <span className="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full">
                         Verified
                     </span>
@@ -175,7 +175,7 @@ const EditCandidate = () => {
                 {/* PAN Card */}
                 <div className="border rounded-xl p-4 shadow-sm">
                     <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-theme-primary">Pan Card</h4>
+                    <h4 className="font-medium text-[#01026E]">Pan Card</h4>
                     <span className="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full">
                         Verified
                     </span>
@@ -187,7 +187,7 @@ const EditCandidate = () => {
                 {/* Driving License */}
                 <div className="border rounded-xl p-4 shadow-sm">
                     <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-theme-primary">Driving License</h4>
+                    <h4 className="font-medium text-[#01026E]">Driving License</h4>
                     <span className="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full">
                         Verified
                     </span>
@@ -199,7 +199,7 @@ const EditCandidate = () => {
                 {/* Voter ID (NEW FIELD) */}
                 <div className="border rounded-xl p-4 shadow-sm">
                     <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium text-theme-primary">Voter ID</h4>
+                    <h4 className="font-medium text-[#01026E]">Voter ID</h4>
                     <span className="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full">
                         Verified
                     </span>
@@ -233,7 +233,7 @@ const EditCandidate = () => {
             >
               <div className="flex items-center gap-3">
                 <CheckCircle size={18} className="text-green-500" />
-                <span className="text-sm font-medium text-theme-primary">
+                <span className="text-sm font-medium text-[#01026E]">
                   {item}
                 </span>
               </div>
@@ -283,7 +283,7 @@ const EditCandidate = () => {
 
           {/* RIGHT PREVIEW */}
           <div className="bg-white p-4 rounded-xl shadow border text-center">
-            <p className="text-sm text-theme-primary mb-3 font-medium">
+            <p className="text-sm text-[#01026E] mb-3 font-medium">
               Preview
             </p>
 
@@ -335,7 +335,7 @@ const EditCandidate = () => {
             {/* Right */}
             <div
               onClick={() => setShowEmploymentView(true)}
-              className="flex items-center gap-2 text-theme-primary cursor-pointer"
+              className="flex items-center gap-2 text-[#01026E] cursor-pointer"
             >
               <Eye size={16} />
               <span className="text-sm">view</span>
@@ -371,7 +371,7 @@ const EditCandidate = () => {
 
           {/* RIGHT PREVIEW */}
           <div className="bg-white p-4 rounded-xl shadow border text-center">
-            <p className="text-sm text-theme-primary mb-3 font-medium">
+            <p className="text-sm text-[#01026E] mb-3 font-medium">
               Preview
             </p>
 
@@ -411,7 +411,7 @@ const EditCandidate = () => {
 
             <div
               onClick={() => setBackgroundView("criminal")}
-              className="flex items-center gap-2 text-theme-primary cursor-pointer"
+              className="flex items-center gap-2 text-[#01026E] cursor-pointer"
             >
               <Eye size={16} />
               <span className="text-sm">View</span>
@@ -437,7 +437,7 @@ const EditCandidate = () => {
 
            <div
              onClick={() => setBackgroundView("drug")}
-             className="flex items-center gap-2 text-theme-primary cursor-pointer"
+             className="flex items-center gap-2 text-[#01026E] cursor-pointer"
            >
              <Eye size={16} />
              <span className="text-sm">View</span>
@@ -486,7 +486,7 @@ const EditCandidate = () => {
 
           {/* RIGHT PREVIEW */}
           <div className="bg-white p-4 rounded-xl shadow border text-center">
-            <p className="text-sm text-theme-primary mb-3 font-medium">
+            <p className="text-sm text-[#01026E] mb-3 font-medium">
               Preview
             </p>
 
@@ -503,12 +503,12 @@ const EditCandidate = () => {
 )}
                     {activeTab === "Reference" && (
                     <>
-                        <h3 className="text-lg font-semibold text-theme-primary">
+                        <h3 className="text-lg font-semibold text-[#01026E]">
                         Reference Details
                         </h3>
 
                         {/* Reference 1 */}
-                        <h4 className="mt-4 font-medium text-theme-primary">Reference 1</h4>
+                        <h4 className="mt-4 font-medium text-[#01026E]">Reference 1</h4>
 
                         <div className="grid grid-cols-2 gap-5 mt-3">
 
@@ -524,7 +524,7 @@ const EditCandidate = () => {
                         </div>
 
                         {/* Reference 2 */}
-                        <h4 className="mt-6 font-medium text-theme-primary">Reference 2</h4>
+                        <h4 className="mt-6 font-medium text-[#01026E]">Reference 2</h4>
 
                         <div className="grid grid-cols-2 gap-5 mt-3">
 
@@ -586,7 +586,7 @@ const EditCandidate = () => {
         console.log("Save Full Profile");
       }
     }}
-    className="px-5 py-2 bg-theme-primary text-white rounded-lg text-sm"
+    className="px-5 py-2 bg-[#01026E] text-white rounded-lg text-sm"
   >
     Save Profile Details
   </button>

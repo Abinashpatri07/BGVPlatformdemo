@@ -52,7 +52,7 @@ function HRAssigneeList({ totalCases }) {
                     <div className="flex items-center gap-2 mt-2">
                       <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-theme-primary"
+                          className="h-full bg-[#02027A]"
                           style={{ width: `${hr.load}%` }}
                         />
                       </div>
@@ -68,7 +68,7 @@ function HRAssigneeList({ totalCases }) {
                   }`}
                 >
                   {isSelected && (
-                    <div className="w-2 h-2 rounded-full bg-theme-primary" />
+                    <div className="w-2 h-2 rounded-full bg-[#02027A]" />
                   )}
                 </div>
               </div>
@@ -78,7 +78,7 @@ function HRAssigneeList({ totalCases }) {
       </div>
 
       {/* BUTTON */}
-      <button className="w-full bg-theme-primary hover:bg-theme-primary-hover text-white py-3 rounded-lg font-semibold mt-6 transition">
+      <button className="w-full bg-[#02027A] hover:bg-[#00005E] text-white py-3 rounded-lg font-semibold mt-6 transition">
         Assign {totalCases} cases
       </button>
     </div>

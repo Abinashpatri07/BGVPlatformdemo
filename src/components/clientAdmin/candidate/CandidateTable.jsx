@@ -228,7 +228,7 @@ function CandidateTable({
 
       {/* ── FLOATING BULK ACTION BAR ── */}
       {selectedRows.length >= 2 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-theme-primary text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-6 z-[9999]">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#02027A] text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-6 z-[9999]">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center">
               <CheckCircle size={22} className="text-white" />
@@ -240,7 +240,7 @@ function CandidateTable({
           </div>
           <button
             onClick={() => setShowBulkAssignHRModal(true)}
-            className="bg-white text-theme-primary hover:bg-indigo-50 px-5 py-2.5 rounded-xl font-semibold transition"
+            className="bg-white text-[#02027A] hover:bg-indigo-50 px-5 py-2.5 rounded-xl font-semibold transition"
           >
             Bulk Assign
           </button>
@@ -288,7 +288,7 @@ function CandidateTable({
                     <p className="text-sm text-red-500">{fetchError}</p>
                     <button
                       onClick={fetchCandidates}
-                      className="px-4 py-1.5 bg-theme-primary text-white text-sm rounded-lg hover:opacity-90"
+                      className="px-4 py-1.5 bg-[#02027A] text-white text-sm rounded-lg hover:opacity-90"
                     >
                       Retry
                     </button>

@@ -84,7 +84,7 @@ function View() {
       <div className="mb-6">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-sm text-gray-500 hover:text-theme-primary transition"
+          className="flex items-center gap-2 text-sm text-gray-500 hover:text-[#02027A] transition"
         >
           <ArrowLeft size={16} />
           Back
@@ -94,7 +94,7 @@ function View() {
       {/* TITLE + STATUS BADGE */}
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-theme-primary">
+          <h1 className="text-3xl font-bold text-[#02027A]">
             Candidate Details
           </h1>
           <p className="text-gray-500 mt-1">
@@ -135,7 +135,7 @@ function View() {
 
       {/* CANDIDATE ID */}
       <div className="mb-6">
-        <span className="bg-indigo-50 text-theme-primary px-4 py-2 rounded-xl text-sm font-medium">
+        <span className="bg-indigo-50 text-[#02027A] px-4 py-2 rounded-xl text-sm font-medium">
           Candidate ID: {id}
         </span>
       </div>
@@ -161,7 +161,7 @@ function View() {
                 }}
                 className={`flex items-center gap-2 px-4 py-1.5 rounded-full whitespace-nowrap transition ${
                   isActive
-                    ? "bg-theme-primary text-white"
+                    ? "bg-[#01026E] text-white"
                     : "text-gray-600 hover:text-black"
                 }`}
               >
@@ -241,7 +241,7 @@ function View() {
                       {candidateData.identity.map((item, idx) => (
                         <div key={idx} className="border rounded-xl p-4 shadow-sm flex items-center justify-between">
                           <div>
-                            <h4 className="font-medium text-theme-primary mb-1">{item.cand_ident_type || `Identity Document ${idx + 1}`}</h4>
+                            <h4 className="font-medium text-[#01026E] mb-1">{item.cand_ident_type || `Identity Document ${idx + 1}`}</h4>
                             <Label label="ID Number" value={item.cand_ident_number || "N/A"} />
                           </div>
                           <div className="flex items-center gap-4">
@@ -250,7 +250,7 @@ function View() {
                             </span>
                             <div 
                               onClick={() => setIdentityView(item)}
-                              className="flex items-center gap-2 text-theme-primary cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
+                              className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
                             >
                               <Eye size={16} />
                               <span className="text-sm font-medium">View</span>
@@ -271,7 +271,7 @@ function View() {
                     </h3>
                     <button 
                       onClick={() => setIdentityView(null)}
-                      className="text-sm text-theme-primary border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
+                      className="text-sm text-[#01026E] border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
                     >
                       Back to List
                     </button>
@@ -289,7 +289,7 @@ function View() {
                     </div>
 
                     <div className="bg-white p-4 rounded-xl shadow border text-center">
-                      <p className="text-sm text-theme-primary mb-3 font-medium">Document Preview</p>
+                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
                       <img
                         src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
                         alt="document preview"
@@ -319,7 +319,7 @@ function View() {
                         >
                           <div className="flex items-center gap-3">
                             <CheckCircle size={18} className="text-green-500" />
-                            <span className="text-sm font-medium text-theme-primary">
+                            <span className="text-sm font-medium text-[#01026E]">
                               {item.cand_edu_type || `Education Record ${idx + 1}`}
                             </span>
                           </div>
@@ -347,7 +347,7 @@ function View() {
                     </h3>
                     <button 
                       onClick={() => setShowEducationView(null)}
-                      className="text-sm text-theme-primary border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
+                      className="text-sm text-[#01026E] border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
                     >
                       Back to List
                     </button>
@@ -366,7 +366,7 @@ function View() {
                     </div>
 
                     <div className="bg-white p-4 rounded-xl shadow border text-center">
-                      <p className="text-sm text-theme-primary mb-3 font-medium">Document Preview</p>
+                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
                       <img
                         src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
                         alt="certificate"
@@ -405,7 +405,7 @@ function View() {
 
                           <div
                             onClick={() => setShowEmploymentView(item)}
-                            className="flex items-center gap-2 text-theme-primary cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg"
+                            className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg"
                           >
                             <Eye size={16} />
                             <span className="text-sm font-medium">View</span>
@@ -425,7 +425,7 @@ function View() {
                     </h3>
                     <button 
                       onClick={() => setShowEmploymentView(null)}
-                      className="text-sm text-theme-primary border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
+                      className="text-sm text-[#01026E] border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
                     >
                       Back to List
                     </button>
@@ -444,7 +444,7 @@ function View() {
                     </div>
 
                     <div className="bg-white p-4 rounded-xl shadow border text-center">
-                      <p className="text-sm text-theme-primary mb-3 font-medium">Document Preview</p>
+                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
                       <img
                         src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
                         className="rounded-lg shadow-sm mx-auto h-64 object-cover"
@@ -475,7 +475,7 @@ function View() {
 
                           <div
                             onClick={() => setCriminalView(item)}
-                            className="flex items-center gap-2 text-theme-primary cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
+                            className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
                           >
                             <Eye size={16} />
                             <span className="text-sm font-medium">View</span>
@@ -495,7 +495,7 @@ function View() {
                     </h3>
                     <button 
                       onClick={() => setCriminalView(null)}
-                      className="text-sm text-theme-primary border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
+                      className="text-sm text-[#01026E] border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
                     >
                       Back to List
                     </button>
@@ -517,7 +517,7 @@ function View() {
                     </div>
 
                     <div className="bg-white p-4 rounded-xl shadow border text-center">
-                      <p className="text-sm text-theme-primary mb-3 font-medium">Document Preview</p>
+                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
                       <img
                         src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
                         alt="document preview"
@@ -549,7 +549,7 @@ function View() {
 
                           <div
                             onClick={() => setDrugView(item)}
-                            className="flex items-center gap-2 text-theme-primary cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
+                            className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
                           >
                             <Eye size={16} />
                             <span className="text-sm font-medium">View</span>
@@ -569,7 +569,7 @@ function View() {
                     </h3>
                     <button 
                       onClick={() => setDrugView(null)}
-                      className="text-sm text-theme-primary border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
+                      className="text-sm text-[#01026E] border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
                     >
                       Back to List
                     </button>
@@ -591,7 +591,7 @@ function View() {
                     </div>
 
                     <div className="bg-white p-4 rounded-xl shadow border text-center">
-                      <p className="text-sm text-theme-primary mb-3 font-medium">Document Preview</p>
+                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
                       <img
                         src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
                         alt="document preview"
@@ -606,7 +606,7 @@ function View() {
 
           {activeTab === "Reference" && (
             <>
-              <h3 className="text-lg font-semibold text-theme-primary mb-2">
+              <h3 className="text-lg font-semibold text-[#01026E] mb-2">
                 Reference Details
               </h3>
 
@@ -614,7 +614,7 @@ function View() {
                 <div className="space-y-6 mb-6">
                   {candidateData.reference.map((item, idx) => (
                     <div key={idx} className="border rounded-xl p-5">
-                      <h4 className="font-medium text-theme-primary mb-4">Reference {idx + 1}</h4>
+                      <h4 className="font-medium text-[#01026E] mb-4">Reference {idx + 1}</h4>
                       <div className="grid grid-cols-2 gap-5">
                         <Label label="Name" value={item.cand_ref_name || "N/A"} />
                         <Label label="Phone no" value={item.cand_ref_contact || "N/A"} />

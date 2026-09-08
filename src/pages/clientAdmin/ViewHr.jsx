@@ -29,7 +29,7 @@ function ViewHr() {
       {/* TITLE */}
       <div className="mb-6">
 
-        <h1 className="text-3xl font-bold text-theme-primary">
+        <h1 className="text-3xl font-bold text-[#02027A]">
           View HR Details
         </h1>
 

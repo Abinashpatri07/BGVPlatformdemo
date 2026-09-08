@@ -313,7 +313,7 @@ function CreateCandidateForm() {
             <button
               type="submit"
               disabled={loading}
-              className="bg-theme-primary text-white py-3 rounded-xl hover:bg-indigo-900 disabled:opacity-60 transition font-medium text-sm"
+              className="bg-[#02027A] text-white py-3 rounded-xl hover:bg-indigo-900 disabled:opacity-60 transition font-medium text-sm"
             >
               {loading ? "Creating..." : "Create Candidate"}
             </button>
