@@ -3,13 +3,15 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const ProfileHeader = ({
-  title = "Welcome Back Magnesh 👋🏻",
+  title,
   subtitle = "Let's Customize Your Workspace",
   showExport = true,
   showCreateHR = false,
   showCreateCandidate = false,
   onExport,
 }) => {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const displayTitle = title || `Welcome Back ${user.name || "User"} 👋🏻`;
   const [showExportModal, setShowExportModal] = useState(false);
   const [showCandidateDropdown, setShowCandidateDropdown] = useState(false);
   const [selectedType, setSelectedType] = useState("pdf");
@@ -37,7 +39,7 @@ const ProfileHeader = ({
 
       {/* LEFT */}
       <div>
-        <h1 className="text-[24px] font-bold text-black leading-tight">{title}</h1>
+        <h1 className="text-[24px] font-bold text-black leading-tight">{displayTitle}</h1>
         <p className="text-[14px] text-gray-600 mt-0.5">{subtitle}</p>
       </div>
 
