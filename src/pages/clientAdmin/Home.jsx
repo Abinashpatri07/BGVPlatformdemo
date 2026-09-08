@@ -3,6 +3,7 @@ import HROverview from "../../components/clientAdmin/home/HROverview";
 import CandidateOverview from "../../components/clientAdmin/home/CandidateOverview";
 import VerificationCredits from "../../components/clientAdmin/home/VerificationCredits";
 import RecentProfiles from "../../components/clientAdmin/home/RecentProfiles";
+import GlowCard from "../../components/common/GlowCard";
 import { useState, useEffect } from "react";
 import axiosInstance from "../../API/axiosInstance";
 
@@ -42,28 +43,36 @@ function Home() {
           <div className="grid grid-cols-12 gap-3">
             {/* HR OVERVIEW */}
             <div className="col-span-8">
-              <div className="bg-theme-surface-soft border border-theme-border rounded-2xl p-3 h-full">
-                <HROverview data={hrStats} />
-              </div>
+              <GlowCard className="h-full">
+                <div className="p-3 h-full">
+                  <HROverview data={hrStats} />
+                </div>
+              </GlowCard>
             </div>
 
             {/* VERIFICATION CREDITS */}
             <div className="col-span-4">
-              <div className="h-full">
+              <GlowCard className="h-full">
                 <VerificationCredits />
-              </div>
+              </GlowCard>
             </div>
           </div>
 
           {/* CANDIDATE OVERVIEW */}
-          <div className="bg-theme-surface-soft border border-theme-border rounded-2xl p-3">
-            <CandidateOverview data={candidateStats} />
-          </div>
+          <GlowCard>
+            <div className="p-3">
+              <CandidateOverview data={candidateStats} />
+            </div>
+          </GlowCard>
         </div>
 
-        {/* RIGHT SIDE */}
+        {/* RIGHT SIDE (Recent Profiles) */}
         <div className="col-span-3">
-          <RecentProfiles data={recentProfiles} />
+          <GlowCard className="h-full">
+            <div className="p-3 h-full">
+              <RecentProfiles data={recentProfiles} />
+            </div>
+          </GlowCard>
         </div>
       </div>
     </div>
