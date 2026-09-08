@@ -163,7 +163,7 @@ const Candidates = () => {
             {exportState.status !== "loading" && (
               <button
                 onClick={() => setExportState({ status:"idle", message:"" })}
-                className="w-full bg-[#02027A] text-white font-semibold py-3 rounded-xl hover:bg-[#01016a] transition cursor-pointer"
+                className="w-full bg-theme-primary text-white font-semibold py-3 rounded-xl hover:bg-theme-primary-hover transition cursor-pointer"
               >
                 Okay
               </button>

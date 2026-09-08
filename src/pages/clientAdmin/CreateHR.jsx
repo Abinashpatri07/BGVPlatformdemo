@@ -27,7 +27,7 @@ function CreateHR() {
       {/* TITLE */}
       <div className="mb-3">
 
-        <h1 className="text-3xl font-bold text-[#02027A]">
+        <h1 className="text-3xl font-bold text-theme-primary">
           Create New Human Resources Officer
         </h1>
 

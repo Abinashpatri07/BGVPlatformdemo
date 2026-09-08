@@ -278,13 +278,13 @@ function HRForm({ mode = "view" }) {
         <div className="flex justify-end gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="border border-[#02027A] text-[#02027A] px-7 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-50 transition"
+            className="border border-[#02027A] text-theme-primary px-7 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-50 transition"
           >
             {isView ? "Back" : "Cancel"}
           </button>
           <button
   onClick={isView ? handleDoneClick : handleSubmitClick}
-  className="bg-[#02027A] hover:bg-[#00005E] text-white px-8 py-2.5 rounded-xl text-sm font-medium transition"
+  className="bg-theme-primary hover:bg-theme-primary-hover text-white px-8 py-2.5 rounded-xl text-sm font-medium transition"
 >
   {isView ? "Done" : "Submit"}
 </button>

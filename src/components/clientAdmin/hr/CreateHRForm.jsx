@@ -273,7 +273,7 @@ function CreateHRForm() {
         </button>
         <button
           onClick={handleSubmit}
-          className="bg-[#02027A] hover:bg-[#00005E] text-white px-8 py-2.5 rounded-xl text-sm font-medium transition"
+          className="bg-theme-primary hover:bg-theme-primary-hover text-white px-8 py-2.5 rounded-xl text-sm font-medium transition"
         >
           Create HR
         </button>

@@ -24,7 +24,7 @@ export default function AnalyticsToolbar({ search, onSearch, onDownload }) {
         {/* DOWNLOAD */}
         <button
           onClick={onDownload}
-          className="flex items-center gap-2 border border-[#02027A] text-[#02027A] text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-50 transition"
+          className="flex items-center gap-2 border border-[#02027A] text-theme-primary text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-50 transition"
         >
           <Download size={14} />
           Download

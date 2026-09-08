@@ -28,9 +28,9 @@ function Home() {
   }, []);
 
   return (
-    <div className="p-3 bg-[#F5F7FF] min-h-screen">
+    <div className="p-3 bg-theme-bg min-h-screen">
       {/* ───────────────── HEADER ───────────────── */}
-      <div className="bg-white rounded-2xl border border-[#E8EBFF] shadow-sm px-5 py-3">
+      <div className="bg-white rounded-2xl border border-theme-border shadow-sm px-5 py-3">
         <ProfileHeader showExport={false} showCreateHR={false} />
       </div>
 
@@ -42,7 +42,7 @@ function Home() {
           <div className="grid grid-cols-12 gap-3">
             {/* HR OVERVIEW */}
             <div className="col-span-8">
-              <div className="bg-[#EEF1FF] border border-[#E4E8FF] rounded-2xl p-3 h-full">
+              <div className="bg-theme-surface-soft border border-theme-border rounded-2xl p-3 h-full">
                 <HROverview data={hrStats} />
               </div>
             </div>
@@ -56,7 +56,7 @@ function Home() {
           </div>
 
           {/* CANDIDATE OVERVIEW */}
-          <div className="bg-[#EEF1FF] border border-[#E4E8FF] rounded-2xl p-3">
+          <div className="bg-theme-surface-soft border border-theme-border rounded-2xl p-3">
             <CandidateOverview data={candidateStats} />
           </div>
         </div>

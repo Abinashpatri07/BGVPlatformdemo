@@ -51,7 +51,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
         <button
           disabled={currentPage === 1}
           onClick={() => onPageChange(currentPage - 1)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-[#8A92A6] rounded-xl hover:text-[#01026E] disabled:opacity-40 disabled:cursor-not-allowed transition"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-[#8A92A6] rounded-xl hover:text-theme-primary disabled:opacity-40 disabled:cursor-not-allowed transition"
         >
           <ChevronLeft size={16} />
           Previous
@@ -84,7 +84,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
         <button
           disabled={currentPage === totalPages}
           onClick={() => onPageChange(currentPage + 1)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-[#8A92A6] rounded-xl hover:text-[#01026E] disabled:opacity-40 disabled:cursor-not-allowed transition"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-[#8A92A6] rounded-xl hover:text-theme-primary disabled:opacity-40 disabled:cursor-not-allowed transition"
         >
           Next
           <ChevronRight size={16} />

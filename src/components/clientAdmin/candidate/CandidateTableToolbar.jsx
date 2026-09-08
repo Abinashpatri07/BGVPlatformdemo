@@ -54,7 +54,7 @@ function CandidateTableToolbar({
           onClick={() => onFilterChange("All")}
           className={`px-4 py-2 rounded-lg text-sm transition ${
             activeFilter === "All"
-              ? "bg-[#02027A] text-white"
+              ? "bg-theme-primary text-white"
               : "bg-gray-200 text-gray-700 hover:bg-gray-300"
           }`}
         >
@@ -75,7 +75,7 @@ function CandidateTableToolbar({
           onClick={() => handleSort("name")}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition ${
             sortBy === "name"
-              ? "bg-[#02027A] text-white"
+              ? "bg-theme-primary text-white"
               : "bg-gray-200 text-gray-700 hover:bg-gray-300"
           }`}
         >
@@ -88,7 +88,7 @@ function CandidateTableToolbar({
           onClick={() => handleSort("date")}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition ${
             sortBy === "date"
-              ? "bg-[#02027A] text-white"
+              ? "bg-theme-primary text-white"
               : "bg-gray-200 text-gray-700 hover:bg-gray-300"
           }`}
         >
@@ -161,7 +161,7 @@ function CandidateTableToolbar({
               <div className="flex justify-end">
                 <button
                   onClick={handleDownload}
-                  className="bg-[#01026E] text-white px-4 py-1.5 rounded-lg text-sm hover:opacity-90 transition"
+                  className="bg-theme-primary text-white px-4 py-1.5 rounded-lg text-sm hover:opacity-90 transition"
                 >
                   Download
                 </button>

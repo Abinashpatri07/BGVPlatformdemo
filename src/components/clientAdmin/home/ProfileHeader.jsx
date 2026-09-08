@@ -1,6 +1,7 @@
 import { Download, Plus, FileText, UserPlus, Users } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import ThemeSwitcher from "../../common/ThemeSwitcher";
 
 const ProfileHeader = ({
   title,
@@ -45,12 +46,13 @@ const ProfileHeader = ({
 
       {/* RIGHT */}
       <div className="flex items-center gap-4 relative">
+        <ThemeSwitcher />
 
         {/* CREATE HR BUTTON */}
         {showCreateHR && (
           <button
             onClick={() => navigate("/admin/create-hr")}
-            className="flex items-center gap-2 bg-[#02027A] hover:bg-[#00005E] text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            className="flex items-center gap-2 bg-theme-primary hover:bg-theme-primary-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
           >
             <Plus size={18} />
             Create HR
@@ -62,7 +64,7 @@ const ProfileHeader = ({
           <div className="relative" ref={candidateRef}>
             <button
               onClick={() => setShowCandidateDropdown((p) => !p)}
-              className="flex items-center gap-2 bg-[#02027A] hover:bg-[#00005E] text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
+              className="flex items-center gap-2 bg-theme-primary hover:bg-theme-primary-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-all"
             >
               <Plus size={18} />
               Create Candidate
@@ -78,10 +80,10 @@ const ProfileHeader = ({
                     setShowCandidateDropdown(false);
                     navigate("/admin/create-candidate");
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-[#02027A] transition"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-theme-primary transition"
                 >
                   <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-                    <UserPlus size={15} className="text-[#02027A]" />
+                    <UserPlus size={15} className="text-theme-primary" />
                   </div>
                   <div className="text-left">
                     <p className="font-medium text-sm">Add Single</p>
@@ -96,10 +98,10 @@ const ProfileHeader = ({
                     setShowCandidateDropdown(false);
                     navigate("/admin/create-candidate-bulk");
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-[#02027A] transition"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-theme-primary transition"
                 >
                   <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-                    <Users size={15} className="text-[#02027A]" />
+                    <Users size={15} className="text-theme-primary" />
                   </div>
                   <div className="text-left">
                     <p className="font-medium text-sm">Add in Bulk</p>
@@ -116,7 +118,7 @@ const ProfileHeader = ({
           <div className="relative" ref={exportRef}>
             <button
               onClick={() => setShowExportModal(!showExportModal)}
-              className="flex items-center gap-2 border border-[#02027A] text-[#02027A] hover:bg-indigo-50 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+              className="flex items-center gap-2 border border-[#02027A] text-theme-primary hover:bg-indigo-50 px-4 py-2 rounded-lg text-sm font-medium transition-all"
             >
               <Download size={18} />
               Export
@@ -163,7 +165,7 @@ const ProfileHeader = ({
                       if (onExport) onExport(selectedType);
                       setShowExportModal(false);
                     }}
-                    className="bg-[#01026E] hover:bg-[#00005E] text-white px-5 py-2 rounded-xl text-sm font-medium transition-all"
+                    className="bg-theme-primary hover:bg-theme-primary-hover text-white px-5 py-2 rounded-xl text-sm font-medium transition-all"
                   >
                     Download
                   </button>
