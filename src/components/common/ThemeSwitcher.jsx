@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { flushSync } from 'react-dom';
 import { Palette, Check } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -33,50 +32,13 @@ const ThemeSwitcher = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const switchThemeWithAnimation = (newTheme, event) => {
-    // Fallback for browsers that don't support View Transitions
-    if (!document.startViewTransition) {
-      setTheme(newTheme);
-      setIsOpen(false);
-      return;
-    }
-
-    // Get click coordinates for the circle origin
-    const x = event.clientX;
-    const y = event.clientY;
-    const endRadius = Math.hypot(
-      Math.max(x, innerWidth - x),
-      Math.max(y, innerHeight - y)
-    );
-
-    const transition = document.startViewTransition(() => {
-      flushSync(() => {
-        setTheme(newTheme);
-        setIsOpen(false);
-      });
-    });
-
-    transition.ready.then(() => {
-      document.documentElement.animate(
-        {
-          clipPath: [
-            `circle(0px at ${x}px ${y}px)`,
-            `circle(${endRadius}px at ${x}px ${y}px)`
-          ]
-        },
-        {
-          duration: 500,
-          easing: "ease-in-out",
-          pseudoElement: "::view-transition-new(root)"
-        }
-      );
-    });
-  };
-
   const renderThemeOption = (t) => (
     <button
       key={t.id}
-      onClick={(e) => switchThemeWithAnimation(t.id, e)}
+      onClick={() => {
+        setTheme(t.id);
+        setIsOpen(false);
+      }}
       className={`w-full flex items-center justify-between p-2 rounded-xl hover:bg-gray-50 transition ${theme === t.id ? 'bg-gray-50' : ''}`}
     >
       <div className="flex items-center gap-3 min-w-0">
