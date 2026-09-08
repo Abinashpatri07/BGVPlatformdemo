@@ -3,7 +3,6 @@ import HROverview from "../../components/clientAdmin/home/HROverview";
 import CandidateOverview from "../../components/clientAdmin/home/CandidateOverview";
 import VerificationCredits from "../../components/clientAdmin/home/VerificationCredits";
 import RecentProfiles from "../../components/clientAdmin/home/RecentProfiles";
-import GlowCard from "../../components/common/GlowCard";
 import { useState, useEffect } from "react";
 import axiosInstance from "../../API/axiosInstance";
 
@@ -43,36 +42,28 @@ function Home() {
           <div className="grid grid-cols-12 gap-3">
             {/* HR OVERVIEW */}
             <div className="col-span-8">
-              <GlowCard className="h-full">
-                <div className="p-3 h-full">
-                  <HROverview data={hrStats} />
-                </div>
-              </GlowCard>
+              <div className="bg-theme-surface-soft border border-theme-border rounded-2xl p-3 h-full">
+                <HROverview data={hrStats} />
+              </div>
             </div>
 
             {/* VERIFICATION CREDITS */}
             <div className="col-span-4">
-              <GlowCard className="h-full">
+              <div className="h-full">
                 <VerificationCredits />
-              </GlowCard>
+              </div>
             </div>
           </div>
 
           {/* CANDIDATE OVERVIEW */}
-          <GlowCard>
-            <div className="p-3">
-              <CandidateOverview data={candidateStats} />
-            </div>
-          </GlowCard>
+          <div className="bg-theme-surface-soft border border-theme-border rounded-2xl p-3">
+            <CandidateOverview data={candidateStats} />
+          </div>
         </div>
 
-        {/* RIGHT SIDE (Recent Profiles) */}
+        {/* RIGHT SIDE */}
         <div className="col-span-3">
-          <GlowCard className="h-full">
-            <div className="p-3 h-full">
-              <RecentProfiles data={recentProfiles} />
-            </div>
-          </GlowCard>
+          <RecentProfiles data={recentProfiles} />
         </div>
       </div>
     </div>
