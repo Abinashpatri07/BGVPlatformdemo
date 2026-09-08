@@ -67,7 +67,24 @@
   --theme-text-muted: #d4d4d8;
 }
 
-/* Base styles for smooth transition */
-html, body {
-  transition: background-color 0.3s ease, color 0.3s ease;
+/* Apply theme colors globally */
+body {
+  background-color: var(--theme-bg);
+  color: var(--theme-text);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* View Transitions Setup */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 2;
 }
