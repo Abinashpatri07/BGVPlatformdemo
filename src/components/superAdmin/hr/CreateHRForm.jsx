@@ -1,5 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
+import { ChevronDown, ChevronUp, CheckCircle, Mail, Briefcase, PlusCircle, UserPlus, Info, Loader2 } from "lucide-react";
+import axiosInstance from "../../../utils/axiosInstance";
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 import { useNavigate } from "react-router-dom";
 
 function CreateHRForm() {
@@ -67,8 +71,8 @@ function CreateHRForm() {
     // PHONE
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required";
-    } else if (formData.phone.length !== 10) {
-      newErrors.phone = "Phone number must be 10 digits";
+    } else if (formData.phone.length < 10) {
+      newErrors.phone = "Phone number must be valid";
     }
 
     // ROLE
@@ -90,8 +94,8 @@ function CreateHRForm() {
   try {
 
     // API REQUEST
-    const response = await axios.post(
-      `${import.meta.env.VITE_API_URL}/api/hr/create`,
+    const response = await axiosInstance.post(
+      `/api/hr/create`,
       formData
     );
 
@@ -216,26 +220,35 @@ function CreateHRForm() {
             Phone Number <span className="text-red-500">*</span>
           </label>
 
-          <div
-            className={`flex items-center border rounded-lg overflow-hidden ${
-              errors.phone ? "border-red-500" : "border-gray-300"
-            }`}
-          >
-            {/* COUNTRY CODE */}
-            <div className="px-3 py-2.5 bg-gray-100 text-gray-700 text-sm border-r">
-              +91
-            </div>
-
-            {/* INPUT */}
-            <input
-              type="text"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="1234567890"
-              className="w-full px-3 py-2.5 outline-none text-sm"
-            />
-          </div>
+          <div className={`border-2 rounded-xl overflow-hidden transition ${
+          errors.phone
+            ? "border-red-300"
+            : "border-indigo-200"
+        }`}>
+          <PhoneInput
+            country={'in'}
+            value={formData.phone}
+            onChange={(phone) => setFormData((prev) => ({ ...prev, phone }))}
+            enableSearch={true}
+            disableSearchIcon={true}
+            inputStyle={{
+              width: '100%',
+              height: '46px',
+              border: 'none',
+              background: 'transparent',
+              fontSize: '14px',
+              paddingLeft: '48px'
+            }}
+            buttonStyle={{
+              border: 'none',
+              background: '#E0E7FF',
+              padding: '0 4px'
+            }}
+            containerStyle={{
+              background: errors.phone ? '#FEF2F2' : '#F5F6FF'
+            }}
+          />
+        </div>
 
           {errors.phone && (
             <p className="text-red-500 text-xs mt-1">{errors.phone}</p>

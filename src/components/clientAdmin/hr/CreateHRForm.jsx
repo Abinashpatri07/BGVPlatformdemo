@@ -2,6 +2,8 @@ import { useState } from "react";
 import axiosInstance from "../../../API/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { ChevronUp, ChevronDown } from "lucide-react";
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 const ROLES = ["HR", "HR Manager", "HR Executive"];
 
@@ -155,21 +157,33 @@ function CreateHRForm() {
         <label className="block text-sm font-medium text-gray-700 mb-1.5">
           Phone Number <span className="text-red-500">*</span>
         </label>
-        <div className={`flex items-center border-2 rounded-xl overflow-hidden transition ${
+        <div className={`border-2 rounded-xl overflow-hidden transition ${
           errors.phone
-            ? "border-red-300 bg-red-50"
-            : "border-indigo-200 bg-[#F5F6FF]"
+            ? "border-red-300"
+            : "border-indigo-200"
         }`}>
-          <div className="px-4 py-3 bg-indigo-100 text-gray-600 text-sm border-r-2 border-indigo-200 shrink-0">
-            +91
-          </div>
-          <input
-            type="text"
-            name="phone"
+          <PhoneInput
+            country={'in'}
             value={formData.phone}
-            onChange={handleChange}
-            placeholder="5487601549"
-            className="w-full px-4 py-3 outline-none text-sm bg-transparent"
+            onChange={(phone) => setFormData((prev) => ({ ...prev, phone }))}
+            enableSearch={true}
+            disableSearchIcon={true}
+            inputStyle={{
+              width: '100%',
+              height: '46px',
+              border: 'none',
+              background: 'transparent',
+              fontSize: '14px',
+              paddingLeft: '48px'
+            }}
+            buttonStyle={{
+              border: 'none',
+              background: '#E0E7FF', // indigo-100
+              padding: '0 4px'
+            }}
+            containerStyle={{
+              background: errors.phone ? '#FEF2F2' : '#F5F6FF'
+            }}
           />
         </div>
         {errors.phone && (

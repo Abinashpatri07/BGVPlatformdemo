@@ -1,8 +1,10 @@
 import { useState } from "react";
 import axiosInstance from "../../../API/axiosInstance";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle } from "lucide-react";
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 function CreateCandidateForm() {
   const navigate = useNavigate();
@@ -16,6 +18,7 @@ function CreateCandidateForm() {
   const {
     register,
     handleSubmit,
+    control,
     reset,
     getValues,
     formState: { errors },
@@ -194,22 +197,40 @@ function CreateCandidateForm() {
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Phone Number <span className="text-red-500">*</span>
             </label>
-            <div className={`flex items-center border-2 rounded-xl overflow-hidden transition ${
-              errors.phone ? "border-red-300 bg-red-50" : "border-indigo-200 bg-[#F5F6FF]"
+            <div className={`border-2 rounded-xl overflow-hidden transition ${
+              errors.phone ? "border-red-300" : "border-indigo-200"
             }`}>
-              <div className="px-4 py-3 bg-indigo-100 text-gray-600 text-sm border-r-2 border-indigo-200 shrink-0">
-                +91
-              </div>
-              <input
-                type="text"
-                placeholder="9876543210"
-                maxLength={10}
-                className="w-full px-4 py-3 outline-none text-sm bg-transparent"
-                {...register("phone", {
+              <Controller
+                name="phone"
+                control={control}
+                rules={{ 
                   required: "Phone number is required",
-                  pattern: { value: /^\d{10}$/, message: "Phone must be exactly 10 digits" },
-                })}
-                onInput={(e) => { e.target.value = e.target.value.replace(/\D/g, ""); }}
+                  minLength: { value: 10, message: "Phone number is too short" }
+                }}
+                render={({ field }) => (
+                  <PhoneInput
+                    {...field}
+                    country={'in'}
+                    enableSearch={true}
+                    disableSearchIcon={true}
+                    inputStyle={{
+                      width: '100%',
+                      height: '46px',
+                      border: 'none',
+                      background: 'transparent',
+                      fontSize: '14px',
+                      paddingLeft: '48px'
+                    }}
+                    buttonStyle={{
+                      border: 'none',
+                      background: '#E0E7FF', // indigo-100
+                      padding: '0 4px'
+                    }}
+                    containerStyle={{
+                      background: errors.phone ? '#FEF2F2' : '#F5F6FF'
+                    }}
+                  />
+                )}
               />
             </div>
             {errors.phone && (
