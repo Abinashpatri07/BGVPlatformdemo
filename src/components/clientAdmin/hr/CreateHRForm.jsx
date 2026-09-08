@@ -2,8 +2,10 @@ import { useState } from "react";
 import axiosInstance from "../../../API/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { ChevronUp, ChevronDown } from "lucide-react";
-import PhoneInput from 'react-phone-input-2';
+import PhoneInputPkg from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
+
+const PhoneInput = PhoneInputPkg.default || PhoneInputPkg;
 
 const ROLES = ["HR", "HR Manager", "HR Executive"];
 

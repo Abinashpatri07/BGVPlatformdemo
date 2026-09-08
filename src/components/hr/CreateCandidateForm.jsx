@@ -4,8 +4,10 @@ import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import PageHeader from "./PageHeader";
-import PhoneInput from 'react-phone-input-2';
+import PhoneInputPkg from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
+
+const PhoneInput = PhoneInputPkg.default || PhoneInputPkg;
 
 function CreateCandidateForm() {
   const navigate = useNavigate();

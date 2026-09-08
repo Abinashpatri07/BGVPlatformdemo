@@ -2,8 +2,10 @@ import { useState } from "react";
 import axios from "axios";
 import { ChevronDown, ChevronUp, CheckCircle, Mail, Briefcase, PlusCircle, UserPlus, Info, Loader2 } from "lucide-react";
 import axiosInstance from "../../../utils/axiosInstance";
-import PhoneInput from 'react-phone-input-2';
+import PhoneInputPkg from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
+
+const PhoneInput = PhoneInputPkg.default || PhoneInputPkg;
 import { useNavigate } from "react-router-dom";
 
 function CreateHRForm() {
