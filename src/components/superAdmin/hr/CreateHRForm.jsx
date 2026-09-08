@@ -222,7 +222,7 @@ function CreateHRForm() {
             Phone Number <span className="text-red-500">*</span>
           </label>
 
-          <div className={`border-2 rounded-xl overflow-hidden transition ${
+          <div className={`border-2 rounded-xl transition ${
           errors.phone
             ? "border-red-300"
             : "border-indigo-200"

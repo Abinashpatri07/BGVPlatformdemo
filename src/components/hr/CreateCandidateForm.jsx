@@ -188,7 +188,7 @@ function CreateCandidateForm() {
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Phone Number <span className="text-red-500">*</span>
             </label>
-            <div className={`border-2 rounded-xl overflow-hidden transition ${
+            <div className={`border-2 rounded-xl transition ${
               errors.phone ? "border-red-300" : "border-indigo-200"
             }`}>
               <Controller
