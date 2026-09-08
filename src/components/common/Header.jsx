@@ -13,7 +13,6 @@ import {
   X,
   AlertCircle,
 } from "lucide-react";
-import ThemeSwitcher from "./ThemeSwitcher";
 
 // ── helpers ──────────────────────────────────────────────
 const getInitials = (name = "") =>
@@ -301,10 +300,8 @@ export default function Header() {
           />
         </div>
 
-        {/* RIGHT — Theme + Bell + User dropdown */}
+        {/* RIGHT — Bell + User dropdown */}
         <div className="flex items-center gap-4">
-          <ThemeSwitcher />
-          
           {/* Bell */}
           <button className="relative w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition">
             <Bell size={16} className="text-gray-500" />

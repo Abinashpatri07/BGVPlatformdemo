@@ -1,6 +1,7 @@
 import { Download, Plus, FileText, UserPlus, Users } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import ThemeSwitcher from "../../common/ThemeSwitcher";
 
 const ProfileHeader = ({
   title,
@@ -45,6 +46,7 @@ const ProfileHeader = ({
 
       {/* RIGHT */}
       <div className="flex items-center gap-4 relative">
+        <ThemeSwitcher />
 
         {/* CREATE HR BUTTON */}
         {showCreateHR && (
