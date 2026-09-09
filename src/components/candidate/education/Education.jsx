@@ -102,8 +102,7 @@ function Education({ onNext }) {
         },
       },
     }));
-
-    setOpenCard(docName);
+    // Don't auto-open card on upload since user fills fields first
   };
 
   const handleFieldChange = (docName, field, value) => {

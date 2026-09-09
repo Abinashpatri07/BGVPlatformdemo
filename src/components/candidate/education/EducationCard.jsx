@@ -4,7 +4,7 @@ import {
   AlertCircle,
   ChevronDown,
   ChevronUp,
-  X,
+  FileText,
 } from "lucide-react";
 
 function Input({ label, value, type = "text", onChange }) {
@@ -36,12 +36,13 @@ function EducationCard({
 }) {
   return (
     <div>
+      {/* Header row */}
       <div className="border border-[#b9b8ff] rounded-xl px-4 py-3 shadow-sm flex justify-between items-center">
         <div>
           <h3 className="text-[#05058D] font-semibold text-base">{doc}</h3>
-          
+
           {item?.success ? (
-            <p className="text-green-600 text-[11px] mt-1">File Uploaded</p>
+            <p className="text-green-600 text-[11px] mt-1">Details Added</p>
           ) : (
             <p className="text-gray-400 text-[11px] mt-1">
               Click to add details and upload certificate
@@ -54,85 +55,98 @@ function EducationCard({
         </button>
       </div>
 
+      {/* Expanded panel */}
       {isOpen && (
-        <div className="border border-[#b9b8ff] rounded-xl mt-3 p-4 bg-gray-50/50">
-          <div className="flex flex-col items-center mb-6">
-            {item?.success ? (
-              <div className="flex flex-col items-center">
-                <div className="border border-green-600 text-green-700 bg-green-50 rounded-lg px-4 py-2 text-xs flex items-center gap-2 font-medium">
-                  {item.fileName}
-                  <button onClick={(e) => {
-                    // Quick way to trigger re-upload or clear if needed
-                    e.stopPropagation();
-                    onOpenFile();
-                  }}>
-                    <Upload size={14} className="text-blue-700 hover:text-blue-900 ml-2" />
-                  </button>
-                </div>
-                <p className="text-[11px] text-gray-500 mt-1">{item.size} MB</p>
+        <div className="border border-[#b9b8ff] rounded-xl mt-3 p-5 bg-gray-50/50">
+
+          {/* Education Fields */}
+          <div className="grid grid-cols-2 gap-4 mb-5">
+            <Input
+              label="Institute Name"
+              value={item?.fields?.institute || ""}
+              onChange={(e) => onChangeField("institute", e.target.value)}
+            />
+            <Input
+              label="Degree"
+              value={item?.fields?.degree || doc}
+              onChange={(e) => onChangeField("degree", e.target.value)}
+            />
+            <Input
+              label="Start Date"
+              value={item?.fields?.startDate || ""}
+              type="date"
+              onChange={(e) => onChangeField("startDate", e.target.value)}
+            />
+            <Input
+              label="End Date"
+              value={item?.fields?.endDate || ""}
+              type="date"
+              onChange={(e) => onChangeField("endDate", e.target.value)}
+            />
+            <Input
+              label="Course / Specialization"
+              value={item?.fields?.course || ""}
+              onChange={(e) => onChangeField("course", e.target.value)}
+            />
+            <Input
+              label="Percentage / CGPA"
+              value={item?.fields?.percentage || ""}
+              onChange={(e) => onChangeField("percentage", e.target.value)}
+            />
+          </div>
+
+          {/* Certificate Upload */}
+          <div className="border-t pt-4">
+            <p className="text-xs font-medium text-gray-700 mb-2">
+              Upload Certificate <span className="text-red-500">*</span>
+            </p>
+
+            {item?.fileObject || item?.existingFileUrl ? (
+              /* File selected — show green pill */
+              <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2 w-fit">
+                <FileText size={14} className="text-green-600 shrink-0" />
+                <span className="text-xs text-green-800 font-medium truncate max-w-[220px]">
+                  {item?.fileName || "Existing Certificate"}
+                </span>
+                {item?.size && (
+                  <span className="text-[10px] text-gray-400 ml-1">{item.size} MB</span>
+                )}
+                <button
+                  onClick={(e) => { e.stopPropagation(); onOpenFile(); }}
+                  title="Re-upload"
+                  className="ml-1 text-blue-500 hover:text-blue-700 transition"
+                >
+                  <Upload size={13} />
+                </button>
               </div>
             ) : (
-              <div className="flex flex-col items-center">
-                <button
-                  onClick={onOpenFile}
-                  className="flex items-center gap-2 bg-white border border-[#05058D] text-[#05058D] px-6 py-2 rounded-lg text-sm hover:bg-blue-50 transition"
-                >
-                  <Upload size={14} />
-                  Upload Certificate
-                </button>
-                <p className="text-[10px] text-gray-400 mt-2 text-center max-w-[200px]">
-                  Supported format PDF, JPG, PNG (Max 5MB)
-                </p>
-                {item?.error && (
-                  <p className="text-red-500 text-[11px] mt-1 flex gap-1 items-center">
-                    <AlertCircle size={12} />
-                    {item.error}
-                  </p>
-                )}
-              </div>
+              /* No file — dashed upload zone */
+              <label className="flex flex-col items-center justify-center gap-1 border-2 border-dashed border-gray-300 rounded-lg py-5 cursor-pointer hover:border-[#05058D] hover:bg-blue-50/40 transition">
+                <Upload size={20} className="text-gray-400" />
+                <span className="text-xs text-gray-500 font-medium">Click to upload certificate</span>
+                <span className="text-[10px] text-gray-400">PDF, JPG, PNG — Max 5 MB</span>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".pdf,.png,.jpg,.jpeg"
+                  onChange={onUpload}
+                />
+              </label>
             )}
-            
+
+            {item?.error && (
+              <p className="text-red-500 text-[11px] mt-1.5 flex gap-1 items-center">
+                <AlertCircle size={12} /> {item.error}
+              </p>
+            )}
+
+            {/* Hidden input for re-upload via icon click */}
             <input
               type="file"
               hidden
               ref={inputRef}
               accept=".pdf,.png,.jpg,.jpeg"
               onChange={onUpload}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Input 
-              label="Institute Name" 
-              value={item?.fields?.institute || ""} 
-              onChange={(e) => onChangeField("institute", e.target.value)} 
-            />
-            <Input 
-              label="Degree" 
-              value={item?.fields?.degree || doc} 
-              onChange={(e) => onChangeField("degree", e.target.value)} 
-            />
-            <Input 
-              label="Start Date" 
-              value={item?.fields?.startDate || ""} 
-              type="date" 
-              onChange={(e) => onChangeField("startDate", e.target.value)} 
-            />
-            <Input 
-              label="End Date" 
-              value={item?.fields?.endDate || ""} 
-              type="date" 
-              onChange={(e) => onChangeField("endDate", e.target.value)} 
-            />
-            <Input 
-              label="Course" 
-              value={item?.fields?.course || ""} 
-              onChange={(e) => onChangeField("course", e.target.value)} 
-            />
-            <Input 
-              label="Percentage/CGPA" 
-              value={item?.fields?.percentage || ""} 
-              onChange={(e) => onChangeField("percentage", e.target.value)} 
             />
           </div>
 
