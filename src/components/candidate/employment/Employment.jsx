@@ -78,14 +78,27 @@ function Employment({ onNext }) {
         // Clone without the file for JSON payload
         const empDetails = { ...emp };
         delete empDetails.certificateFile;
+        delete empDetails.joiningLetterFile;
+        delete empDetails.relievingLetterFile;
+        delete empDetails.serviceLetterFile;
         employmentData.push(empDetails);
         
         if (emp.certificateFile) {
           formPayload.append(`certificateFile_${index}`, emp.certificateFile);
         }
+        if (emp.joiningLetterFile) {
+          formPayload.append(`joiningLetterFile_${index}`, emp.joiningLetterFile);
+        }
+        if (emp.relievingLetterFile) {
+          formPayload.append(`relievingLetterFile_${index}`, emp.relievingLetterFile);
+        }
+        if (emp.serviceLetterFile) {
+          formPayload.append(`serviceLetterFile_${index}`, emp.serviceLetterFile);
+        }
       });
       
       formPayload.append("employmentData", JSON.stringify(employmentData));
+
 
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       await axios.post(`${API_BASE}/api/candidate/submit/employment`, formPayload, {
