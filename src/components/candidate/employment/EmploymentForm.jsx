@@ -134,12 +134,14 @@ function EmploymentForm({ onSubmit, isInternship, initialData }) {
             <div className="grid grid-cols-3 gap-5">
               <FileUploadBox
                 label="Joining Letter"
+                optional={false}
                 fieldKey="joiningLetterFile"
                 file={formData.joiningLetterFile}
                 onChange={handleDocChange}
               />
               <FileUploadBox
                 label="Relieving Letter"
+                optional={false}
                 fieldKey="relievingLetterFile"
                 file={formData.relievingLetterFile}
                 onChange={handleDocChange}
