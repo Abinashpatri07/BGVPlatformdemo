@@ -102,7 +102,7 @@ function CreateCandidateForm() {
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 max-w-2xl">
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 max-w-2xl mx-auto">
         <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
 
       {/* SUCCESS MODAL */}

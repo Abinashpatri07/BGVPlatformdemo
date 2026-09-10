@@ -86,12 +86,14 @@ function CreateCandidateForm() {
     }`;
 
   return (
-    <div className="p-6">
+    <div className="p-6 flex flex-col items-center min-h-[80vh] justify-center">
 
       {/* BACK + HEADING */}
-      <PageHeader />
+      <div className="w-full max-w-2xl">
+        <PageHeader />
+      </div>
 
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 max-w-2xl">
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 max-w-2xl w-full mx-auto">
         <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
 
           {/* SUCCESS MODAL */}
