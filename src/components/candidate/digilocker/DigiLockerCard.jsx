@@ -1,8 +1,54 @@
-import { ShieldCheck, Zap } from "lucide-react";
+import { useState } from "react";
+import { ShieldCheck, Zap, Loader2 } from "lucide-react";
+import axios from "axios";
 
-export default function DigiLockerCard() {
+export default function DigiLockerCard({ onClick, loading = false }) {
+  const [internalLoading, setInternalLoading] = useState(false);
+
+  const handleClick = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    if (onClick) {
+      onClick();
+      return;
+    }
+
+    // Direct fallback if onClick not passed
+    try {
+      setInternalLoading(true);
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const candId = user.cand_id || user.id || 1;
+      const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+      const res = await axios.post(`${API_BASE}/api/candidate/ekyc/digilocker/initiate`, {
+        cand_id: candId
+      });
+
+      if (res.data?.success && res.data?.authUrl) {
+        if (res.data.state) {
+          sessionStorage.setItem("digilocker_state", res.data.state);
+        }
+        sessionStorage.setItem("digilocker_cand_id", String(candId));
+        window.location.assign(res.data.authUrl);
+      }
+    } catch (err) {
+      console.error("Direct trigger error:", err);
+      alert("Failed to initiate DigiLocker. Please check backend.");
+    } finally {
+      setInternalLoading(false);
+    }
+  };
+
+  const isLoading = loading || internalLoading;
+
   return (
-    <div className="relative bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col justify-between min-h-105">
+    <div
+      onClick={handleClick}
+      className="relative bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col justify-between min-h-105 cursor-pointer hover:border-indigo-400 hover:shadow-md transition-all group"
+    >
 
       {/* Recommended badge */}
       <div className="absolute top-4 right-4 bg-gray-100 text-gray-500 text-[10px] font-semibold uppercase tracking-widest px-2 py-1 rounded-full">
@@ -12,7 +58,7 @@ export default function DigiLockerCard() {
       <div>
         {/* DigiLocker logo area */}
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
               <rect x="2" y="8" width="18" height="14" rx="3" fill="#6366F1" />
               <path d="M8 8V6a4 4 0 018 0v2" stroke="#6366F1" strokeWidth="2" strokeLinecap="round" />
@@ -51,8 +97,21 @@ export default function DigiLockerCard() {
 
       <div>
         {/* CTA Button */}
-        <button className="w-full bg-[#1E1B8B] hover:bg-[#2d29b3] active:scale-[0.98] text-white text-sm font-semibold py-3 rounded-xl transition-all mt-8">
-          Get Started With DigiLocker
+        <button
+          type="button"
+          id="btn-get-started-digilocker"
+          onClick={handleClick}
+          disabled={isLoading}
+          className="w-full bg-[#1E1B8B] hover:bg-[#2d29b3] active:scale-[0.98] disabled:opacity-75 disabled:cursor-not-allowed text-white text-sm font-semibold py-3 rounded-xl transition-all mt-8 flex items-center justify-center gap-2 shadow-md hover:shadow-lg cursor-pointer"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="animate-spin w-4 h-4 text-white" />
+              <span>Connecting to DigiLocker...</span>
+            </>
+          ) : (
+            <span>Get Started With DigiLocker</span>
+          )}
         </button>
 
         {/* Trust line */}

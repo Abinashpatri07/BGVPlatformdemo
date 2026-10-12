@@ -51,14 +51,15 @@ export default function ActionButtons() {
           submitConsent(lat, lon);
         },
         (error) => {
-          console.error("Location error:", error);
-          alert("Location access is required to submit your consent. Please allow location permissions in your browser.");
-          setIsSubmitting(false);
-        }
+          // Location denied or unavailable — submit without coordinates
+          console.warn("Location not available, proceeding without it:", error.message);
+          submitConsent(null, null);
+        },
+        { timeout: 5000 }
       );
     } else {
-      alert("Geolocation is not supported by your browser.");
-      setIsSubmitting(false);
+      // Geolocation not supported — proceed without location
+      submitConsent(null, null);
     }
   };
 

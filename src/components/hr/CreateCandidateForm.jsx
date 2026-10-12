@@ -39,10 +39,19 @@ function CreateCandidateForm() {
       // TODO: createdById ko auth/session se lo — abhi hardcoded
       const createdById = 1; // logged-in HR ka users_id
 
+      let normalizedPhone = (data.phone || "").toString().replace(/[\s\-()+]/g, "");
+      if (normalizedPhone.startsWith("91") && normalizedPhone.length === 12) {
+        normalizedPhone = normalizedPhone.slice(2);
+      }
+
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/candidates/single_candidate_add`,
         {
           ...data,
+          firstName: data.firstName?.trim(),
+          lastName: data.lastName?.trim(),
+          phone: normalizedPhone,
+          email: data.email?.trim().toLowerCase(),
           createdByRole: "hr",   // ← HR create kar raha hai
           createdById,
         }

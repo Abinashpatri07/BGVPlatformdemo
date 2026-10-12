@@ -28,10 +28,19 @@ function CreateCandidateForm() {
     setGeneralError("");
 
     try {
+      let normalizedPhone = (data.phone || "").toString().replace(/[\s\-()+]/g, "");
+      if (normalizedPhone.startsWith("91") && normalizedPhone.length === 12) {
+        normalizedPhone = normalizedPhone.slice(2);
+      }
+
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/candidate/create`,
         {
           ...data,
+          firstName: data.firstName?.trim(),
+          lastName: data.lastName?.trim(),
+          phone: normalizedPhone,
+          email: data.email?.trim().toLowerCase(),
           createdByRole: "super_admin",
         }
       );

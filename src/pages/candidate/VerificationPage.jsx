@@ -13,6 +13,7 @@ import DrugTestStep from "../../components/candidate/drug/DrugTestStep";
 import CriminalCheck from "../../components/candidate/criminal/CriminalCheck";
 import ReferenceCheck from "../../components/candidate/reference/ReferenceCheck";
 import ReviewSubmit from "../../components/candidate/review/ReviewSubmit";
+import ReviewContent from "../../components/candidate/review/ReviewContent";
 import { useLocation } from "react-router-dom";
 
 export default function VerificationPage() {
@@ -38,6 +39,7 @@ export default function VerificationPage() {
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState(true);
+  const [submittedData, setSubmittedData] = useState(null);
 
   useEffect(() => {
     const checkStatus = async () => {
@@ -46,8 +48,9 @@ export default function VerificationPage() {
         const candId = user.cand_id || 1;
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
-        if (response.data && response.data.basicInfo) {
-          if (response.data.basicInfo.verification_status === 2) {
+        if (response.data) {
+          setSubmittedData(response.data);
+          if (response.data.basicInfo && response.data.basicInfo.verification_status === 2) {
             setIsSubmitted(true);
           }
         }
@@ -59,6 +62,21 @@ export default function VerificationPage() {
     };
     checkStatus();
   }, []);
+
+  const handleFinalSubmit = async () => {
+    setIsSubmitted(true);
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const candId = user.cand_id || 1;
+      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
+      if (response.data) {
+        setSubmittedData(response.data);
+      }
+    } catch (err) {
+      console.error("Error refreshing submission review data", err);
+    }
+  };
 
   useEffect(() => {
     sessionStorage.setItem("candidate_currentStep", currentStep);
@@ -101,17 +119,61 @@ export default function VerificationPage() {
     return (
       <div className="min-h-screen bg-[#f4f4ff] flex flex-col">
         <Header />
-        <div className="flex-1 flex items-center justify-center p-6">
-          <div className="bg-white rounded-2xl shadow-sm p-10 max-w-xl w-full text-center">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-              </svg>
+        
+        <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 py-8">
+          {/* Status Header Banner */}
+          <div className="bg-white rounded-2xl shadow-sm border border-emerald-100 p-6 mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-start md:items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-xl font-bold shrink-0">
+                ✓
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <h1 className="text-xl font-bold text-gray-900">Application Submitted Successfully</h1>
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Under Verification
+                  </span>
+                </div>
+                <p className="text-sm text-gray-500 mt-1">
+                  You have successfully submitted your background verification details. All information below is locked in <strong className="text-gray-700 font-semibold">View-Only mode</strong> and cannot be edited.
+                </p>
+              </div>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Application Submitted!</h1>
-            <p className="text-gray-600 mb-8">
-              You have already submitted your background verification details successfully. You can no longer edit this information.
-            </p>
+
+            <div className="flex items-center gap-2 self-end md:self-auto shrink-0">
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 flex items-center gap-2 transition-colors cursor-pointer shadow-sm"
+              >
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Print / Save PDF
+              </button>
+            </div>
+          </div>
+
+          {/* Form Content - Read Only */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
+              <div>
+                <h2 className="text-lg font-bold text-[#05058D]">Submitted Application Details</h2>
+                <p className="text-xs text-gray-500 mt-0.5">Below is the complete record of the information and documents you submitted.</p>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
+                <span>🔒</span>
+                <span>Editing Disabled (Read-Only)</span>
+              </div>
+            </div>
+
+            {submittedData ? (
+              <ReviewContent candidateData={submittedData} />
+            ) : (
+              <div className="text-center py-12 text-gray-400">
+                <p>Loading your submitted details...</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -171,7 +233,7 @@ export default function VerificationPage() {
           {currentStep === 9 && (
             <ReviewSubmit 
               onNext={handleNext} 
-              onSubmit={() => setIsSubmitted(true)}
+              onSubmit={handleFinalSubmit}
             />
           )}
         </div>

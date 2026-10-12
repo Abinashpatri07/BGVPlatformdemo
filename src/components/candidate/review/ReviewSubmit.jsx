@@ -40,9 +40,6 @@ function ReviewSubmit({ onSubmit }) {
       
       // show popup
       setShowModal(true);
-
-      // optional frontend callback
-      if (onSubmit) onSubmit();
     } catch (err) {
       console.error(err);
       alert("Failed to finally submit details. Please try again.");
@@ -112,7 +109,12 @@ function ReviewSubmit({ onSubmit }) {
 
       {/* ✅ Popup */}
       {showModal && (
-        <SuccessModal onClose={() => setShowModal(false)} />
+        <SuccessModal 
+          onClose={() => {
+            setShowModal(false);
+            if (onSubmit) onSubmit();
+          }} 
+        />
       )}
     </>
   );

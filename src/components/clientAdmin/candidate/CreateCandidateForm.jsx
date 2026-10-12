@@ -35,25 +35,34 @@ function CreateCandidateForm() {
     setGeneralError("");
 
     try {
-      const createdById = 2; // mock admin ID
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const createdById = storedUser.id || 2;
+      const cmId = storedUser.client_id || 1;
+
+      let normalizedPhone = (data.phone || "").toString().replace(/[\s\-()+]/g, "");
+      if (normalizedPhone.startsWith("91") && normalizedPhone.length === 12) {
+        normalizedPhone = normalizedPhone.slice(2);
+      }
+
       const response = await axiosInstance.post(
-        `${import.meta.env.VITE_API_URL}/api/client-admin/candidate/create`,
+        `/api/client-admin/candidate/create`,
         {
-          firstName:     data.firstName,
-          lastName:      data.lastName,
-          phone:         data.phone,
-          email:         data.email,
-          jobFunction:   data.jobFunction || "",
+          firstName:     data.firstName?.trim(),
+          lastName:      data.lastName?.trim(),
+          phone:         normalizedPhone,
+          email:         data.email?.trim().toLowerCase(),
+          jobFunction:   data.jobFunction?.trim() || "",
           candidateExperience: data.candidateExperience || "1",
-          tag:           data.tag || "",
+          tag:           data.tag?.trim() || "",
           createdByRole: "client_admin",
           clientAdminId: createdById,
-          cmId: 1,
+          cmId:          cmId,
         }
       );
 
       if (response.data.success) {
-        setSuccessMessage(`Candidate Created Successfully! Case ID: ${response.data.data?.case_id || "BGV"} ✅`);
+        const caseId = response.data.caseId || response.data.data?.case_id || "BGV";
+        setSuccessMessage(`Candidate Created Successfully! Case ID: ${caseId} ✅`);
         reset();
         setTimeout(() => navigate("/admin/candidates"), 2000);
       }
@@ -65,6 +74,8 @@ function CreateCandidateForm() {
       } else if (errData?.field === "email") {
         setEmailMessage(errData.message);
       } else if (errData?.errors) {
+        if (errData.errors.phone) setPhoneMessage(errData.errors.phone);
+        if (errData.errors.email) setEmailMessage(errData.errors.email);
         const firstError = Object.values(errData.errors)[0];
         setGeneralError(firstError || "Validation failed.");
       } else if (errData?.message) {
