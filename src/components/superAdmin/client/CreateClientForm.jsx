@@ -67,8 +67,9 @@ export default function CreateClientForm({ onSubmit, onCancel }) {
     if (form.email && !/\S+@\S+\.\S+/.test(form.email)) {
       newErrors.email = "Invalid email format";
     }
-    if (form.phone && !/^[0-9]{10}$/.test(form.phone)) {
-      newErrors.phone = "Phone number must be 10 digits";
+    const cleanDigits = (form.phone || "").replace(/\D/g, "");
+    if (!cleanDigits || cleanDigits.length < 10) {
+      newErrors.phone = "Valid phone number is required";
     }
     if (form.pinCode && !/^\d{6}$/.test(form.pinCode)) {
       newErrors.pinCode = "Pin Code must be 6 digits";
@@ -84,8 +85,9 @@ const handleSubmit = async () => {
 
   try {
     let cleanPhone = form.phone.replace(/\D/g, "");
-    if (cleanPhone.startsWith("91") && cleanPhone.length === 12) {
-      cleanPhone = cleanPhone.slice(2);
+    // If phone has 91 country code (12 digits), extract last 10 digits
+    if (cleanPhone.length > 10) {
+      cleanPhone = cleanPhone.slice(-10);
     }
 
     const response = await axios.post(
@@ -227,13 +229,8 @@ const handleSubmit = async () => {
                   <PhoneInput
                     country={'in'}
                     value={form.phone}
-                    onChange={(phone, countryData) => {
-                      const dialCode = countryData?.dialCode || "91";
-                      let rawNumber = phone;
-                      if (rawNumber.startsWith(dialCode)) {
-                        rawNumber = rawNumber.slice(dialCode.length);
-                      }
-                      setForm((prev) => ({ ...prev, phone: rawNumber }));
+                    onChange={(phone) => {
+                      setForm((prev) => ({ ...prev, phone }));
                       if (errors.phone) setErrors((prev) => ({ ...prev, phone: "" }));
                     }}
                     enableSearch={true}
