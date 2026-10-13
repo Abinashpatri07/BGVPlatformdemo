@@ -83,10 +83,17 @@ const handleSubmit = async () => {
   if (!validate()) return;
 
   try {
+    let cleanPhone = form.phone.replace(/\D/g, "");
+    if (cleanPhone.startsWith("91") && cleanPhone.length === 12) {
+      cleanPhone = cleanPhone.slice(2);
+    }
 
     const response = await axios.post(
       `${import.meta.env.VITE_API_URL}/api/client/create-client`,
-      form
+      {
+        ...form,
+        phone: cleanPhone,
+      }
     );
 
     setShowSuccessModal(true);
@@ -220,7 +227,15 @@ const handleSubmit = async () => {
                   <PhoneInput
                     country={'in'}
                     value={form.phone}
-                    onChange={(phone) => handle("phone")({ target: { value: phone } })}
+                    onChange={(phone, countryData) => {
+                      const dialCode = countryData?.dialCode || "91";
+                      let rawNumber = phone;
+                      if (rawNumber.startsWith(dialCode)) {
+                        rawNumber = rawNumber.slice(dialCode.length);
+                      }
+                      setForm((prev) => ({ ...prev, phone: rawNumber }));
+                      if (errors.phone) setErrors((prev) => ({ ...prev, phone: "" }));
+                    }}
                     enableSearch={true}
                     disableSearchIcon={true}
                     inputStyle={{
