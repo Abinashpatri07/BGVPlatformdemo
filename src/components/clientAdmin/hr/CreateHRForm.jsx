@@ -47,8 +47,13 @@ function CreateHRForm() {
     if (!formData.lastName.trim())  newErrors.lastName  = "Last name is required";
     if (!formData.email.trim())     newErrors.email     = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Enter valid email address";
-    if (!formData.phone.trim())     newErrors.phone     = "Phone number is required";
-    else if (formData.phone.length !== 10) newErrors.phone = "Phone number must be 10 digits";
+    // PHONE
+    const cleanPhone = (formData.phone || "").replace(/\D/g, "");
+    if (!cleanPhone) {
+      newErrors.phone = "Phone number is required";
+    } else if (cleanPhone.length < 10) {
+      newErrors.phone = "Phone number must be at least 10 digits";
+    }
     if (!formData.role.trim())      newErrors.role      = "Role is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -58,8 +63,12 @@ function CreateHRForm() {
   const handleSubmit = async () => {
     if (!validateForm()) return;
     try {
+      let cleanPhone = (formData.phone || "").replace(/\D/g, "");
+      if (cleanPhone.length > 10) {
+        cleanPhone = cleanPhone.slice(-10);
+      }
       // Default to clientId 1 for development as mentioned in the plan
-      const payload = { ...formData, clientId: 1 };
+      const payload = { ...formData, phone: cleanPhone, clientId: 1 };
       const res = await axiosInstance.post(`${import.meta.env.VITE_API_URL}/api/client-admin/hr/create`, payload);
       if (res.data.success) {
         setShowSuccessModal(true);

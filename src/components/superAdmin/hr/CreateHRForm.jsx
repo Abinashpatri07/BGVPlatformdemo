@@ -94,11 +94,18 @@ function CreateHRForm() {
   if (!validateForm()) return;
 
   try {
+    let cleanPhone = (formData.phone || "").replace(/\D/g, "");
+    if (cleanPhone.length > 10) {
+      cleanPhone = cleanPhone.slice(-10);
+    }
 
     // API REQUEST
     const response = await axiosInstance.post(
       `/api/hr/create`,
-      formData
+      {
+        ...formData,
+        phone: cleanPhone,
+      }
     );
 
     console.log(response.data);
