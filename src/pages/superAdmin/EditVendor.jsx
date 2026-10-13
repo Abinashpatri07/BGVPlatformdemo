@@ -203,8 +203,9 @@ export default function EditVendor() {
     if (!form.gst.trim())        e.gst        = "GST number is required.";
     if (!form.fullName.trim())   e.fullName   = "Full name is required.";
     if (!form.email.trim())      e.email      = "Email is required.";
-    else if (!/^[\w.-]+@[\w.-]+\.\w+$/.test(form.email)) e.email = "Enter a valid email.";
-    if (!form.phone.trim())      e.phone      = "Phone number is required.";
+    const cleanDigits = (form.phone || "").replace(/\D/g, "");
+    if (!cleanDigits) e.phone = "Phone number is required.";
+    else if (cleanDigits.length < 10) e.phone = "Enter a valid 10-digit phone number.";
 
     const hasService = Object.keys(selectedServices).length > 0;
     if (!hasService) setServiceError("Please select at least one service.");
@@ -219,8 +220,14 @@ export default function EditVendor() {
     if (Object.keys(e).length > 0 || Object.keys(selectedServices).length === 0) return;
 
     try {
+      let cleanPhone = (form.phone || "").replace(/\D/g, "");
+      if (cleanPhone.length > 10) {
+        cleanPhone = cleanPhone.slice(-10);
+      }
+
       const payload = {
         ...form,
+        phone: cleanPhone,
         states,
         cities,
         services: selectedServices

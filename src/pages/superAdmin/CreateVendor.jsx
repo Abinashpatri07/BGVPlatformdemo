@@ -222,9 +222,10 @@ export default function CreateVendor() {
       e.email = "Enter a valid email address.";
     }
 
-    if (!form.phone.trim()) {
+    const cleanDigits = (form.phone || "").replace(/\D/g, "");
+    if (!cleanDigits) {
       e.phone = "Phone number is required.";
-    } else if (!/^[0-9]{10}$/.test(form.phone)) {
+    } else if (cleanDigits.length < 10) {
       e.phone = "Enter a valid 10-digit phone number.";
     }
 
@@ -256,8 +257,14 @@ export default function CreateVendor() {
     try {
       const validCoverage = coverageAreas.filter((c) => c.stateId !== "");
 
+      let cleanPhone = (form.phone || "").replace(/\D/g, "");
+      if (cleanPhone.length > 10) {
+        cleanPhone = cleanPhone.slice(-10);
+      }
+
       const finalData = {
         ...form,
+        phone: cleanPhone,
         coverageAreas: validCoverage,
         services: selectedServices,
       };
