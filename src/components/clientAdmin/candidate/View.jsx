@@ -13,7 +13,9 @@ import {
   CheckCircle,
   Eye,
   ArrowLeft,
+  Download,
 } from "lucide-react";
+import { exportCandidateCompleteReport } from "../../../utils/exportCandidatePdf";
 
 const Label = ({ label, value }) => (
   <div>
@@ -102,34 +104,55 @@ function View() {
           </p>
         </div>
 
-        {/* ACCOUNT STATUS - RIGHT SIDE */}
-        <div className={`flex items-center gap-3 border rounded-2xl px-5 py-3 ${
-          candidateData.verification_status === 1 ? 'bg-[#e8fce8] border-green-200' : 
-          candidateData.verification_status === 3 ? 'bg-red-50 border-red-200' : 
-          'bg-yellow-50 border-yellow-200'
-        }`}>
-          {candidateData.verification_status === 1 ? (
-            <>
-              <CheckCircle size={20} className="text-green-500" />
-              <span className="text-[#00cc00] text-base font-bold tracking-wide">
-                Account Status: Verified
-              </span>
-            </>
-          ) : candidateData.verification_status === 3 ? (
-            <>
-              <ShieldAlert size={20} className="text-red-500" />
-              <span className="text-red-600 text-base font-bold tracking-wide">
-                Account Status: Rejected
-              </span>
-            </>
-          ) : (
-            <>
-              <Activity size={20} className="text-yellow-600" />
-              <span className="text-yellow-700 text-base font-bold tracking-wide">
-                Account Status: Pending
-              </span>
-            </>
+        {/* ACCOUNT STATUS & EXPORT BUTTON - RIGHT SIDE */}
+        <div className="flex flex-col items-end gap-3">
+          {/* EXPORT BUTTON - Enabled when status is Complete (4) or Verified (1) */}
+          {candidateData && (candidateData.verification_status === 1 || candidateData.verification_status === 4) && (
+            <button
+              onClick={() => exportCandidateCompleteReport(candidateData, id)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#02027A] hover:bg-[#010156] text-white text-sm font-semibold rounded-xl shadow-sm hover:shadow transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+              title="Download complete verified candidate report as PDF"
+            >
+              <Download size={16} />
+              Export Report
+            </button>
           )}
+
+          <div className={`flex items-center gap-3 border rounded-2xl px-5 py-3 ${
+            candidateData.verification_status === 1 || candidateData.verification_status === 4 ? 'bg-[#e8fce8] border-green-200' : 
+            candidateData.verification_status === 3 ? 'bg-red-50 border-red-200' : 
+            'bg-yellow-50 border-yellow-200'
+          }`}>
+            {candidateData.verification_status === 1 ? (
+              <>
+                <CheckCircle size={20} className="text-green-500" />
+                <span className="text-[#00cc00] text-base font-bold tracking-wide">
+                  Account Status: Verified
+                </span>
+              </>
+            ) : candidateData.verification_status === 4 ? (
+              <>
+                <CheckCircle size={20} className="text-green-500" />
+                <span className="text-[#00cc00] text-base font-bold tracking-wide">
+                  Account Status: Complete
+                </span>
+              </>
+            ) : candidateData.verification_status === 3 ? (
+              <>
+                <ShieldAlert size={20} className="text-red-500" />
+                <span className="text-red-600 text-base font-bold tracking-wide">
+                  Account Status: Rejected
+                </span>
+              </>
+            ) : (
+              <>
+                <Activity size={20} className="text-yellow-600" />
+                <span className="text-yellow-700 text-base font-bold tracking-wide">
+                  Account Status: Pending
+                </span>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
