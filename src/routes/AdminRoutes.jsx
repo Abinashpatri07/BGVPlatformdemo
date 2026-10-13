@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import AdminLogin from "../pages/clientAdmin/AdminLogin";
 import Signup from "../pages/clientAdmin/Signup";
 import Home from "../pages/clientAdmin/Home";
+import SetupClientPasswordPage from "../pages/clientAdmin/SetupClientPasswordPage";
 
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -29,6 +30,7 @@ function AdminRoutes() {
       {/* LOGIN */}
       <Route path="login" element={<AdminLogin />} />
       <Route path="signup" element={<Signup />} />
+      <Route path="client-setup-password" element={<SetupClientPasswordPage />} />
 
       {/* PROTECTED ADMIN LAYOUT */}
       <Route
