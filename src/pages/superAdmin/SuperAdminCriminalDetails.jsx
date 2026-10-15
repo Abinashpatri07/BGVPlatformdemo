@@ -1,43 +1,144 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ShieldAlert,
+  ShieldCheck,
+  User,
   Eye,
-  Trash2,
-  CloudUpload,
   CheckCircle2,
-  Scale,
   FileWarning,
   CheckSquare,
   MessageSquare,
   Mic,
-  ChevronLeft
+  ChevronLeft,
+  Loader2
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import axios from "axios";
+
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+const getDocUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  const clean = path.replace(/\\/g, "/");
+  return `${API_BASE}/${clean.startsWith("/") ? clean.slice(1) : clean}`;
+};
+
+const Field = ({ label, value }) => (
+  <div>
+    <p className="text-xs text-gray-500 mb-0.5 font-medium">{label}</p>
+    <p className="text-sm font-semibold text-gray-900">{value || "—"}</p>
+  </div>
+);
 
 function SuperAdminCriminalDetails() {
-  const [recordIdentified, setRecordIdentified] = useState("Yes Record Found");
+  const [recordIdentified, setRecordIdentified] = useState("No Record Found");
   const [decision, setDecision] = useState("Verified");
+  const [remarks, setRemarks] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [caseData, setCaseData] = useState(null);
+  const [candidate, setCandidate] = useState(null);
+  const [records, setRecords] = useState([]);
+
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const caseIdParam = searchParams.get("caseId");
+
+  useEffect(() => {
+    if (!caseIdParam) return;
+    const fetchDetails = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(`${API_BASE}/api/superadmin/cases/details/${caseIdParam}`);
+        if (res.data.success) {
+          setCaseData(res.data.case);
+          setCandidate(res.data.candidate);
+          const recs = res.data.records || [];
+          setRecords(recs);
+          if (recs.length > 0) {
+            const hasRecord = recs[0].cand_crim_record === "Yes" || recs[0].cand_crim_record === 1 || recs[0].candidate_crim_status === 2;
+            setRecordIdentified(hasRecord ? "Yes Record Found" : "No Record Found");
+            if (recs[0].cand_crim_remarks) {
+              setRemarks(recs[0].cand_crim_remarks);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching criminal case details:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDetails();
+  }, [caseIdParam]);
+
+  const handleSaveDecision = async () => {
+    if (!caseIdParam) return;
+    try {
+      setSaving(true);
+      await axios.post(`${API_BASE}/api/superadmin/cases/update-decision`, {
+        caseId: caseIdParam,
+        decision,
+        remarks
+      });
+      alert("Criminal background verification decision saved successfully!");
+      navigate(-1);
+    } catch (err) {
+      console.error("Save decision error:", err);
+      alert("Failed to save decision: " + (err.response?.data?.message || err.message));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 size={32} className="animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  const crimRecord = records[0] || {};
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto space-y-6 animate-fade-in pb-10 px-4">
-      {/* HEADER SECTION */}
-      <div className="flex items-center gap-4 border-b border-indigo-100 pb-4">
-        <button 
-          onClick={() => navigate(-1)}
-          className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <div className="p-2 bg-indigo-50 rounded-lg text-indigo-700 border border-indigo-100">
-          <ShieldAlert size={24} />
+    <div className="w-full max-w-[1600px] mx-auto space-y-8 animate-fade-in pb-10 px-4 mt-4">
+      {/* Header Profile Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => navigate(-1)}
+              className="p-1 hover:bg-gray-100 rounded-md text-gray-500 transition"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <div className="p-1.5 bg-indigo-50 rounded-full text-indigo-700">
+              <User size={20} />
+            </div>
+            <h2 className="text-xl font-semibold text-indigo-900">
+              {caseData?.caseId || (caseIdParam ? `Case #${caseIdParam}` : "Criminal Background Check")}
+            </h2>
+          </div>
+          {caseData?.vendorName && (
+            <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+              Assigned Vendor: {caseData.vendorName}
+            </span>
+          )}
         </div>
-        <h1 className="text-2xl font-bold text-indigo-900">
-          Criminal Details
-        </h1>
+
+        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm flex flex-wrap gap-10 lg:gap-14 items-start ml-2">
+          <Field label="First Name" value={candidate?.firstName} />
+          <Field label="Last Name" value={candidate?.lastName} />
+          <Field label="Phone Number" value={candidate?.phone ? `+91 ${candidate.phone}` : null} />
+          <Field label="Email Id" value={candidate?.email} />
+          <Field label="Function / Dept" value={candidate?.department} />
+          {candidate?.dob && <Field label="Date of Birth" value={new Date(candidate.dob).toLocaleDateString()} />}
+        </div>
       </div>
 
-      <div className="space-y-8 mt-6">
+      <div className="space-y-8 ml-2">
         {/* Main Details Card */}
         <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -49,22 +150,42 @@ function SuperAdminCriminalDetails() {
                   <ShieldAlert size={20} />
                 </div>
                 <h3 className="text-lg font-bold text-indigo-900">
-                  Criminal Background Verification
+                  Criminal Record Findings
                 </h3>
               </div>
 
+              {/* Show candidate-submitted data from DB */}
+              {(crimRecord.cand_crim_date || crimRecord.cand_crim_record) && (
+                <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="grid grid-cols-2 gap-4">
+                    {crimRecord.cand_crim_date && (
+                      <Field label="Record Date" value={new Date(crimRecord.cand_crim_date).toLocaleDateString("en-IN")} />
+                    )}
+                    {crimRecord.cand_crim_record && (
+                      <Field label="Candidate Declared" value={crimRecord.cand_crim_record} />
+                    )}
+                    {crimRecord.cand_crim_remarks && (
+                      <div className="col-span-2">
+                        <Field label="Candidate Remarks" value={crimRecord.cand_crim_remarks} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="mb-4">
                 <p className="text-sm text-gray-500 mb-4">
-                  Has A Criminal Record Or Active Citation Been Identified?
+                  Has a criminal record or active police citation been identified?
                 </p>
                 <div className="space-y-4">
                   {/* Option No Record */}
                   <label 
-                    className={`flex items-center justify-between p-4 rounded-lg border cursor-pointer transition ${
+                    className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition ${
                       recordIdentified === "No Record Found" 
-                        ? "border-emerald-500 bg-emerald-50/20 shadow-sm" 
+                        ? "border-emerald-500 bg-emerald-50/30 shadow-sm ring-1 ring-emerald-500/20" 
                         : "border-gray-200 hover:bg-gray-50"
                     }`}
+                    onClick={() => setRecordIdentified("No Record Found")}
                   >
                     <div className="flex items-center gap-3">
                       <div className="p-1.5 bg-emerald-100 text-emerald-600 rounded-full">
@@ -72,7 +193,7 @@ function SuperAdminCriminalDetails() {
                       </div>
                       <div>
                         <span className="block font-semibold text-gray-900 text-sm">No Record Found</span>
-                        <span className="block text-xs text-gray-400 mt-0.5">Candidate background is clear</span>
+                        <span className="block text-xs text-gray-400 mt-0.5">Candidate background is clean</span>
                       </div>
                     </div>
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
@@ -84,19 +205,20 @@ function SuperAdminCriminalDetails() {
 
                   {/* Option Yes Record */}
                   <label 
-                    className={`flex items-center justify-between p-4 rounded-lg border cursor-pointer transition ${
+                    className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition ${
                       recordIdentified === "Yes Record Found" 
-                        ? "border-red-400 bg-red-50/30 shadow-sm" 
+                        ? "border-red-400 bg-red-50/40 shadow-sm ring-1 ring-red-400/20" 
                         : "border-gray-200 hover:bg-gray-50"
                     }`}
+                    onClick={() => setRecordIdentified("Yes Record Found")}
                   >
                     <div className="flex items-center gap-3">
                       <div className="p-1.5 bg-red-100 text-red-500 rounded-full">
                         <FileWarning size={16} />
                       </div>
                       <div>
-                        <span className="block font-semibold text-gray-900 text-sm">Yes Record Found</span>
-                        <span className="block text-xs text-gray-400 mt-0.5">Offence and case filings exist</span>
+                        <span className="block font-semibold text-gray-900 text-sm">Record / Citation Found</span>
+                        <span className="block text-xs text-gray-400 mt-0.5">Court filings or police records identified</span>
                       </div>
                     </div>
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
@@ -109,65 +231,48 @@ function SuperAdminCriminalDetails() {
               </div>
             </div>
 
-            {/* Right Column: Evidence Upload */}
+            {/* Right Column: Evidence / Report */}
             <div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">
-                Required Supporting Evidence Upload
+                Police / Court Verification Report
               </h3>
               <p className="text-xs text-gray-400 mb-6 leading-relaxed">
-                Please provide a certified First Information Report (FIR), arrest certificate, or official court docket copy confirming these offenses.
+                Documentation and official law enforcement verification status records.
               </p>
 
-              <div className="space-y-4">
-                {/* Doc 1 - Uploaded */}
+              {crimRecord.cand_crim_report ? (
                 <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0">
-                    <CheckCircle2 size={22} className="text-emerald-500" />
-                  </div>
+                  <CheckCircle2 size={22} className="text-emerald-500 shrink-0" />
                   <div className="flex-1 flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-lg">
                     <div>
-                      <p className="text-sm font-semibold text-gray-800">Charge Sheet</p>
-                      <p className="text-xs text-gray-400">gachibowli_entrance_gps.jpg • 2.4 MB</p>
+                      <p className="text-sm font-semibold text-gray-800">Verification Report</p>
+                      <p className="text-xs text-gray-400">Attached Report</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <button className="text-gray-400 hover:text-gray-600 transition">
-                        <Eye size={18} />
-                      </button>
-                      <button className="text-red-300 hover:text-red-500 transition">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
+                    <a
+                      href={getDocUrl(crimRecord.cand_crim_report)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-1.5 hover:bg-gray-200 rounded text-gray-600 transition"
+                      title="View Report"
+                    >
+                      <Eye size={18} />
+                    </a>
                   </div>
                 </div>
-                
-                {/* Doc 2 */}
-                <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0 p-1.5 bg-indigo-50 text-indigo-400 rounded-md">
-                    <Scale size={16} />
-                  </div>
-                  <div className="flex-1 border border-indigo-100 border-dashed rounded-lg p-3 bg-white flex items-center justify-between hover:bg-indigo-50/30 transition cursor-pointer group">
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800">Court Judgment / Order</p>
-                      <p className="text-xs text-gray-400">Supported formats: CSV, XLSX</p>
-                    </div>
-                    <CloudUpload size={22} className="text-indigo-600 group-hover:scale-110 transition-transform" />
-                  </div>
+              ) : (
+                <div className="border border-indigo-100 border-dashed rounded-xl p-6 bg-slate-50/50 flex flex-col items-center justify-center text-center">
+                  <ShieldCheck size={32} className="text-indigo-400 mb-2" />
+                  <p className="text-sm font-semibold text-gray-700">Digital Record Search</p>
+                  <p className="text-xs text-gray-400 mt-1 max-w-xs">
+                    Electronic court registry and police database search completed with no active warrants.
+                  </p>
                 </div>
-              </div>
-            </div>
-
-          </div>
-          
-          {/* Bottom Area: Description */}
-          <div className="mt-8">
-            <h4 className="text-sm font-bold text-gray-900 mb-3">Description</h4>
-            <div className="p-4 border border-indigo-100 border-dashed bg-gray-50/50 rounded-lg text-xs text-gray-600 leading-relaxed">
-              On 15 January 2024, An FIR Was Registered Alleging Involvement In The Theft Of Commercial Electronic Equipment From A Warehouse. The Accused Was Arrested On 18 January 2024 And Was Granted Bail By The District Court On 22 January 2024.
+              )}
             </div>
           </div>
         </div>
 
-        {/* Verification Decision */}
+        {/* Verification Decision Section */}
         <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
           <div className="flex items-center gap-3 border-b border-gray-100 pb-4 mb-6">
             <div className="p-1.5 bg-indigo-50 rounded text-indigo-700">
@@ -177,8 +282,8 @@ function SuperAdminCriminalDetails() {
               Verification Decision
             </h2>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {[
               "Verified",
               "Partially Verified",
@@ -215,43 +320,43 @@ function SuperAdminCriminalDetails() {
             ))}
           </div>
 
-          <div className="flex items-center pt-6 border-t border-gray-100 gap-12">
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Verification Date & Time</p>
-              <p className="text-sm font-semibold text-gray-900">12 Oct 2023, 14:30 IST</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Verified By</p>
-              <p className="text-sm font-semibold text-gray-900">Amit Kumar (Field Exec)</p>
+          {/* Remarks */}
+          <div className="pt-4 border-t border-gray-100">
+            <label className="block text-xs font-semibold text-gray-700 mb-2">
+              Verification Remarks / Findings
+            </label>
+            <div className="relative">
+              <textarea
+                rows="3"
+                value={remarks}
+                onChange={(e) => setRemarks(e.target.value)}
+                className="w-full rounded-lg border border-gray-200 bg-gray-50/50 p-4 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white resize-none"
+                placeholder="Enter criminal background findings or court verification remarks..."
+              />
+              <div className="absolute bottom-4 right-4 text-gray-400">
+                <Mic size={18} />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Verification Remarks */}
-        <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-3 border-b border-gray-100 pb-4 mb-6">
-            <div className="p-1.5 bg-indigo-50 rounded text-indigo-700">
-              <MessageSquare size={20} />
-            </div>
-            <h2 className="text-lg font-bold text-indigo-900">
-              Verification Remarks
-            </h2>
-          </div>
-          
-          <div className="relative">
-            <textarea
-              rows="4"
-              className="w-full rounded-lg border border-indigo-100 bg-indigo-50/30 p-4 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 resize-none"
-              placeholder="Enter remarks..."
-            ></textarea>
-            <div className="absolute bottom-4 right-4 text-gray-400">
-              <Mic size={18} />
-            </div>
-          </div>
-          
-          <div className="flex justify-between items-center mt-2 px-1">
-            <span className="text-xs text-gray-500">Max 1000 Characters</span>
-            <span className="text-xs text-gray-500">0 / 1000</span>
+          {/* Actions */}
+          <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="px-5 py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition"
+            >
+              Back to Cases
+            </button>
+            <button
+              type="button"
+              disabled={saving}
+              onClick={handleSaveDecision}
+              className="px-6 py-2.5 text-xs font-semibold text-white bg-[#05058D] hover:bg-blue-800 rounded-xl transition shadow-sm disabled:opacity-50 flex items-center gap-2"
+            >
+              {saving && <Loader2 size={14} className="animate-spin" />}
+              Save Decision
+            </button>
           </div>
         </div>
       </div>

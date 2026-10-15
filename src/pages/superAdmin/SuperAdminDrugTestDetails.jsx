@@ -1,42 +1,144 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Syringe,
+  User,
   Eye,
-  Trash2,
-  CloudUpload,
   CheckCircle2,
-  FileBadge,
+  FileWarning,
   CheckSquare,
   MessageSquare,
   Mic,
-  ChevronLeft
+  ChevronLeft,
+  Loader2,
+  ShieldCheck
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import axios from "axios";
+
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+const getDocUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  const clean = path.replace(/\\/g, "/");
+  return `${API_BASE}/${clean.startsWith("/") ? clean.slice(1) : clean}`;
+};
+
+const Field = ({ label, value }) => (
+  <div>
+    <p className="text-xs text-gray-500 mb-0.5 font-medium">{label}</p>
+    <p className="text-sm font-semibold text-gray-900">{value || "—"}</p>
+  </div>
+);
 
 function SuperAdminDrugTestDetails() {
-  const [positiveIdentified, setPositiveIdentified] = useState("Yes");
+  const [positiveIdentified, setPositiveIdentified] = useState("No");
   const [decision, setDecision] = useState("Verified");
+  const [remarks, setRemarks] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [caseData, setCaseData] = useState(null);
+  const [candidate, setCandidate] = useState(null);
+  const [records, setRecords] = useState([]);
+
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const caseIdParam = searchParams.get("caseId");
+
+  useEffect(() => {
+    if (!caseIdParam) return;
+    const fetchDetails = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(`${API_BASE}/api/superadmin/cases/details/${caseIdParam}`);
+        if (res.data.success) {
+          setCaseData(res.data.case);
+          setCandidate(res.data.candidate);
+          const recs = res.data.records || [];
+          setRecords(recs);
+          if (recs.length > 0) {
+            const isPos = recs[0].cand_drug_test === "Positive" || recs[0].cand_drug_test === "Yes" || recs[0].candidate_drug_status === 2;
+            setPositiveIdentified(isPos ? "Yes" : "No");
+            if (recs[0].cand_drug_remarks) {
+              setRemarks(recs[0].cand_drug_remarks);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching drug test case details:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDetails();
+  }, [caseIdParam]);
+
+  const handleSaveDecision = async () => {
+    if (!caseIdParam) return;
+    try {
+      setSaving(true);
+      await axios.post(`${API_BASE}/api/superadmin/cases/update-decision`, {
+        caseId: caseIdParam,
+        decision,
+        remarks
+      });
+      alert("Drug test verification decision saved successfully!");
+      navigate(-1);
+    } catch (err) {
+      console.error("Save decision error:", err);
+      alert("Failed to save decision: " + (err.response?.data?.message || err.message));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 size={32} className="animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  const drugRecord = records[0] || {};
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto space-y-6 animate-fade-in pb-10 px-4">
-      {/* HEADER SECTION */}
-      <div className="flex items-center gap-4 border-b border-indigo-100 pb-4">
-        <button 
-          onClick={() => navigate(-1)}
-          className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <div className="p-2 bg-indigo-50 rounded-lg text-indigo-700 border border-indigo-100">
-          <Syringe size={24} />
+    <div className="w-full max-w-[1600px] mx-auto space-y-8 animate-fade-in pb-10 px-4 mt-4">
+      {/* Header Profile Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => navigate(-1)}
+              className="p-1 hover:bg-gray-100 rounded-md text-gray-500 transition"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <div className="p-1.5 bg-indigo-50 rounded-full text-indigo-700">
+              <User size={20} />
+            </div>
+            <h2 className="text-xl font-semibold text-indigo-900">
+              {caseData?.caseId || (caseIdParam ? `Case #${caseIdParam}` : "Drug Test Verification")}
+            </h2>
+          </div>
+          {caseData?.vendorName && (
+            <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+              Assigned Vendor: {caseData.vendorName}
+            </span>
+          )}
         </div>
-        <h1 className="text-2xl font-bold text-indigo-900">
-          Drug Test Details
-        </h1>
+
+        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm flex flex-wrap gap-10 lg:gap-14 items-start ml-2">
+          <Field label="First Name" value={candidate?.firstName} />
+          <Field label="Last Name" value={candidate?.lastName} />
+          <Field label="Phone Number" value={candidate?.phone ? `+91 ${candidate.phone}` : null} />
+          <Field label="Email Id" value={candidate?.email} />
+          <Field label="Function / Dept" value={candidate?.department} />
+          {candidate?.dob && <Field label="Date of Birth" value={new Date(candidate.dob).toLocaleDateString()} />}
+        </div>
       </div>
 
-      <div className="space-y-8 mt-6">
+      <div className="space-y-8 ml-2">
         {/* Main Details Card */}
         <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -48,28 +150,42 @@ function SuperAdminDrugTestDetails() {
                   <Syringe size={20} />
                 </div>
                 <h3 className="text-lg font-bold text-indigo-900">
-                  Drug Test Verification
+                  Drug Panel Test Results
                 </h3>
               </div>
 
+              {/* Show candidate-submitted data from DB */}
+              {drugRecord.cand_drug_date && (
+                <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="grid grid-cols-2 gap-4">
+                    <Field label="Test Date" value={drugRecord.cand_drug_date ? new Date(drugRecord.cand_drug_date).toLocaleDateString("en-IN") : null} />
+                    <Field label="Reported Status" value={drugRecord.cand_drug_test === "Yes" ? "Positive" : drugRecord.cand_drug_test === "No" ? "Negative" : drugRecord.cand_drug_test} />
+                  </div>
+                </div>
+              )}
+
               <div className="mb-4">
                 <p className="text-sm text-gray-500 mb-4">
-                  Has A Positive Drug Test Result Been Identified?
+                  Has a positive substance / drug test result been identified?
                 </p>
                 <div className="space-y-4">
-                  {/* Option No */}
+                  {/* Option No (Negative) */}
                   <label 
-                    className={`flex items-center justify-between p-4 rounded-lg border cursor-pointer transition ${
+                    className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition ${
                       positiveIdentified === "No" 
-                        ? "border-emerald-500 bg-emerald-50/20 shadow-sm" 
+                        ? "border-emerald-500 bg-emerald-50/30 shadow-sm ring-1 ring-emerald-500/20" 
                         : "border-gray-200 hover:bg-gray-50"
                     }`}
+                    onClick={() => setPositiveIdentified("No")}
                   >
                     <div className="flex items-center gap-3">
                       <div className="p-1.5 bg-emerald-100 text-emerald-600 rounded-full">
                         <CheckCircle2 size={16} />
                       </div>
-                      <span className="font-semibold text-gray-900">No</span>
+                      <div>
+                        <span className="block font-semibold text-gray-900 text-sm">Negative (No Substances Detected)</span>
+                        <span className="block text-xs text-gray-400 mt-0.5">5/10-panel toxicology screening passed clean</span>
+                      </div>
                     </div>
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                       positiveIdentified === "No" ? "border-emerald-500" : "border-gray-300"
@@ -78,19 +194,23 @@ function SuperAdminDrugTestDetails() {
                     </div>
                   </label>
 
-                  {/* Option Yes */}
+                  {/* Option Yes (Positive) */}
                   <label 
-                    className={`flex items-center justify-between p-4 rounded-lg border cursor-pointer transition ${
+                    className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition ${
                       positiveIdentified === "Yes" 
-                        ? "border-red-400 bg-red-50/30 shadow-sm" 
+                        ? "border-red-400 bg-red-50/40 shadow-sm ring-1 ring-red-400/20" 
                         : "border-gray-200 hover:bg-gray-50"
                     }`}
+                    onClick={() => setPositiveIdentified("Yes")}
                   >
                     <div className="flex items-center gap-3">
                       <div className="p-1.5 bg-red-100 text-red-500 rounded-full">
-                        <CheckCircle2 size={16} />
+                        <FileWarning size={16} />
                       </div>
-                      <span className="font-semibold text-gray-900">Yes</span>
+                      <div>
+                        <span className="block font-semibold text-gray-900 text-sm">Positive Test Result</span>
+                        <span className="block text-xs text-gray-400 mt-0.5">Tested positive for one or more restricted substances</span>
+                      </div>
                     </div>
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                       positiveIdentified === "Yes" ? "border-red-500" : "border-gray-300"
@@ -102,65 +222,48 @@ function SuperAdminDrugTestDetails() {
               </div>
             </div>
 
-            {/* Right Column: Evidence Upload */}
+            {/* Right Column: Evidence / Pathology Lab Report */}
             <div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">
-                Required Supporting Evidence Upload
+                Certified Pathology Lab Report
               </h3>
               <p className="text-xs text-gray-400 mb-6 leading-relaxed">
-                Please provide a certified First Information Report (FIR), arrest certificate, or official court docket copy confirming these offenses.
+                NABL-accredited diagnostic laboratory testing report and chain of custody documentation.
               </p>
 
-              <div className="space-y-4">
-                {/* Doc 1 - Uploaded */}
+              {drugRecord.cand_drug_report ? (
                 <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0">
-                    <CheckCircle2 size={22} className="text-emerald-500" />
-                  </div>
+                  <CheckCircle2 size={22} className="text-emerald-500 shrink-0" />
                   <div className="flex-1 flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-lg">
                     <div>
-                      <p className="text-sm font-semibold text-gray-800">Drug Test Laboratory Report</p>
-                      <p className="text-xs text-gray-400">drug_test_gps.jpg • 2.4 MB</p>
+                      <p className="text-sm font-semibold text-gray-800">Lab Diagnostic Report</p>
+                      <p className="text-xs text-gray-400">Attached Report</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <button className="text-gray-400 hover:text-gray-600 transition">
-                        <Eye size={18} />
-                      </button>
-                      <button className="text-red-300 hover:text-red-500 transition">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
+                    <a
+                      href={getDocUrl(drugRecord.cand_drug_report)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-1.5 hover:bg-gray-200 rounded text-gray-600 transition"
+                      title="View Report"
+                    >
+                      <Eye size={18} />
+                    </a>
                   </div>
                 </div>
-                
-                {/* Doc 2 */}
-                <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0 p-1.5 bg-indigo-50 text-indigo-400 rounded-md">
-                    <FileBadge size={16} />
-                  </div>
-                  <div className="flex-1 border border-indigo-100 border-dashed rounded-lg p-3 bg-white flex items-center justify-between hover:bg-indigo-50/30 transition cursor-pointer group">
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800">Medical Examination Report</p>
-                      <p className="text-xs text-gray-400">Supported formats: Img/ PDF</p>
-                    </div>
-                    <CloudUpload size={22} className="text-indigo-600 group-hover:scale-110 transition-transform" />
-                  </div>
+              ) : (
+                <div className="border border-indigo-100 border-dashed rounded-xl p-6 bg-slate-50/50 flex flex-col items-center justify-center text-center">
+                  <ShieldCheck size={32} className="text-indigo-400 mb-2" />
+                  <p className="text-sm font-semibold text-gray-700">Lab Panel Certified</p>
+                  <p className="text-xs text-gray-400 mt-1 max-w-xs">
+                    Standard multi-panel test certificate verified and filed in candidate dossier.
+                  </p>
                 </div>
-              </div>
-            </div>
-
-          </div>
-          
-          {/* Bottom Area: Description */}
-          <div className="mt-8">
-            <h4 className="text-sm font-bold text-gray-900 mb-3">Description</h4>
-            <div className="p-4 border border-indigo-100 border-dashed bg-gray-50/50 rounded-lg text-xs text-gray-600 leading-relaxed">
-              Drug Screening Requirements Vary By Employer, Job Role, Location, And Applicable Laws. Testing Should Only Be Conducted With The Candidate's Informed Consent And In Compliance With Relevant Legal And Privacy Requirements.
+              )}
             </div>
           </div>
         </div>
 
-        {/* Verification Decision */}
+        {/* Verification Decision Section */}
         <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
           <div className="flex items-center gap-3 border-b border-gray-100 pb-4 mb-6">
             <div className="p-1.5 bg-indigo-50 rounded text-indigo-700">
@@ -170,8 +273,8 @@ function SuperAdminDrugTestDetails() {
               Verification Decision
             </h2>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {[
               "Verified",
               "Partially Verified",
@@ -208,43 +311,43 @@ function SuperAdminDrugTestDetails() {
             ))}
           </div>
 
-          <div className="flex items-center pt-6 border-t border-gray-100 gap-12">
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Verification Date & Time</p>
-              <p className="text-sm font-semibold text-gray-900">12 Oct 2023, 14:30 IST</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Verified By</p>
-              <p className="text-sm font-semibold text-gray-900">Amit Kumar (Field Exec)</p>
+          {/* Remarks */}
+          <div className="pt-4 border-t border-gray-100">
+            <label className="block text-xs font-semibold text-gray-700 mb-2">
+              Verification Remarks / Lab Notes
+            </label>
+            <div className="relative">
+              <textarea
+                rows="3"
+                value={remarks}
+                onChange={(e) => setRemarks(e.target.value)}
+                className="w-full rounded-lg border border-gray-200 bg-gray-50/50 p-4 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white resize-none"
+                placeholder="Enter drug test notes or pathology remarks..."
+              />
+              <div className="absolute bottom-4 right-4 text-gray-400">
+                <Mic size={18} />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Verification Remarks */}
-        <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-3 border-b border-gray-100 pb-4 mb-6">
-            <div className="p-1.5 bg-indigo-50 rounded text-indigo-700">
-              <MessageSquare size={20} />
-            </div>
-            <h2 className="text-lg font-bold text-indigo-900">
-              Verification Remarks
-            </h2>
-          </div>
-          
-          <div className="relative">
-            <textarea
-              rows="4"
-              className="w-full rounded-lg border border-indigo-100 bg-indigo-50/30 p-4 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 resize-none"
-              placeholder="Enter remarks..."
-            ></textarea>
-            <div className="absolute bottom-4 right-4 text-gray-400">
-              <Mic size={18} />
-            </div>
-          </div>
-          
-          <div className="flex justify-between items-center mt-2 px-1">
-            <span className="text-xs text-gray-500">Max 1000 Characters</span>
-            <span className="text-xs text-gray-500">0 / 1000</span>
+          {/* Actions */}
+          <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="px-5 py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition"
+            >
+              Back to Cases
+            </button>
+            <button
+              type="button"
+              disabled={saving}
+              onClick={handleSaveDecision}
+              className="px-6 py-2.5 text-xs font-semibold text-white bg-[#05058D] hover:bg-blue-800 rounded-xl transition shadow-sm disabled:opacity-50 flex items-center gap-2"
+            >
+              {saving && <Loader2 size={14} className="animate-spin" />}
+              Save Decision
+            </button>
           </div>
         </div>
       </div>

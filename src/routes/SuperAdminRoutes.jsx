@@ -18,6 +18,8 @@ import SuperAdminAddressDetails from "../pages/superAdmin/SuperAdminAddressDetai
 import SuperAdminDrugTestDetails from "../pages/superAdmin/SuperAdminDrugTestDetails";
 import SuperAdminEducationDetails from "../pages/superAdmin/SuperAdminEducationDetails";
 import SuperAdminCriminalDetails from "../pages/superAdmin/SuperAdminCriminalDetails";
+import SuperAdminIdentificationDetails from "../pages/superAdmin/SuperAdminIdentificationDetails";
+import SuperAdminReferenceDetails from "../pages/superAdmin/SuperAdminReferenceDetails";
 import SuperAdminAssignedApplications from "../pages/superAdmin/SuperAdminAssignedApplications";
 import SuperAdminVerifiedApplications from "../pages/superAdmin/SuperAdminVerifiedApplications";
 import SuperAdminRefuteApplications from "../pages/superAdmin/SuperAdminRefuteApplications";
@@ -116,11 +118,13 @@ function SuperAdminRoutes() {
         
         {/* CASES AND DETAILS */}
         <Route path="cases" element={<SuperAdminCases />} />
+        <Route path="identification-details" element={<SuperAdminIdentificationDetails />} />
         <Route path="employment-details" element={<SuperAdminEmploymentDetails />} />
         <Route path="address-details" element={<SuperAdminAddressDetails />} />
         <Route path="drug-test-details" element={<SuperAdminDrugTestDetails />} />
         <Route path="education-details" element={<SuperAdminEducationDetails />} />
         <Route path="criminal-details" element={<SuperAdminCriminalDetails />} />
+        <Route path="reference-details" element={<SuperAdminReferenceDetails />} />
         <Route path="cases/assigned" element={<SuperAdminAssignedApplications />} />
         <Route path="cases/verified" element={<SuperAdminVerifiedApplications />} />
         <Route path="cases/refuted" element={<SuperAdminRefuteApplications />} />

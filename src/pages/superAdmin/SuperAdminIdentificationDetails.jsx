@@ -1,0 +1,416 @@
+import React, { useState, useEffect } from "react";
+import {
+  IdCard,
+  User,
+  Eye,
+  CheckCircle2,
+  AlertTriangle,
+  ChevronLeft,
+  Calendar,
+  CreditCard,
+  ShieldCheck,
+  Building,
+  CheckSquare,
+  MessageSquare,
+  Loader2,
+  FileText
+} from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import axios from "axios";
+
+export default function SuperAdminIdentificationDetails() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const caseIdParam = searchParams.get("caseId");
+  const mode = searchParams.get("mode") || "view";
+
+  const [loading, setLoading] = useState(true);
+  const [caseData, setCaseData] = useState(null);
+  const [candidate, setCandidate] = useState(null);
+  const [records, setRecords] = useState([]);
+  const [selectedDocIndex, setSelectedDocIndex] = useState(0);
+  const [decision, setDecision] = useState("Verified");
+  const [remarks, setRemarks] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      if (!caseIdParam) {
+        setLoading(false);
+        return;
+      }
+      try {
+        setLoading(true);
+        const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+        const res = await axios.get(`${API_BASE}/api/superadmin/cases/details/${caseIdParam}`);
+        if (res.data.success) {
+          setCaseData(res.data.case);
+          setCandidate(res.data.candidate);
+          setRecords(res.data.records || []);
+        }
+      } catch (err) {
+        console.error("Error fetching identification case details:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetails();
+  }, [caseIdParam]);
+
+  const activeDoc = records[selectedDocIndex] || records[0] || null;
+
+  const getIdNumber = (doc) => {
+    if (!doc) return "N/A";
+    return doc.pan_number || doc.driving_number || doc.voter_number || doc.passport_number || doc.uan_number || doc.cand_ident_number || "N/A";
+  };
+
+  const getIssueDate = (doc) => {
+    if (!doc) return "N/A";
+    const d = doc.driv_issue_date || doc.pass_issue_date || doc.voter_issue_date;
+    return d ? new Date(d).toLocaleDateString() : "N/A";
+  };
+
+  const getExpiryDate = (doc) => {
+    if (!doc) return "N/A";
+    const d = doc.pass_expiry_date || doc.driv_expiry_date;
+    return d ? new Date(d).toLocaleDateString() : "N/A";
+  };
+
+  return (
+    <div className="w-full max-w-[1600px] mx-auto space-y-6 animate-fade-in pb-12 px-4 mt-2">
+      {/* HEADER SECTION */}
+      <div className="flex items-center justify-between border-b border-indigo-100 pb-4">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => navigate(-1)}
+            className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition"
+          >
+            <ChevronLeft size={22} />
+          </button>
+          <div className="p-2.5 bg-indigo-50 rounded-xl text-indigo-700 border border-indigo-100">
+            <IdCard size={24} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-indigo-950">
+              Identification Verification Details
+            </h1>
+            <p className="text-xs text-gray-500 font-medium">
+              {caseData?.caseId || `Case #${caseIdParam || "N/A"}`} • {candidate?.fullName || "Candidate Details"}
+            </p>
+          </div>
+        </div>
+
+        {caseData && (
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+              {caseData.vendorName ? `Assigned to: ${caseData.vendorName}` : "Unassigned Vendor"}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-gray-100 shadow-sm">
+          <Loader2 className="w-8 h-8 text-indigo-600 animate-spin mb-3" />
+          <p className="text-sm font-medium text-gray-600">Loading identification case records...</p>
+        </div>
+      ) : (
+        <>
+          {/* CANDIDATE INFO OVERVIEW */}
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-100">
+              <div className="p-2 bg-indigo-50 rounded-lg text-indigo-700">
+                <User size={18} />
+              </div>
+              <h2 className="text-base font-bold text-gray-900">
+                Candidate Profile
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-1">First Name</p>
+                <p className="text-sm font-semibold text-gray-900">{candidate?.firstName || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-1">Last Name</p>
+                <p className="text-sm font-semibold text-gray-900">{candidate?.lastName || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-1">Candidate ID</p>
+                <p className="text-sm font-mono font-semibold text-indigo-700">{candidate?.candidateId || `CAND-${candidate?.candId || "N/A"}`}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-1">Phone Number</p>
+                <p className="text-sm font-semibold text-gray-900">+91 {candidate?.phone || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-1">Email Address</p>
+                <p className="text-sm font-semibold text-gray-900 truncate" title={candidate?.email}>{candidate?.email || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 font-medium mb-1">Function / Dept</p>
+                <p className="text-sm font-semibold text-gray-900">{candidate?.department || "General"}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* MAIN IDENTIFICATION DETAILS & PREVIEW */}
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <div className="flex items-center justify-between mb-6 pb-3 border-b border-gray-100">
+              <div>
+                <h3 className="text-lg font-bold text-indigo-950">
+                  Uploaded Identity Documents ({records.length})
+                </h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  National identification documents submitted for verification.
+                </p>
+              </div>
+
+              {/* Document Selector Pills if multiple */}
+              {records.length > 1 && (
+                <div className="flex gap-2">
+                  {records.map((doc, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedDocIndex(idx)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                        selectedDocIndex === idx
+                          ? "bg-[#05058D] text-white shadow-sm"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      {doc.cand_iden_type || `Document ${idx + 1}`}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {records.length === 0 ? (
+              <div className="py-12 text-center text-gray-500 text-sm">
+                No identity documents uploaded for this candidate yet.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                {/* Left side: Extracted Details */}
+                <div className="lg:col-span-7 space-y-6">
+                  <div className="flex items-center justify-between bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
+                    <div>
+                      <h4 className="text-base font-bold text-indigo-950">
+                        {activeDoc?.cand_iden_type || "Identity Document"}
+                      </h4>
+                      <p className="text-xs text-gray-500 font-mono mt-0.5">
+                        ID: {getIdNumber(activeDoc)}
+                      </p>
+                    </div>
+                    <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-700 border border-emerald-200">
+                      <CheckCircle2 size={13} /> {activeDoc?.iden_verification_status === 2 ? "Verified" : "Submitted"}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-6 bg-gray-50/50 p-5 rounded-xl border border-gray-100">
+                    <div>
+                      <p className="text-xs text-gray-400 font-medium mb-1">Full Name on Card</p>
+                      <p className="text-sm font-semibold text-gray-900">{activeDoc?.cand_full_name || `${candidate?.firstName || ''} ${candidate?.lastName || ''}`.trim() || "N/A"}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-gray-400 font-medium mb-1">Document Number</p>
+                      <p className="text-sm font-mono font-bold text-indigo-700">{getIdNumber(activeDoc)}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-gray-400 font-medium mb-1">Date of Birth</p>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {activeDoc?.cand_dob ? new Date(activeDoc.cand_dob).toLocaleDateString() : candidate?.dob ? new Date(candidate.dob).toLocaleDateString() : "N/A"}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-gray-400 font-medium mb-1">Gender</p>
+                      <p className="text-sm font-semibold text-gray-900">{activeDoc?.cand_gender || "N/A"}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-gray-400 font-medium mb-1">Issue Date</p>
+                      <p className="text-sm font-semibold text-gray-900">{getIssueDate(activeDoc)}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-gray-400 font-medium mb-1">Expiry Date</p>
+                      <p className="text-sm font-semibold text-gray-900">{getExpiryDate(activeDoc)}</p>
+                    </div>
+
+                    {activeDoc?.cand_father_name && (
+                      <div className="sm:col-span-2">
+                        <p className="text-xs text-gray-400 font-medium mb-1">Father's Name</p>
+                        <p className="text-sm font-semibold text-gray-900">{activeDoc.cand_father_name}</p>
+                      </div>
+                    )}
+
+                    {activeDoc?.cand_address && (
+                      <div className="sm:col-span-2">
+                        <p className="text-xs text-gray-400 font-medium mb-1">Address on Document</p>
+                        <p className="text-sm font-semibold text-gray-900">{activeDoc.cand_address}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right side: Realistic Digital Document Preview */}
+                <div className="lg:col-span-5 bg-slate-50 p-6 rounded-2xl border border-slate-200 text-center flex flex-col items-center justify-center">
+                  <div className="flex items-center justify-between w-full mb-3 px-1">
+                    <p className="text-xs text-[#01026E] font-bold uppercase tracking-wider">Document Preview</p>
+                    <span className="text-[11px] font-medium text-slate-500">{activeDoc?.cand_iden_type}</span>
+                  </div>
+
+                  {activeDoc?.cand_iden_docu ? (
+                    <img
+                      src={activeDoc.cand_iden_docu.startsWith("http") ? activeDoc.cand_iden_docu : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/${activeDoc.cand_iden_docu}`}
+                      alt="Identity document preview"
+                      className="rounded-xl shadow-md max-h-72 object-contain border border-slate-200 bg-white"
+                    />
+                  ) : (
+                    /* Digital ID Card Mockup */
+                    <div className="w-full max-w-sm rounded-2xl overflow-hidden shadow-lg border border-slate-300 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-5 relative text-left select-none">
+                      <div className="flex justify-between items-start border-b border-white/15 pb-3 mb-4">
+                        <div>
+                          <p className="text-[9px] uppercase tracking-widest text-indigo-300 font-bold">Government of India</p>
+                          <h4 className="text-sm font-bold tracking-tight text-white">{activeDoc?.cand_iden_type || "IDENTITY CARD"}</h4>
+                        </div>
+                        <CreditCard className="w-5 h-5 text-indigo-300" />
+                      </div>
+
+                      <div className="flex gap-4 items-center mb-4">
+                        <div className="w-20 h-24 rounded-lg bg-slate-800 border-2 border-indigo-400/30 flex flex-col items-center justify-center text-slate-400 shrink-0 shadow-inner">
+                          <User className="w-8 h-8 text-indigo-200/50 mb-1" />
+                          <span className="text-[8px] uppercase tracking-wider text-slate-400">Photo</span>
+                        </div>
+
+                        <div className="flex-1 space-y-1.5 min-w-0">
+                          <div>
+                            <p className="text-[8px] uppercase tracking-wider text-slate-400">Name</p>
+                            <p className="text-xs font-semibold text-white truncate">
+                              {activeDoc?.cand_full_name || candidate?.fullName || "Candidate"}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-[8px] uppercase tracking-wider text-slate-400">ID Number</p>
+                            <p className="text-xs font-mono font-bold text-amber-300 tracking-wider truncate">
+                              {getIdNumber(activeDoc)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-[8px] uppercase tracking-wider text-slate-400">DOB</p>
+                            <p className="text-[10px] text-slate-200">
+                              {activeDoc?.cand_dob ? new Date(activeDoc.cand_dob).toLocaleDateString() : candidate?.dob ? new Date(candidate.dob).toLocaleDateString() : "N/A"}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-white/10 pt-2 flex justify-between items-center text-[9px] text-slate-400">
+                        <span className="flex items-center gap-1 text-emerald-400 font-medium">
+                          <ShieldCheck className="w-3.5 h-3.5" /> Source Verified
+                        </span>
+                        <span className="font-mono text-[9px]">{activeDoc?.cand_iden_type}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+          </div>
+
+          {/* VERIFICATION DECISION SECTION */}
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-3 border-b border-gray-100 pb-3 mb-6">
+              <div className="p-2 bg-indigo-50 rounded-lg text-indigo-700">
+                <CheckSquare size={18} />
+              </div>
+              <h2 className="text-base font-bold text-indigo-950">
+                Verification Decision
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              {["Verified", "Partially Verified", "Unable To Verify", "Verification Pending"].map((opt) => (
+                <label
+                  key={opt}
+                  className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition ${
+                    decision === opt
+                      ? "border-indigo-600 bg-indigo-50/40 shadow-sm"
+                      : "border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                    decision === opt ? "border-indigo-800" : "border-gray-300"
+                  }`}>
+                    {decision === opt && <div className="w-2.5 h-2.5 bg-indigo-800 rounded-full" />}
+                  </div>
+                  <span className={`text-sm font-semibold ${decision === opt ? "text-gray-900" : "text-gray-600"}`}>
+                    {opt}
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-xs font-semibold text-gray-700 mb-2">
+                Remarks / Comments
+              </label>
+              <textarea
+                rows="3"
+                value={remarks}
+                onChange={(e) => setRemarks(e.target.value)}
+                placeholder="Enter verification comments or observations regarding identity documents..."
+                className="w-full rounded-xl border border-gray-200 bg-gray-50/40 p-3 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:bg-white resize-none"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="px-5 py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition"
+              >
+                Back to Cases
+              </button>
+              <button
+                type="button"
+                disabled={saving}
+                onClick={async () => {
+                  if (!caseIdParam) return;
+                  try {
+                    setSaving(true);
+                    const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+                    await axios.post(`${API_BASE}/api/superadmin/cases/update-decision`, {
+                      caseId: caseIdParam,
+                      decision,
+                      remarks
+                    });
+                    alert("Identity verification decision saved successfully.");
+                    navigate(-1);
+                  } catch (err) {
+                    console.error("Save decision error:", err);
+                    alert("Failed to save decision: " + (err.response?.data?.message || err.message));
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                className="px-6 py-2.5 text-xs font-semibold text-white bg-[#05058D] hover:bg-blue-800 rounded-xl transition shadow-sm disabled:opacity-50 flex items-center gap-2"
+              >
+                {saving && <Loader2 size={14} className="animate-spin" />}
+                Save Decision
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}

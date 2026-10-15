@@ -261,26 +261,30 @@ function View() {
 
                   {candidateData.identity && candidateData.identity.length > 0 ? (
                     <div className="space-y-5">
-                      {candidateData.identity.map((item, idx) => (
-                        <div key={idx} className="border rounded-xl p-4 shadow-sm flex items-center justify-between">
-                          <div>
-                            <h4 className="font-medium text-[#01026E] mb-1">{item.cand_ident_type || `Identity Document ${idx + 1}`}</h4>
-                            <Label label="ID Number" value={item.cand_ident_number || "N/A"} />
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <span className="bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full flex items-center gap-1">
-                              <CheckCircle size={12} /> Verified
-                            </span>
-                            <div 
-                              onClick={() => setIdentityView(item)}
-                              className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
-                            >
-                              <Eye size={16} />
-                              <span className="text-sm font-medium">View</span>
+                      {candidateData.identity.map((item, idx) => {
+                        const docType = item.cand_iden_type || item.cand_ident_type || `Identity Document ${idx + 1}`;
+                        const docNumber = item.pan_number || item.driving_number || item.voter_number || item.passport_number || item.uan_number || item.cand_ident_number || "N/A";
+                        return (
+                          <div key={idx} className="border border-gray-100 rounded-xl p-4 shadow-sm flex items-center justify-between hover:border-indigo-100 transition">
+                            <div>
+                              <h4 className="font-semibold text-[#01026E] mb-1">{docType}</h4>
+                              <Label label="ID Number" value={docNumber} />
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-3 py-1 rounded-full flex items-center gap-1 font-medium">
+                                <CheckCircle size={12} /> Verified
+                              </span>
+                              <div 
+                                onClick={() => setIdentityView(item)}
+                                className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition font-medium"
+                              >
+                                <Eye size={16} />
+                                <span className="text-sm">View</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <p className="text-gray-500 text-sm">No identity records found.</p>
@@ -290,34 +294,52 @@ function View() {
                 <>
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold text-gray-800">
-                      Identity Details
+                      Identity Details - {identityView.cand_iden_type || identityView.cand_ident_type || "National ID"}
                     </h3>
                     <button 
                       onClick={() => setIdentityView(null)}
-                      className="text-sm text-[#01026E] border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
+                      className="text-sm text-[#01026E] border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50 font-medium transition"
                     >
                       Back to List
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-6">
-                    <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                       <div className="grid grid-cols-2 gap-5">
-                        <Label label="Name" value={`${candidateData.candidate_first_name} ${candidateData.candidate_last_name || ""}`} />
-                        <Label label="Document Type" value={identityView.cand_ident_type || "N/A"} />
-                        <Label label="ID Number" value={identityView.cand_ident_number || "N/A"} />
-                        <Label label="Issue Date" value={identityView.cand_ident_issue_date ? new Date(identityView.cand_ident_issue_date).toLocaleDateString() : "N/A"} />
-                        <Label label="Expiry Date" value={identityView.cand_ident_expiry_date ? new Date(identityView.cand_ident_expiry_date).toLocaleDateString() : "N/A"} />
+                        <Label label="Cardholder Name" value={identityView.cand_full_name || `${candidateData.candidate_first_name} ${candidateData.candidate_last_name || ""}` } />
+                        <Label label="Document Type" value={identityView.cand_iden_type || identityView.cand_ident_type || "National ID"} />
+                        <Label label="ID Number" value={identityView.pan_number || identityView.driving_number || identityView.voter_number || identityView.passport_number || identityView.uan_number || identityView.cand_ident_number || "N/A"} />
+                        <Label label="Father / Guardian Name" value={identityView.cand_father_name || "N/A"} />
+                        <Label label="Date of Birth" value={identityView.cand_dob ? new Date(identityView.cand_dob).toLocaleDateString() : "N/A"} />
+                        <Label label="Gender" value={identityView.cand_gender || "N/A"} />
+                        <Label label="Issue Date" value={(identityView.driv_issue_date || identityView.pass_issue_date || identityView.voter_issue_date || identityView.cand_ident_issue_date) ? new Date(identityView.driv_issue_date || identityView.pass_issue_date || identityView.voter_issue_date || identityView.cand_ident_issue_date).toLocaleDateString() : "N/A"} />
+                        <Label label="Expiry Date" value={(identityView.pass_expiry_date || identityView.driv_expiry_date || identityView.cand_ident_expiry_date) ? new Date(identityView.pass_expiry_date || identityView.driv_expiry_date || identityView.cand_ident_expiry_date).toLocaleDateString() : "N/A"} />
+                        <div className="col-span-2">
+                          <Label label="Address on ID" value={identityView.cand_address || "N/A"} />
+                        </div>
                       </div>
                     </div>
 
-                    <div className="bg-white p-4 rounded-xl shadow border text-center">
-                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
-                      <img
-                        src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
-                        alt="document preview"
-                        className="rounded-lg shadow-sm mx-auto h-64 object-cover"
-                      />
+                    <div className="bg-gradient-to-br from-[#02027A] to-[#1E3A8A] p-6 rounded-xl text-white shadow-md flex flex-col justify-between min-h-[220px]">
+                      <div>
+                        <div className="flex justify-between items-center mb-4">
+                          <span className="text-xs uppercase tracking-wider text-indigo-200 font-semibold">Government of India</span>
+                          <span className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded font-medium">Verified</span>
+                        </div>
+                        <p className="text-xs text-indigo-200">Document Type</p>
+                        <h4 className="text-lg font-bold tracking-wide">{identityView.cand_iden_type || identityView.cand_ident_type || "National ID"}</h4>
+                      </div>
+                      <div className="my-3 py-3 border-y border-white/10">
+                        <p className="text-xs text-indigo-200">ID / Document Number</p>
+                        <p className="text-xl font-mono tracking-widest font-bold text-amber-300">
+                          {identityView.pan_number || identityView.driving_number || identityView.voter_number || identityView.passport_number || identityView.uan_number || identityView.cand_ident_number || "N/A"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-indigo-200">Name</p>
+                        <p className="text-sm font-semibold uppercase">{identityView.cand_full_name || `${candidateData.candidate_first_name} ${candidateData.candidate_last_name || ""}`}</p>
+                      </div>
                     </div>
                   </div>
                 </>

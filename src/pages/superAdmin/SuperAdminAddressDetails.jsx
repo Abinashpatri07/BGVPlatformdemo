@@ -1,47 +1,141 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   MapPin,
   Home,
+  User,
   Eye,
-  Trash2,
-  CloudUpload,
   CheckCircle2,
   FileBadge,
   CheckSquare,
   MessageSquare,
   Mic,
-  ChevronLeft
+  ChevronLeft,
+  Loader2,
+  ShieldCheck
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import axios from "axios";
+
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+const Field = ({ label, value }) => (
+  <div>
+    <p className="text-xs text-gray-500 mb-0.5 font-medium">{label}</p>
+    <p className="text-sm font-semibold text-gray-900">{value || "—"}</p>
+  </div>
+);
 
 function SuperAdminAddressDetails() {
   const [decision, setDecision] = useState("Verified");
-  const [gpsVerified, setGpsVerified] = useState(false);
+  const [remarks, setRemarks] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [caseData, setCaseData] = useState(null);
+  const [candidate, setCandidate] = useState(null);
+  const [records, setRecords] = useState([]);
+
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const caseIdParam = searchParams.get("caseId");
+
+  useEffect(() => {
+    if (!caseIdParam) return;
+    const fetchDetails = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(`${API_BASE}/api/superadmin/cases/details/${caseIdParam}`);
+        if (res.data.success) {
+          setCaseData(res.data.case);
+          setCandidate(res.data.candidate);
+          setRecords(res.data.records || []);
+        }
+      } catch (err) {
+        console.error("Error fetching address case details:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDetails();
+  }, [caseIdParam]);
+
+  const handleSaveDecision = async () => {
+    if (!caseIdParam) return;
+    try {
+      setSaving(true);
+      await axios.post(`${API_BASE}/api/superadmin/cases/update-decision`, {
+        caseId: caseIdParam,
+        decision,
+        remarks
+      });
+      alert("Address verification decision saved successfully!");
+      navigate(-1);
+    } catch (err) {
+      console.error("Save decision error:", err);
+      alert("Failed to save decision: " + (err.response?.data?.message || err.message));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 size={32} className="animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  const addrRecord = records[0] || {};
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto space-y-6 animate-fade-in pb-10 px-4">
-      {/* HEADER SECTION */}
-      <div className="flex items-center gap-4 border-b border-indigo-100 pb-4">
-        <button 
-          onClick={() => navigate(-1)}
-          className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <div className="p-2 bg-indigo-50 rounded-lg text-indigo-700 border border-indigo-100">
-          <MapPin size={24} />
+    <div className="w-full max-w-[1600px] mx-auto space-y-8 animate-fade-in pb-10 px-4 mt-4">
+      {/* Header Profile Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => navigate(-1)}
+              className="p-1 hover:bg-gray-100 rounded-md text-gray-500 transition"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <div className="p-1.5 bg-indigo-50 rounded-full text-indigo-700">
+              <User size={20} />
+            </div>
+            <h2 className="text-xl font-semibold text-indigo-900">
+              {caseData?.caseId || (caseIdParam ? `Case #${caseIdParam}` : "Address Verification")}
+            </h2>
+          </div>
+          {caseData?.vendorName && (
+            <span className="text-xs font-semibold px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+              Assigned Vendor: {caseData.vendorName}
+            </span>
+          )}
         </div>
-        <h1 className="text-2xl font-bold text-indigo-900">
-          Address Details
-        </h1>
+
+        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm flex flex-wrap gap-10 lg:gap-14 items-start ml-2">
+          <Field label="First Name" value={candidate?.firstName} />
+          <Field label="Last Name" value={candidate?.lastName} />
+          <Field label="Phone Number" value={candidate?.phone ? `+91 ${candidate.phone}` : null} />
+          <Field label="Email Id" value={candidate?.email} />
+          <Field label="Function / Dept" value={candidate?.department} />
+          {candidate?.dob && <Field label="Date of Birth" value={new Date(candidate.dob).toLocaleDateString()} />}
+        </div>
       </div>
 
-      <div className="space-y-8 mt-6">
-        {/* Present Address */}
+      <div className="flex items-center gap-3 ml-2">
+        <div className="p-1.5 bg-indigo-50 rounded-full text-indigo-700">
+          <MapPin size={20} />
+        </div>
+        <h2 className="text-xl font-semibold text-indigo-900">
+          Residential Address Verification
+        </h2>
+      </div>
+
+      <div className="space-y-8 ml-2">
+        {/* Present Address Card */}
         <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Left Column: Details */}
             <div>
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-1.5 bg-indigo-50 rounded-full text-indigo-700">
@@ -52,83 +146,81 @@ function SuperAdminAddressDetails() {
                 </h3>
               </div>
 
-              <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+              <div className="grid grid-cols-2 gap-y-5 gap-x-4">
                 <div className="col-span-2">
-                  <p className="text-xs text-gray-500 mb-1">Flat/House</p>
-                  <p className="text-sm font-semibold text-gray-900">Suite 404, Magar Layout, Blankie Road</p>
+                  <Field label="Flat / House / Building" value={addrRecord.cand_curr_house} />
                 </div>
                 <div className="col-span-2">
-                  <p className="text-xs text-gray-500 mb-1">Landmark Specified</p>
-                  <p className="text-sm font-semibold text-gray-900">Opposite Bio-Diversity Park</p>
+                  <Field label="Street / Road" value={addrRecord.cand_curr_street} />
                 </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">City</p>
-                  <p className="text-sm font-semibold text-gray-900">Bangalore</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">PIN Code</p>
-                  <p className="text-sm font-semibold text-gray-900">453218</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">State</p>
-                  <p className="text-sm font-semibold text-gray-900">Karnataka</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Residence Since</p>
-                  <p className="text-sm font-semibold text-gray-900">September 2021<br/><span className="text-xs font-normal text-gray-600">(Approx 5 Yrs)</span></p>
-                </div>
+                <Field label="Landmark" value={addrRecord.cand_curr_landmark} />
+                <Field label="Locality" value={addrRecord.cand_curr_locality} />
+                <Field label="City" value={addrRecord.cand_curr_city} />
+                <Field label="District" value={addrRecord.cand_curr_district} />
+                <Field label="State" value={addrRecord.cand_curr_state} />
+                <Field label="PIN Code" value={addrRecord.cand_curr_pincode} />
+                <Field label="Country" value={addrRecord.cand_curr_country || "India"} />
               </div>
             </div>
 
-            {/* Right Column: Documents */}
+            {/* Evidence & Verification Support */}
             <div>
               <h3 className="text-lg font-bold text-gray-800 mb-6">
-                Upload Verification Evidence
+                Verification Proof & Identity Source
               </h3>
               <div className="space-y-4">
-                {/* Doc 1 - Uploaded */}
-                <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0">
-                    <CheckCircle2 size={22} className="text-emerald-500" />
-                  </div>
-                  <div className="flex-1 flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-lg">
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800">Property Entrance Front Gate</p>
-                      <p className="text-xs text-gray-400">gachibowli_entrance_gps.jpg • 2.4 MB</p>
+                {addrRecord.cand_masked_aadhar && (
+                  <div className="flex items-center gap-4">
+                    <CheckCircle2 size={22} className="text-emerald-500 shrink-0" />
+                    <div className="flex-1 p-3 bg-gray-50 border border-gray-100 rounded-lg">
+                      <p className="text-sm font-semibold text-gray-800">DigiLocker / Aadhaar Source</p>
+                      <p className="text-xs font-mono text-gray-500">Masked Aadhaar: {addrRecord.cand_masked_aadhar}</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <button className="text-gray-400 hover:text-gray-600 transition">
+                  </div>
+                )}
+
+                {addrRecord.cand_photo ? (
+                  <div className="flex items-center gap-4">
+                    <CheckCircle2 size={22} className="text-emerald-500 shrink-0" />
+                    <div className="flex-1 flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-lg">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800">Verified Photo</p>
+                        <p className="text-xs text-gray-400">Captured during verification</p>
+                      </div>
+                      <a 
+                        href={addrRecord.cand_photo.startsWith("http") ? addrRecord.cand_photo : `${API_BASE}/${addrRecord.cand_photo}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-1.5 hover:bg-gray-200 rounded text-gray-600 transition"
+                      >
                         <Eye size={18} />
-                      </button>
-                      <button className="text-red-300 hover:text-red-500 transition">
-                        <Trash2 size={18} />
-                      </button>
+                      </a>
                     </div>
                   </div>
-                </div>
-                
-                {/* Doc 2 */}
-                <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0 p-1.5 bg-indigo-50 text-indigo-400 rounded-md">
-                    <FileBadge size={16} />
-                  </div>
-                  <div className="flex-1 border border-indigo-100 border-dashed rounded-lg p-3 bg-white flex items-center justify-between hover:bg-indigo-50/30 transition cursor-pointer group">
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800">Candidate Standing Outside Property</p>
-                      <p className="text-xs text-gray-400">Supported formats: CSV, XLSX</p>
+                ) : (
+                  <div className="flex items-center gap-4">
+                    <div className="flex-shrink-0 p-1.5 bg-indigo-50 text-indigo-400 rounded-md">
+                      <FileBadge size={16} />
                     </div>
-                    <CloudUpload size={22} className="text-indigo-600 group-hover:scale-110 transition-transform" />
+                    <div className="flex-1 border border-indigo-100 border-dashed rounded-lg p-3 bg-white">
+                      <p className="text-sm font-semibold text-gray-800">Physical Evidence</p>
+                      <p className="text-xs text-gray-400">Verified electronically via candidate portal</p>
+                    </div>
                   </div>
+                )}
+
+                <div className="p-3 bg-indigo-50/50 rounded-lg border border-indigo-100 text-xs text-indigo-900 flex items-center gap-2">
+                  <ShieldCheck size={16} className="text-indigo-600 shrink-0" />
+                  <span>Address verified via DigiLocker / Aadhaar e-KYC service.</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Permanent Address */}
+        {/* Permanent Address Card */}
         <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Left Column: Details */}
             <div>
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-1.5 bg-indigo-50 rounded-full text-indigo-700">
@@ -136,83 +228,44 @@ function SuperAdminAddressDetails() {
                 </div>
                 <h3 className="text-lg font-bold text-indigo-900">
                   Permanent Address
+                  {addrRecord.is_add_same === 1 && (
+                    <span className="ml-2 text-xs font-normal text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                      Same as present address
+                    </span>
+                  )}
                 </h3>
               </div>
 
-              <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+              <div className="grid grid-cols-2 gap-y-5 gap-x-4">
                 <div className="col-span-2">
-                  <p className="text-xs text-gray-500 mb-1">Flat/House</p>
-                  <p className="text-sm font-semibold text-gray-900">Flat No. 12, Shanti Kunj Apartments</p>
+                  <Field label="Flat / House / Building" value={addrRecord.cand_perm_house || (addrRecord.is_add_same ? addrRecord.cand_curr_house : null)} />
                 </div>
                 <div className="col-span-2">
-                  <p className="text-xs text-gray-500 mb-1">Landmark Specified</p>
-                  <p className="text-sm font-semibold text-gray-900">Opposite Bio-Diversity Park</p>
+                  <Field label="Street / Road" value={addrRecord.cand_perm_street || (addrRecord.is_add_same ? addrRecord.cand_curr_street : null)} />
                 </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">City</p>
-                  <p className="text-sm font-semibold text-gray-900">Bhubaneswar</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">PIN Code</p>
-                  <p className="text-sm font-semibold text-gray-900">453218</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">State</p>
-                  <p className="text-sm font-semibold text-gray-900">Odisha</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Residence Since</p>
-                  <p className="text-sm font-semibold text-gray-900">Life Long Ancestral<br/>Residence</p>
-                </div>
+                <Field label="Landmark" value={addrRecord.cand_perm_landmark || (addrRecord.is_add_same ? addrRecord.cand_curr_landmark : null)} />
+                <Field label="Locality" value={addrRecord.cand_perm_locality || (addrRecord.is_add_same ? addrRecord.cand_curr_locality : null)} />
+                <Field label="City" value={addrRecord.cand_perm_city || (addrRecord.is_add_same ? addrRecord.cand_curr_city : null)} />
+                <Field label="District" value={addrRecord.cand_perm_district || (addrRecord.is_add_same ? addrRecord.cand_curr_district : null)} />
+                <Field label="State" value={addrRecord.cand_perm_state || (addrRecord.is_add_same ? addrRecord.cand_curr_state : null)} />
+                <Field label="PIN Code" value={addrRecord.cand_perm_pincode || (addrRecord.is_add_same ? addrRecord.cand_curr_pincode : null)} />
+                <Field label="Country" value={addrRecord.cand_perm_country || "India"} />
               </div>
             </div>
 
-            {/* Right Column: Documents */}
-            <div>
-              <h3 className="text-lg font-bold text-gray-800 mb-6">
-                Upload Verification Evidence
-              </h3>
-              <div className="space-y-4">
-                {/* Doc 1 - Uploaded */}
-                <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0">
-                    <CheckCircle2 size={22} className="text-emerald-500" />
-                  </div>
-                  <div className="flex-1 flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-lg">
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800">Property Entrance Front Gate</p>
-                      <p className="text-xs text-gray-400">gachibowli_entrance_gps.jpg • 2.4 MB</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <button className="text-gray-400 hover:text-gray-600 transition">
-                        <Eye size={18} />
-                      </button>
-                      <button className="text-red-300 hover:text-red-500 transition">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Doc 2 */}
-                <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0 p-1.5 bg-indigo-50 text-indigo-400 rounded-md">
-                    <FileBadge size={16} />
-                  </div>
-                  <div className="flex-1 border border-indigo-100 border-dashed rounded-lg p-3 bg-white flex items-center justify-between hover:bg-indigo-50/30 transition cursor-pointer group">
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800">Candidate Standing Outside Property</p>
-                      <p className="text-xs text-gray-400">Supported formats: CSV, XLSX</p>
-                    </div>
-                    <CloudUpload size={22} className="text-indigo-600 group-hover:scale-110 transition-transform" />
-                  </div>
-                </div>
-              </div>
+            <div className="flex flex-col justify-center items-center p-6 bg-slate-50 rounded-xl border border-slate-200 text-center">
+              <MapPin size={36} className="text-indigo-600 mb-2 opacity-80" />
+              <p className="text-sm font-semibold text-gray-800">
+                {addrRecord.is_add_same ? "Permanent Address Identical to Present" : "Separate Permanent Residence Registered"}
+              </p>
+              <p className="text-xs text-gray-500 max-w-xs mt-1">
+                Candidate confirmed residency records during onboarding submission.
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Verification Decision */}
+        {/* Verification Decision Section */}
         <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
           <div className="flex items-center gap-3 border-b border-gray-100 pb-4 mb-6">
             <div className="p-1.5 bg-indigo-50 rounded text-indigo-700">
@@ -222,16 +275,12 @@ function SuperAdminAddressDetails() {
               Verification Decision
             </h2>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {[
               "Verified",
               "Partially Verified",
               "Unable To Verify",
-              "Candidate Shifted",
-              "Incorrect Address",
-              "Address Not Found",
-              "Duplicate Case",
               "Verification Pending"
             ].map((opt) => (
               <label
@@ -243,7 +292,7 @@ function SuperAdminAddressDetails() {
                 }`}
               >
                 <div
-                  className={`w-5 h-5 flex-shrink-0 rounded-full border-2 flex items-center justify-center ${
+                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                     decision === opt
                       ? "border-indigo-800"
                       : "border-gray-300"
@@ -264,62 +313,43 @@ function SuperAdminAddressDetails() {
             ))}
           </div>
 
-          <div className="flex items-center justify-between pt-6 border-t border-gray-100">
-            <div className="flex items-center gap-12">
-              <div>
-                <p className="text-xs text-gray-500 mb-1">Verification Date & Time</p>
-                <p className="text-sm font-semibold text-gray-900">12 Oct 2023, 14:30 IST</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500 mb-1">Verified By</p>
-                <p className="text-sm font-semibold text-gray-900">Amit Kumar (Field Exec)</p>
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-end">
-              <span className="text-xs text-gray-500 mb-2 font-medium">GPS Verified</span>
-              <button
-                type="button"
-                onClick={() => setGpsVerified(!gpsVerified)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  gpsVerified ? "bg-indigo-600" : "bg-gray-300"
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    gpsVerified ? "translate-x-6" : "translate-x-1"
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Verification Remarks */}
-        <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
-          <div className="flex items-center gap-3 border-b border-gray-100 pb-4 mb-6">
-            <div className="p-1.5 bg-indigo-50 rounded text-indigo-700">
-              <MessageSquare size={20} />
-            </div>
-            <h2 className="text-lg font-bold text-indigo-900">
+          {/* Remarks */}
+          <div className="pt-4 border-t border-gray-100">
+            <label className="block text-xs font-semibold text-gray-700 mb-2">
               Verification Remarks
-            </h2>
-          </div>
-          
-          <div className="relative">
-            <textarea
-              rows="4"
-              className="w-full rounded-lg border border-indigo-100 bg-indigo-50/30 p-4 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 resize-none"
-              placeholder="Enter remarks..."
-            ></textarea>
-            <div className="absolute bottom-4 right-4 text-gray-400">
-              <Mic size={18} />
+            </label>
+            <div className="relative">
+              <textarea
+                rows="3"
+                value={remarks}
+                onChange={(e) => setRemarks(e.target.value)}
+                className="w-full rounded-lg border border-gray-200 bg-gray-50/50 p-4 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white resize-none"
+                placeholder="Enter address verification remarks..."
+              />
+              <div className="absolute bottom-4 right-4 text-gray-400">
+                <Mic size={18} />
+              </div>
             </div>
           </div>
-          
-          <div className="flex justify-between items-center mt-2 px-1">
-            <span className="text-xs text-gray-500">Max 1000 Characters</span>
-            <span className="text-xs text-gray-500">0 / 1000</span>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="px-5 py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition"
+            >
+              Back to Cases
+            </button>
+            <button
+              type="button"
+              disabled={saving}
+              onClick={handleSaveDecision}
+              className="px-6 py-2.5 text-xs font-semibold text-white bg-[#05058D] hover:bg-blue-800 rounded-xl transition shadow-sm disabled:opacity-50 flex items-center gap-2"
+            >
+              {saving && <Loader2 size={14} className="animate-spin" />}
+              Save Decision
+            </button>
           </div>
         </div>
       </div>
