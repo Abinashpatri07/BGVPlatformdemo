@@ -1,14 +1,23 @@
 import { X } from "lucide-react";
+import { useState } from "react";
 
-export default function ConsentModal({ onClose }) {
+export default function ConsentModal({ onClose, onAgree }) {
+  const [modalChecked, setModalChecked] = useState(false);
+
+  const handleAgree = () => {
+    if (!modalChecked) return;
+    if (onAgree) onAgree();
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl">
-        
+
         {/* Header */}
         <div className="px-6 py-4 border-b flex justify-between items-center bg-gray-50 rounded-t-2xl">
           <h2 className="text-xl font-bold text-gray-800">Background Verification Consent</h2>
-          <button 
+          <button
             onClick={onClose}
             className="text-gray-500 hover:bg-gray-200 p-2 rounded-full transition"
           >
@@ -42,14 +51,41 @@ export default function ConsentModal({ onClose }) {
           </p>
         </div>
 
-        {/* Footer */}
-        <div className="px-6 py-4 border-t flex justify-end bg-gray-50 rounded-b-2xl">
-          <button 
-            onClick={onClose}
-            className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-          >
-            Close
-          </button>
+        {/* Checkbox + Footer */}
+        <div className="px-6 py-4 border-t bg-gray-50 rounded-b-2xl space-y-3">
+          {/* Checkbox */}
+          <label className="flex items-start gap-3 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={modalChecked}
+              onChange={(e) => setModalChecked(e.target.checked)}
+              className="mt-0.5 w-4 h-4 accent-indigo-600 shrink-0"
+            />
+            <span className="text-sm text-gray-700 leading-snug">
+              I have read and understood the above consent form and agree to authorize background verification of my information.
+            </span>
+          </label>
+
+          {/* Buttons */}
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleAgree}
+              disabled={!modalChecked}
+              className={`px-5 py-2 text-sm font-medium text-white rounded-lg transition ${
+                modalChecked
+                  ? "bg-indigo-600 hover:bg-indigo-700 cursor-pointer"
+                  : "bg-gray-400 cursor-not-allowed opacity-70"
+              }`}
+            >
+              I Agree & Close
+            </button>
+          </div>
         </div>
 
       </div>

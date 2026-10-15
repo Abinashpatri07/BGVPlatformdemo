@@ -3,13 +3,28 @@ import axios from "axios";
 import { ArrowRight, Pill, CheckCircle, AlertCircle } from "lucide-react";
 
 function DrugTestStep({ onNext }) {
-  const [step, setStep] = useState("question");
-  const [testDate, setTestDate] = useState("");
-  const [details, setDetails] = useState("");
-  const [file, setFile] = useState(null);
+  const [step, setStep] = useState(() => {
+    return sessionStorage.getItem("candidate_drug_step") || "question";
+  });
+  const [testDate, setTestDate] = useState(() => {
+    return sessionStorage.getItem("candidate_drug_date") || "";
+  });
+  const [details, setDetails] = useState(() => {
+    return sessionStorage.getItem("candidate_drug_details") || "";
+  });
+  const [existingReportUrl, setExistingReportUrl] = useState(() => {
+    return sessionStorage.getItem("candidate_drug_reportUrl") || null;
+  });
+  const [file, setFile] = useState(() => {
+    const savedName = sessionStorage.getItem("candidate_drug_fileName");
+    return savedName ? { name: savedName } : null;
+  });
+  const [loadingExisting, setLoadingExisting] = useState(() => {
+    return !sessionStorage.getItem("candidate_drug_step");
+  });
+
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [existingReportUrl, setExistingReportUrl] = useState(null);
 
   const fileRef = useRef(null);
 
@@ -24,19 +39,29 @@ function DrugTestStep({ onNext }) {
           const drug = response.data.drugTest;
           if (drug.cand_drug_test === "Yes") {
             setStep("input");
+            sessionStorage.setItem("candidate_drug_step", "input");
             setDetails(drug.cand_drug_remarks || "");
+            sessionStorage.setItem("candidate_drug_details", drug.cand_drug_remarks || "");
             if (drug.cand_drug_date) {
-              setTestDate(new Date(drug.cand_drug_date).toISOString().split('T')[0]);
+              const formattedDate = new Date(drug.cand_drug_date).toISOString().split('T')[0];
+              setTestDate(formattedDate);
+              sessionStorage.setItem("candidate_drug_date", formattedDate);
             }
             if (drug.cand_drug_report) {
               setExistingReportUrl(drug.cand_drug_report);
-              // Mock a file object so the UI shows it as uploaded
-              setFile({ name: "existing_drug_document" });
+              sessionStorage.setItem("candidate_drug_reportUrl", drug.cand_drug_report);
+              setFile({ name: "Drug_Test_Report.pdf" });
+              sessionStorage.setItem("candidate_drug_fileName", "Drug_Test_Report.pdf");
             }
+          } else if (drug.cand_drug_test === "No") {
+            setStep("skipped");
+            sessionStorage.setItem("candidate_drug_step", "skipped");
           }
         }
       } catch (err) {
         console.error("Error fetching drug records:", err);
+      } finally {
+        setLoadingExisting(false);
       }
     };
     fetchExisting();
@@ -53,6 +78,8 @@ function DrugTestStep({ onNext }) {
         has_taken: false,
         drugStatus: "No" 
       });
+      setStep("skipped");
+      sessionStorage.setItem("candidate_drug_step", "skipped");
       if (onNext) onNext();
     } catch (err) {
       console.error(err);
@@ -77,6 +104,7 @@ function DrugTestStep({ onNext }) {
     }
 
     setFile(selectedFile);
+    sessionStorage.setItem("candidate_drug_fileName", selectedFile.name);
     setError(false);
   };
 
@@ -97,14 +125,22 @@ function DrugTestStep({ onNext }) {
       formData.append("drugDate", testDate);
       formData.append("remarks", details);
       
-      if (file.name === "existing_drug_document" && existingReportUrl) {
-        formData.append("reportUrl", existingReportUrl);
+      if (file.name === "existing_drug_document" || file.name === "Drug_Test_Report.pdf") {
+        if (existingReportUrl) {
+          formData.append("reportUrl", existingReportUrl);
+        }
       } else {
         formData.append("reportFile", file);
       }
 
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       await axios.post(`${API_BASE}/api/candidate/submit/drug`, formData);
+
+      sessionStorage.setItem("candidate_drug_step", "input");
+      sessionStorage.setItem("candidate_drug_date", testDate);
+      sessionStorage.setItem("candidate_drug_details", details);
+      sessionStorage.setItem("candidate_drug_fileName", file.name || "Drug_Test_Report.pdf");
+
       if (onNext) onNext();
     } catch (err) {
       console.error(err);
@@ -122,42 +158,81 @@ function DrugTestStep({ onNext }) {
         </h2>
       </div>
 
-      {step === "question" && (
-        <div className="flex-1 flex flex-col items-center justify-center py-6">
-          <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-5 border-4 border-blue-100/50 shadow-inner">
-             <Pill className="w-7 h-7 text-blue-600" />
-          </div>
-
-          <h1 className="text-2xl font-semibold text-[#05058D] mb-2 text-center">
-            Have You Taken The Drug Test?
-          </h1>
-          <p className="text-gray-500 mb-8 text-center max-w-md text-sm leading-relaxed">
-            This Information Is Required For Compliance Purposes. All Information Will Be Kept Confidential. Providing it helps create a much stronger verification profile.
-          </p>
-
-          <div className="flex gap-4 w-full justify-center">
-            <button
-              onClick={() => setStep("input")}
-              className="flex items-center justify-center gap-2 w-36 py-2.5 bg-[#05058D] text-white rounded-xl hover:bg-blue-800 hover:shadow-lg hover:shadow-blue-900/20 hover:-translate-y-1 transition-all duration-300 font-medium text-sm"
-            >
-              Yes, I have
-            </button>
-            <button
-              onClick={handleSkip}
-              disabled={loading}
-              className="flex items-center justify-center gap-2 w-36 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:-translate-y-1 transition-all duration-300 font-medium text-sm disabled:opacity-50"
-            >
-              {loading ? "Saving..." : <>No, skip <ArrowRight className="w-4 h-4 ml-1" /></>}
-            </button>
-          </div>
+      {loadingExisting ? (
+        <div className="flex-1 flex flex-col items-center justify-center py-12">
+          <Pill className="w-8 h-8 animate-spin text-blue-600 mb-2" />
+          <p className="text-sm text-gray-500">Loading drug test details...</p>
         </div>
-      )}
+      ) : (
+        <>
+          {step === "question" && (
+            <div className="flex-1 flex flex-col items-center justify-center py-6">
+              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-5 border-4 border-blue-100/50 shadow-inner">
+                 <Pill className="w-7 h-7 text-blue-600" />
+              </div>
 
-      {step === "input" && (
-        <div className="mt-8 flex-1">
-           <p className="text-gray-600 mb-6 text-sm">
-             Please enter your drug test details below.
-           </p>
+              <h1 className="text-2xl font-semibold text-[#05058D] mb-2 text-center">
+                Have You Taken The Drug Test?
+              </h1>
+              <p className="text-gray-500 mb-8 text-center max-w-md text-sm leading-relaxed">
+                This Information Is Required For Compliance Purposes. All Information Will Be Kept Confidential. Providing it helps create a much stronger verification profile.
+              </p>
+
+              <div className="flex gap-4 w-full justify-center">
+                <button
+                  onClick={() => {
+                    setStep("input");
+                    sessionStorage.setItem("candidate_drug_step", "input");
+                  }}
+                  className="flex items-center justify-center gap-2 w-36 py-2.5 bg-[#05058D] text-white rounded-xl hover:bg-blue-800 hover:shadow-lg hover:shadow-blue-900/20 hover:-translate-y-1 transition-all duration-300 font-medium text-sm"
+                >
+                  Yes, I have
+                </button>
+                <button
+                  onClick={handleSkip}
+                  disabled={loading}
+                  className="flex items-center justify-center gap-2 w-36 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:-translate-y-1 transition-all duration-300 font-medium text-sm disabled:opacity-50"
+                >
+                  {loading ? "Saving..." : <>No, skip <ArrowRight className="w-4 h-4 ml-1" /></>}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === "skipped" && (
+            <div className="flex-1 flex flex-col items-center justify-center py-8">
+              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-200">
+                <Pill className="w-7 h-7 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">No Drug Test Taken</h3>
+              <p className="text-gray-500 mb-6 text-sm text-center max-w-md">
+                You previously indicated that you have not taken a drug test. If you have taken a drug test and wish to submit the report now, click below.
+              </p>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => {
+                    setStep("input");
+                    sessionStorage.setItem("candidate_drug_step", "input");
+                  }}
+                  className="px-6 py-2.5 bg-[#05058D] text-white rounded-xl text-sm font-medium hover:bg-blue-800 transition shadow-sm"
+                >
+                  Provide Test Details
+                </button>
+                <button
+                  onClick={onNext}
+                  className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition"
+                >
+                  Continue →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === "input" && (
+            <div className="mt-8 flex-1">
+               <p className="text-gray-600 mb-6 text-sm">
+                 Please enter your drug test details below.
+               </p>
 
            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
              <div>
@@ -279,6 +354,8 @@ function DrugTestStep({ onNext }) {
              </button>
            </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

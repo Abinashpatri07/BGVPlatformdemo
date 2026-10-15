@@ -1,10 +1,11 @@
 import React from "react";
 import {
-  Upload,
+  RotateCcw,
   AlertCircle,
   ChevronDown,
   ChevronUp,
   FileText,
+  Upload,
 } from "lucide-react";
 
 function Input({ label, value, type = "text", onChange }) {
@@ -50,7 +51,10 @@ function EducationCard({
           )}
         </div>
 
-        <button onClick={onToggle} className="p-2 text-[#05058D] hover:bg-blue-50 rounded-full transition">
+        <button
+          onClick={onToggle}
+          className="p-2 text-[#05058D] hover:bg-blue-50 rounded-full transition"
+        >
           {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
         </button>
       </div>
@@ -109,22 +113,32 @@ function EducationCard({
                   {item?.fileName || "Existing Certificate"}
                 </span>
                 {item?.size && (
-                  <span className="text-[10px] text-gray-400 ml-1">{item.size} MB</span>
+                  <span className="text-[10px] text-gray-400 ml-1">
+                    {item.size} MB
+                  </span>
                 )}
+                {/* ── Reload / Re-upload icon (RotateCcw) ── */}
                 <button
-                  onClick={(e) => { e.stopPropagation(); onOpenFile(); }}
-                  title="Re-upload"
-                  className="ml-1 text-blue-500 hover:text-blue-700 transition"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenFile();
+                  }}
+                  title="Re-upload certificate"
+                  className="ml-1 text-[#05058D] hover:text-blue-800 transition"
                 >
-                  <Upload size={13} />
+                  <RotateCcw size={13} />
                 </button>
               </div>
             ) : (
               /* No file — dashed upload zone */
               <label className="flex flex-col items-center justify-center gap-1 border-2 border-dashed border-gray-300 rounded-lg py-5 cursor-pointer hover:border-[#05058D] hover:bg-blue-50/40 transition">
                 <Upload size={20} className="text-gray-400" />
-                <span className="text-xs text-gray-500 font-medium">Click to upload certificate</span>
-                <span className="text-[10px] text-gray-400">PDF, JPG, PNG — Max 5 MB</span>
+                <span className="text-xs text-gray-500 font-medium">
+                  Click to upload certificate
+                </span>
+                <span className="text-[10px] text-gray-400">
+                  PDF, JPG, PNG — Max 5 MB
+                </span>
                 <input
                   type="file"
                   className="hidden"

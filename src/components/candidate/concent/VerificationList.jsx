@@ -41,8 +41,26 @@ const verificationItems = [
   },
 ];
 
-export default function VerificationList() {
+export default function VerificationList({ onConsentRead }) {
   const [showConsentModal, setShowConsentModal] = useState(false);
+
+  // sessionStorage se read karo taaki wapas aane par bhi yaad rahe
+  const [consentRead, setConsentRead] = useState(() => {
+    return sessionStorage.getItem("candidate_consentRead") === "true";
+  });
+
+  // Parent ko bhi initial value pass karo agar already read tha
+  useState(() => {
+    if (sessionStorage.getItem("candidate_consentRead") === "true" && onConsentRead) {
+      onConsentRead(true);
+    }
+  });
+
+  const handleAgree = () => {
+    setConsentRead(true);
+    sessionStorage.setItem("candidate_consentRead", "true");
+    if (onConsentRead) onConsentRead(true);
+  };
 
   return (
     <div className="mt-5 space-y-4 max-w-lg mx-auto">
@@ -72,19 +90,29 @@ export default function VerificationList() {
 
       {/* CONSENT FORM ROW */}
       <div className="flex items-center justify-between border border-gray-200 rounded-lg px-3 py-1.5 mt-2">
-        <span className="text-[13px] text-gray-700">Consent form</span>
-        <button 
+        <div className="flex items-center gap-2">
+          <span className="text-[13px] text-gray-700">Consent form</span>
+          {consentRead && (
+            <span className="text-[11px] text-emerald-600 font-medium flex items-center gap-1">
+              ✓ Read & Agreed
+            </span>
+          )}
+        </div>
+        <button
           onClick={() => setShowConsentModal(true)}
           className="text-indigo-600 text-[13px] font-medium hover:underline"
         >
-          View
+          {consentRead ? "View Again" : "View"}
         </button>
       </div>
 
       {showConsentModal && (
-        <ConsentModal onClose={() => setShowConsentModal(false)} />
+        <ConsentModal
+          onClose={() => setShowConsentModal(false)}
+          onAgree={handleAgree}
+        />
       )}
 
     </div>
   );
-}
+}

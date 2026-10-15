@@ -55,6 +55,33 @@ function EmploymentCard({ employments, onAddNew, onFinalSubmit, onEdit }) {
                 Employee ID: <span className="font-medium text-gray-700">{data.employeeId}</span>
               </p>
             )}
+
+            <div className="flex flex-wrap items-center gap-2 mt-3 pt-2.5 border-t border-gray-100">
+              <span className="text-xs font-medium text-gray-500">Documents:</span>
+              {data.isInternship ? (
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                  ✓ Internship Certificate Attached
+                </span>
+              ) : (
+                <>
+                  <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${
+                    data.joiningLetterFile ? "text-emerald-700 bg-emerald-50 border-emerald-200" : "text-amber-700 bg-amber-50 border-amber-200"
+                  }`}>
+                    {data.joiningLetterFile ? "✓" : "!"} Joining Letter
+                  </span>
+                  <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${
+                    data.relievingLetterFile ? "text-emerald-700 bg-emerald-50 border-emerald-200" : "text-amber-700 bg-amber-50 border-amber-200"
+                  }`}>
+                    {data.relievingLetterFile ? "✓" : "!"} Relieving Letter
+                  </span>
+                  <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${
+                    data.serviceLetterFile ? "text-emerald-700 bg-emerald-50 border-emerald-200" : "text-amber-700 bg-amber-50 border-amber-200"
+                  }`}>
+                    {data.serviceLetterFile ? "✓" : "!"} Service Letter
+                  </span>
+                </>
+              )}
+            </div>
           </div>
         ))}
       </div>

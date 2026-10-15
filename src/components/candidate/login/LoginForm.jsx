@@ -1,237 +1,257 @@
-// import { useState } from "react";
-// import { useNavigate } from "react-router-dom";
-
-// export default function LoginForm() {
-//   const navigate = useNavigate();
-
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-
-//   const handleLogin = () => {
-//     // ✅ Dummy credentials
-//     const dummyEmail = "ramesh@gmail.com";
-//     const dummyPassword = "123456";
-
-//     if (email === dummyEmail && password === dummyPassword) {
-//       // store login flag
-//       localStorage.setItem("isLoggedIn", "true");
-
-//       // redirect
-//       navigate("/verification");
-//     } else {
-//       alert("Invalid email or password");
-//     }
-//   };
-
-//   return (
-//     <div className="relative z-10 w-full max-w-sm px-8">
-
-//       {/* Heading */}
-//       <h1 className="text-4xl font-black text-center tracking-widest uppercase text-gray-900 mb-1">
-//         Welcome
-//       </h1>
-//       <p className="text-center text-sm text-gray-500 mb-8">
-//         Candidate login Portal
-//       </p>
-
-//       {/* Email */}
-//       <div className="mb-4">
-//         <label className="block text-sm font-medium text-gray-700 mb-1">
-//           Email
-//         </label>
-//         <input
-//           type="email"
-//           placeholder="Enter your email"
-//           value={email}
-//           onChange={(e) => setEmail(e.target.value)}
-//           className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
-//         />
-//       </div>
-
-//       {/* Password */}
-//       <div className="mb-3">
-//         <label className="block text-sm font-medium text-gray-700 mb-1">
-//           Password
-//         </label>
-//         <input
-//           type="password"
-//           placeholder="••••••••••"
-//           value={password}
-//           onChange={(e) => setPassword(e.target.value)}
-//           className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
-//         />
-//       </div>
-
-//       {/* Remember me + Forgot password */}
-//       <div className="flex items-center justify-between mb-6">
-//         <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-//           <input
-//             type="checkbox"
-//             className="w-3.5 h-3.5 rounded border-gray-300 accent-indigo-500"
-//           />
-//           Remember me
-//         </label>
-
-//         <button
-//           type="button"
-//           onClick={() => navigate("/forgot-password")}
-//           className="text-sm text-gray-500 hover:text-indigo-600 transition-colors"
-//         >
-//           Forgot password
-//         </button>
-//       </div>
-
-//       {/* Login button */}
-//       <button
-//         onClick={handleLogin}
-//         className="w-full bg-indigo-500 hover:bg-indigo-600 active:scale-[0.98] text-white text-sm font-medium py-3 rounded-lg transition-all"
-//       >
-//         Log in
-//       </button>
-
-//       {/* Sign up link */}
-//       <p className="text-center text-sm text-gray-500 mt-10">
-//         Don't have an account?{" "}
-//         <span className="text-indigo-500 hover:underline cursor-pointer">
-//           Sign up to free!
-//         </span>
-//       </p>
-//     </div>
-//   );
-// }
-
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
+/* ── LOGIN POPUP ─────────────────────────────────────────── */
+function LoginPopup({ type, title, message, onClose }) {
+  const isSuccess = type === "success";
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (onClose) onClose();
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  return (
+    <div className="fixed top-6 right-6 z-[9999] animate-[fadeIn_0.3s_ease-out]">
+      <div className={`flex items-center gap-4 px-6 py-4 rounded-xl shadow-lg border-l-4 ${
+        isSuccess ? "bg-green-50 border-green-500 text-green-700" : "bg-red-50 border-red-500 text-red-700"
+      }`}>
+        {isSuccess ? (
+          <svg className="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        ) : (
+          <svg className="w-6 h-6 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        )}
+        <div className="flex flex-col">
+          <span className="font-bold">{title || (isSuccess ? "Success!" : "Failed")}</span>
+          <span className="text-sm">{message}</span>
+        </div>
+        {!isSuccess && (
+          <button onClick={onClose} className="ml-4 text-gray-400 hover:text-gray-600 transition">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── CANDIDATE LOGIN FORM ────────────────────────────────── */
 export default function LoginForm() {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail]               = useState("");
+  const [password, setPassword]         = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [otp, setOtp]                   = useState("");
+  const [step, setStep]                 = useState(1); // 1 = Login, 2 = OTP
+  const [popup, setPopup]               = useState(null); // { type, title, message }
+  const [isLoading, setIsLoading]       = useState(false);
 
+  useEffect(() => {
+    if (location.state?.message) {
+      setPopup({ type: "success", title: "Logged Out", message: location.state.message });
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
+
+  /* ── Step 1: Email + Password → Send OTP ── */
   const handleLogin = async () => {
-    setError("");
     if (!email || !password) {
-      setError("Please enter email and password.");
+      setPopup({ type: "error", message: "Please enter email and password." });
       return;
     }
 
-    setLoading(true);
+    setIsLoading(true);
     try {
       const res = await axios.post(`${API_BASE}/api/candidate/auth/login`, { email, password });
 
+      if (res.data.success && res.data.otpSent) {
+        setPopup({ type: "success", title: "OTP Sent!", message: res.data.message });
+        setStep(2); // Move to OTP step
+      }
+    } catch (err) {
+      setPopup({
+        type: "error",
+        title: "Login Failed",
+        message: err.response?.data?.message || "Invalid email or password.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /* ── Step 2: Verify OTP → Store token + Navigate ── */
+  const handleVerifyOtp = async () => {
+    if (!otp) {
+      setPopup({ type: "error", title: "Verification Failed", message: "Please enter the OTP." });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await axios.post(`${API_BASE}/api/candidate/auth/verify-otp`, { email, otp });
+
       if (res.data.success) {
+        localStorage.clear();
         localStorage.setItem("candidateToken", res.data.token);
         localStorage.setItem("role", "candidate");
         localStorage.setItem("user", JSON.stringify(res.data.user));
-        navigate("/verification");
+
+        setPopup({ type: "success", title: "Login Successful!", message: `Welcome back, ${res.data.user.name}!` });
+        setTimeout(() => navigate("/verification"), 1500);
       }
     } catch (err) {
-      const msg = err.response?.data?.message || "Login failed. Please try again.";
-      setError(msg);
+      const errorMsg = err.response?.data?.message || "Invalid or expired OTP.";
+      setPopup({ type: "error", title: "Verification Failed", message: errorMsg });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter") handleLogin();
+    if (e.key === "Enter") step === 1 ? handleLogin() : handleVerifyOtp();
   };
 
   return (
     <div className="relative z-10 w-full max-w-sm px-8">
 
+      {/* POPUP */}
+      {popup && (
+        <LoginPopup
+          type={popup.type}
+          title={popup.title}
+          message={popup.message}
+          onClose={() => setPopup(null)}
+        />
+      )}
+
       <h1 className="text-4xl font-black text-center tracking-widest uppercase text-gray-900 mb-1">
         Welcome
       </h1>
       <p className="text-center text-sm text-gray-500 mb-8">
-        Candidate login Portal
+        Candidate Login Portal
       </p>
 
-      {/* Error Message */}
-      {error && (
-        <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-md">
-          {error}
-        </div>
+      {step === 1 ? (
+        <>
+          {/* Email */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
+            />
+          </div>
+
+          {/* Password */}
+          <div className="mb-3 relative">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                onCopy={(e) => e.preventDefault()}
+                onPaste={(e) => e.preventDefault()}
+                onCut={(e) => e.preventDefault()}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="w-full border border-gray-300 rounded-md px-4 py-2.5 pr-10 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Remember + Forgot */}
+          <div className="flex justify-between items-center mb-6">
+            <label className="flex items-center gap-2 text-sm text-gray-600">
+              <input type="checkbox" />
+              Remember me
+            </label>
+            <button
+              onClick={() => navigate("/forgot-password")}
+              className="text-sm text-gray-500 hover:text-indigo-600"
+            >
+              Forgot password
+            </button>
+          </div>
+
+          {/* Login Button */}
+          <button
+            onClick={handleLogin}
+            disabled={isLoading}
+            className="w-full bg-indigo-500 hover:bg-indigo-600 transition-all duration-200 text-white py-3 rounded-lg font-medium disabled:opacity-50"
+          >
+            {isLoading ? "Checking..." : "Log in"}
+          </button>
+
+          <p className="text-center text-sm text-gray-500 mt-10">
+            Don't have an account?{" "}
+            <span className="text-indigo-500 cursor-pointer hover:underline">Sign up</span>
+          </p>
+        </>
+      ) : (
+        <>
+          {/* OTP Step */}
+          <p className="text-center text-sm text-gray-500 mb-6">
+            OTP sent to <span className="font-semibold text-gray-700">{email}</span>
+          </p>
+
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
+              Enter the OTP sent to your email
+            </label>
+            <input
+              type="text"
+              placeholder="6-digit OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="w-full border rounded-md px-4 py-2.5 text-center tracking-widest text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              maxLength={6}
+              autoFocus
+            />
+          </div>
+
+          <button
+            onClick={handleVerifyOtp}
+            disabled={isLoading}
+            className="w-full bg-indigo-500 hover:bg-indigo-600 transition-all duration-200 text-white py-3 rounded-lg font-medium mb-3 disabled:opacity-50"
+          >
+            {isLoading ? "Verifying..." : "Verify OTP"}
+          </button>
+
+          <button
+            onClick={() => { setStep(1); setOtp(""); }}
+            className="w-full bg-gray-100 hover:bg-gray-200 transition-all duration-200 text-gray-700 py-3 rounded-lg font-medium text-sm"
+          >
+            Back to Login
+          </button>
+        </>
       )}
 
-      {/* Email */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Email
-        </label>
-        <input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="w-full border border-gray-300 rounded-md px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
-        />
-      </div>
-
-      {/* Password */}
-      <div className="mb-3 relative">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Password
-        </label>
-        <div className="relative">
-          <input
-            type={showPassword ? "text" : "password"}
-            onCopy={(e) => e.preventDefault()}
-            onPaste={(e) => e.preventDefault()}
-            onCut={(e) => e.preventDefault()}
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="w-full border border-gray-300 rounded-md px-4 py-2.5 pr-10 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-          >
-            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-          </button>
-        </div>
-      </div>
-
-      {/* Remember + Forgot */}
-      <div className="flex justify-between mb-6">
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" />
-          Remember me
-        </label>
-
-        <button
-          onClick={() => navigate("/forgot-password")}
-          className="text-sm text-gray-500 hover:text-indigo-600"
-        >
-          Forgot password
-        </button>
-      </div>
-
-      <button
-        onClick={handleLogin}
-        disabled={loading}
-        className="w-full bg-indigo-500 hover:bg-indigo-600 disabled:opacity-60 text-white py-3 rounded-lg font-medium transition-colors"
-      >
-        {loading ? "Logging in..." : "Log in"}
-      </button>
-
-      <p className="text-center text-sm text-gray-500 mt-10">
-        Don't have an account?{" "}
-        <span className="text-indigo-500 cursor-pointer">Sign up</span>
-      </p>
     </div>
   );
 }
-

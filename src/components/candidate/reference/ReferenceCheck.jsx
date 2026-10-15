@@ -67,6 +67,11 @@ function ReferenceCheck({ onNext }) {
         return false;
       }
     }
+    // Phone format check — Professional
+    if (!/^\d{10}$/.test(String(references[0].phone).trim())) {
+      setError("Contact number must be exactly 10 digits in Professional / Academic Reference");
+      return false;
+    }
 
     // Personal Reference: email is optional, others required
     const persFields = ["name", "relationship", "phone"];
@@ -75,6 +80,11 @@ function ReferenceCheck({ onNext }) {
         setError("Please fill all required fields in Personal / Family Reference");
         return false;
       }
+    }
+    // Phone format check — Personal
+    if (!/^\d{10}$/.test(String(references[1].phone).trim())) {
+      setError("Contact number must be exactly 10 digits in Personal / Family Reference");
+      return false;
     }
 
     return true;

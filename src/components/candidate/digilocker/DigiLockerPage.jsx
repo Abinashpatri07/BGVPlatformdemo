@@ -4,6 +4,7 @@ import DigiLockerCard from "../digilocker/DigiLockerCard";
 import ManualEntryCard from "../digilocker/ManualEntryCard";
 import { useNavigate } from "react-router-dom";
 import DigiLockerHeader from "../digilocker/DigiLockerHeader";
+import { ArrowLeft } from "lucide-react";
 
 export default function DigiLockerPage() {
   const navigate = useNavigate();
@@ -61,6 +62,18 @@ export default function DigiLockerPage() {
 
       {/* Background blob */}
       <div className="absolute -top-10 -left-10 w-52 h-52 bg-[#C8CCEB] rounded-full opacity-60 pointer-events-none" />
+
+      {/* Back Button */}
+      <button
+        onClick={() => {
+          sessionStorage.setItem("candidate_currentStep", "0");
+          navigate("/verification");
+        }}
+        className="absolute top-6 left-6 z-20 flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-indigo-700 hover:border-indigo-200 shadow-sm transition-all cursor-pointer"
+      >
+        <ArrowLeft size={16} />
+        Back
+      </button>
 
       {/* Header */}
       <DigiLockerHeader />

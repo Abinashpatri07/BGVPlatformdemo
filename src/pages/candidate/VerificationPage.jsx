@@ -40,6 +40,9 @@ export default function VerificationPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [submittedData, setSubmittedData] = useState(null);
+  const [consentRead, setConsentRead] = useState(() => {
+    return sessionStorage.getItem("candidate_consentRead") === "true";
+  });
 
   useEffect(() => {
     const checkStatus = async () => {
@@ -213,11 +216,12 @@ export default function VerificationPage() {
                 Please review and provide consent
               </p>
 
-              <VerificationList />
+              <VerificationList onConsentRead={setConsentRead} />
 
               <ActionButtons
                 onNext={handleNext}
                 onBack={handleBack}
+                consentRead={consentRead}
               />
             </main>
           )}

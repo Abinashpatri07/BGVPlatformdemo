@@ -1,4 +1,3 @@
-import React from "react";
 import { Upload, ChevronDown, ChevronUp, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 
 export default function UploadCard({
@@ -7,26 +6,39 @@ export default function UploadCard({
   isUploading,
   open,
   verificationState,
+  nameMismatch,
   onUpload,
   onToggle,
 }) {
+  const isFailed = verificationState?.status === "failed" || !!nameMismatch;
+  const isSuccess = uploaded && !isFailed && verificationState?.status === "success";
+
   return (
     <div className="bg-white border border-[#D8D8F8] rounded-xl shadow-sm px-4 py-3">
       <div className="flex justify-between items-center">
         <div>
           <h3 className="text-base font-semibold text-[#05058D] flex items-center gap-2">
             {doc}
-            {uploaded && verificationState?.status !== "failed" && <CheckCircle2 size={16} className="text-green-600" />}
-            {uploaded && verificationState?.status === "failed" && <XCircle size={16} className="text-red-500" />}
+            {isSuccess && <CheckCircle2 size={16} className="text-green-600" />}
+            {uploaded && isFailed && <XCircle size={16} className="text-red-500" />}
+            {uploaded && !isSuccess && !isFailed && <CheckCircle2 size={16} className="text-green-600" />}
           </h3>
 
           {!uploaded ? (
             <p className="text-[11px] text-gray-500 mt-0.5">
               Supported format PDF, JPG, PNG, up to 5MB
             </p>
+          ) : isFailed ? (
+            <p className="text-[11px] mt-0.5 flex items-center gap-1 text-red-500 font-medium">
+              {nameMismatch ? "Name mismatch detected" : "Verification failed"}
+            </p>
+          ) : verificationState?.status === "verifying" ? (
+            <p className="text-[11px] mt-0.5 flex items-center gap-1 text-blue-600">
+              Verifying document details...
+            </p>
           ) : (
-            <p className={`text-[11px] mt-0.5 flex items-center gap-1 ${verificationState?.status === "failed" ? "text-red-500" : "text-green-600"}`}>
-              {verificationState?.status === "failed" ? "Verification failed" : "Upload successful"}
+            <p className="text-[11px] mt-0.5 flex items-center gap-1 text-green-600">
+              {verificationState?.status === "success" ? "Verified successfully" : "Uploaded successfully"}
             </p>
           )}
         </div>

@@ -55,6 +55,90 @@ function ReviewContent({ candidateData }) {
     }
   };
 
+  const calculateTotalExperience = () => {
+    // Check if there are employment records (from props or sessionStorage)
+    let empList = (employment && employment.length > 0) ? employment : [];
+    if (empList.length === 0) {
+      try {
+        const saved = sessionStorage.getItem("candidate_employments");
+        if (saved) empList = JSON.parse(saved);
+      } catch {}
+    }
+
+    // Filter employments with valid from dates
+    const intervals = [];
+    if (empList && empList.length > 0) {
+      empList.forEach(emp => {
+        const from = emp.cand_emp_from_date || emp.fromDate;
+        const to = emp.cand_emp_to_date || emp.toDate;
+        if (from) {
+          const start = new Date(from);
+          const end = to ? new Date(to) : new Date();
+          if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && end >= start) {
+            intervals.push({ start, end });
+          }
+        }
+      });
+    }
+
+    if (intervals.length > 0) {
+      // Sort intervals by start date
+      intervals.sort((a, b) => a.start.getTime() - b.start.getTime());
+
+      // Merge overlapping intervals
+      const merged = [];
+      let current = intervals[0];
+      for (let i = 1; i < intervals.length; i++) {
+        const next = intervals[i];
+        if (next.start.getTime() <= current.end.getTime()) {
+          current = {
+            start: current.start,
+            end: new Date(Math.max(current.end.getTime(), next.end.getTime()))
+          };
+        } else {
+          merged.push(current);
+          current = next;
+        }
+      }
+      merged.push(current);
+
+      // Calculate total months across merged intervals
+      let totalMonths = 0;
+      merged.forEach(({ start, end }) => {
+        let months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+        if (end.getDate() - start.getDate() >= 15) {
+          months += 1;
+        } else if (start.getDate() - end.getDate() > 15) {
+          months -= 1;
+        }
+        totalMonths += Math.max(1, months);
+      });
+
+      if (totalMonths > 0) {
+        const years = Math.floor(totalMonths / 12);
+        const remainingMonths = totalMonths % 12;
+        const parts = [];
+        if (years > 0) parts.push(`${years} Year${years > 1 ? 's' : ''}`);
+        if (remainingMonths > 0) parts.push(`${remainingMonths} Month${remainingMonths > 1 ? 's' : ''}`);
+        return parts.join(' ') || "0 Months";
+      }
+    }
+
+    // Fallback to basicInfo candidate_experience
+    const exp = basicInfo?.candidate_experience;
+    if (exp === 1 || exp === "1" || String(exp).toLowerCase() === "fresher") {
+      return "Fresher";
+    }
+    if (exp === 2 || exp === "2" || String(exp).toLowerCase() === "experienced") {
+      return "Experienced";
+    }
+    if (exp !== undefined && exp !== null && !isNaN(exp) && Number(exp) > 2) {
+      return `${exp} Year${Number(exp) > 1 ? 's' : ''}`;
+    }
+
+    return "Fresher";
+  };
+
   return (
     <div>
       {/* Personal Information */}
@@ -84,11 +168,7 @@ function ReviewContent({ candidateData }) {
           )}
           <Field 
             label="Total Experience" 
-            value={
-              basicInfo.candidate_experience !== undefined && basicInfo.candidate_experience !== null
-                ? `${basicInfo.candidate_experience} Year${basicInfo.candidate_experience > 1 ? 's' : ''}`
-                : "Fresher"
-            } 
+            value={calculateTotalExperience()} 
           />
           {basicInfo.candidate_function && (
             <Field label="Department / Function" value={basicInfo.candidate_function} />
@@ -130,7 +210,7 @@ function ReviewContent({ candidateData }) {
                 key={idx} 
                 label={doc.cand_iden_type || `Document ${idx+1}`} 
                 value={docNumber || "N/A"} 
-                verified={doc.iden_verification_status === 1} 
+                verified={doc.iden_verification_status === 2} 
               />
             );
           })}
@@ -149,8 +229,33 @@ function ReviewContent({ candidateData }) {
             <Field label="Designation" value={emp.cand_emp_designation || "N/A"} />
             <Field label="Start Date" value={formatDate(emp.cand_emp_from_date)} />
             <Field label="End Date" value={formatDate(emp.cand_emp_to_date)} />
+            <Field label="Joining Letter" value={emp.cand_emp_joining ? "Uploaded" : "Not Provided"} verified={!!emp.cand_emp_joining} />
+            {emp.cand_emp_type !== "Internship" && (
+              <>
+                <Field label="Relieving Letter" value={emp.cand_emp_payslip ? "Uploaded" : "Not Provided"} verified={!!emp.cand_emp_payslip} />
+                <Field label="Service Letter" value={emp.cand_emp_service ? "Uploaded" : "Not Provided"} verified={!!emp.cand_emp_service} />
+              </>
+            )}
           </React.Fragment>
         )) : <p className="text-sm text-gray-500 col-span-1 sm:col-span-2 md:col-span-3">No employment details added.</p>}
+      </Section>
+
+      {/* Universal Account Number (UAN) */}
+      <Section title="Universal Account Number (UAN)">
+        <Field 
+          label="UAN Number" 
+          value={
+            employment?.find(e => e.cand_emp_uan_number)?.cand_emp_uan_number || 
+            idDocs?.find(d => d.uan_number)?.uan_number || 
+            sessionStorage.getItem("candidate_uan_number") || 
+            "Not Provided"
+          } 
+          verified={!!(
+            employment?.find(e => e.cand_emp_uan_number)?.cand_emp_uan_number || 
+            idDocs?.find(d => d.uan_number)?.uan_number || 
+            sessionStorage.getItem("candidate_uan_number")
+          )}
+        />
       </Section>
 
       {/* Education */}

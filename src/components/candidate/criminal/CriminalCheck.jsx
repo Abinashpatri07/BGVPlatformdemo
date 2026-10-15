@@ -1,18 +1,34 @@
 import React, { useRef, useState } from "react";
 import axios from "axios";
-import { ArrowRight, ShieldAlert, CheckCircle, AlertCircle } from "lucide-react";
+import { ArrowRight, ShieldAlert, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 
 function CriminalCheck({ onNext }) {
-  const [step, setStep] = useState("question");
-  const [details, setDetails] = useState("");
-  const [file, setFile] = useState(null);
+  const [step, setStep] = useState(() => {
+    return sessionStorage.getItem("candidate_criminal_step") || "question";
+  });
+  const [details, setDetails] = useState(() => {
+    return sessionStorage.getItem("candidate_criminal_details") || "";
+  });
+  const [existingReportUrl, setExistingReportUrl] = useState(() => {
+    return sessionStorage.getItem("candidate_criminal_reportUrl") || null;
+  });
+  const [file, setFile] = useState(() => {
+    const savedName = sessionStorage.getItem("candidate_criminal_fileName");
+    return savedName ? { name: savedName } : null;
+  });
+  const [loadingExisting, setLoadingExisting] = useState(() => {
+    return !sessionStorage.getItem("candidate_criminal_step");
+  });
+
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [existingReportUrl, setExistingReportUrl] = useState(null);
 
   const fileRef = useRef(null);
 
   React.useEffect(() => {
+    // If sessionStorage already has state, skip API fetch entirely
+    if (!loadingExisting) return;
+
     const fetchExisting = async () => {
       try {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -23,20 +39,32 @@ function CriminalCheck({ onNext }) {
           const crim = response.data.criminal;
           if (crim.cand_crim_record === "Yes") {
             setStep("input");
-            setDetails(crim.cand_crim_remarks || "");
-            if (crim.cand_crim_report) {
-              setExistingReportUrl(crim.cand_crim_report);
-              // Mock a file object so the UI shows it as uploaded
-              setFile({ name: "existing_criminal_document" });
+            sessionStorage.setItem("candidate_criminal_step", "input");
+            // Only restore from API if sessionStorage had nothing
+            const savedDetails = sessionStorage.getItem("candidate_criminal_details");
+            if (!savedDetails) {
+              setDetails(crim.cand_crim_remarks || "");
+              sessionStorage.setItem("candidate_criminal_details", crim.cand_crim_remarks || "");
             }
+            if (crim.cand_crim_report && !sessionStorage.getItem("candidate_criminal_reportUrl")) {
+              setExistingReportUrl(crim.cand_crim_report);
+              sessionStorage.setItem("candidate_criminal_reportUrl", crim.cand_crim_report);
+              setFile({ name: "Criminal_Record_Document.pdf" });
+              sessionStorage.setItem("candidate_criminal_fileName", "Criminal_Record_Document.pdf");
+            }
+          } else if (crim.cand_crim_record === "No") {
+            setStep("skipped");
+            sessionStorage.setItem("candidate_criminal_step", "skipped");
           }
         }
       } catch (err) {
         console.error("Error fetching criminal records:", err);
+      } finally {
+        setLoadingExisting(false);
       }
     };
     fetchExisting();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSkip = async () => {
     setLoading(true);
@@ -49,6 +77,8 @@ function CriminalCheck({ onNext }) {
         has_record: false,
         criminalStatus: "No" 
       });
+      setStep("skipped");
+      sessionStorage.setItem("candidate_criminal_step", "skipped");
       if (onNext) onNext();
     } catch (err) {
       console.error(err);
@@ -73,6 +103,7 @@ function CriminalCheck({ onNext }) {
     }
 
     setFile(selectedFile);
+    sessionStorage.setItem("candidate_criminal_fileName", selectedFile.name);
     setError(false);
   };
 
@@ -92,14 +123,21 @@ function CriminalCheck({ onNext }) {
       formData.append("criminalStatus", "Yes");
       formData.append("remarks", details);
       
-      if (file.name === "existing_criminal_document" && existingReportUrl) {
-        formData.append("reportUrl", existingReportUrl);
+      if (file.name === "existing_criminal_document" || file.name === "Criminal_Record_Document.pdf") {
+        if (existingReportUrl) {
+          formData.append("reportUrl", existingReportUrl);
+        }
       } else {
         formData.append("reportFile", file);
       }
 
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       await axios.post(`${API_BASE}/api/candidate/submit/criminal`, formData);
+
+      sessionStorage.setItem("candidate_criminal_step", "input");
+      sessionStorage.setItem("candidate_criminal_details", details);
+      sessionStorage.setItem("candidate_criminal_fileName", file.name || "Criminal_Record_Document.pdf");
+
       if (onNext) onNext();
     } catch (err) {
       console.error(err);
@@ -117,42 +155,81 @@ function CriminalCheck({ onNext }) {
         </h2>
       </div>
 
-      {step === "question" && (
-        <div className="flex-1 flex flex-col items-center justify-center py-6">
-          <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-5 border-4 border-blue-100/50 shadow-inner">
-             <ShieldAlert className="w-7 h-7 text-blue-600" />
-          </div>
-
-          <h1 className="text-2xl font-semibold text-[#05058D] mb-2 text-center">
-            Do You Have Any Criminal Record?
-          </h1>
-          <p className="text-gray-500 mb-8 text-center max-w-md text-sm leading-relaxed">
-            This Information Is Required For Compliance Purposes. All Information Will Be Kept Confidential. Providing accurate information is mandatory for background verification.
-          </p>
-
-          <div className="flex gap-4 w-full justify-center">
-            <button
-              onClick={() => setStep("input")}
-              className="flex items-center justify-center gap-2 w-36 py-2.5 bg-[#05058D] text-white rounded-xl hover:bg-blue-800 hover:shadow-lg hover:shadow-blue-900/20 hover:-translate-y-1 transition-all duration-300 font-medium text-sm"
-            >
-              Yes, I have
-            </button>
-            <button
-              onClick={handleSkip}
-              disabled={loading}
-              className="flex items-center justify-center gap-2 w-36 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:-translate-y-1 transition-all duration-300 font-medium text-sm disabled:opacity-50"
-            >
-              {loading ? "Saving..." : <>No, I don't <ArrowRight className="w-4 h-4 ml-1" /></>}
-            </button>
-          </div>
+      {loadingExisting ? (
+        <div className="flex-1 flex flex-col items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-2" />
+          <p className="text-sm text-gray-500">Loading criminal background check details...</p>
         </div>
-      )}
+      ) : (
+        <>
+          {step === "question" && (
+            <div className="flex-1 flex flex-col items-center justify-center py-6">
+              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-5 border-4 border-blue-100/50 shadow-inner">
+                 <ShieldAlert className="w-7 h-7 text-blue-600" />
+              </div>
 
-      {step === "input" && (
-        <div className="mt-8 flex-1">
-           <p className="text-gray-600 mb-6 text-sm">
-             Please provide details about your criminal record and upload relevant documents below.
-           </p>
+              <h1 className="text-2xl font-semibold text-[#05058D] mb-2 text-center">
+                Do You Have Any Criminal Record?
+              </h1>
+              <p className="text-gray-500 mb-8 text-center max-w-md text-sm leading-relaxed">
+                This Information Is Required For Compliance Purposes. All Information Will Be Kept Confidential. Providing accurate information is mandatory for background verification.
+              </p>
+
+              <div className="flex gap-4 w-full justify-center">
+                <button
+                  onClick={() => {
+                    setStep("input");
+                    sessionStorage.setItem("candidate_criminal_step", "input");
+                  }}
+                  className="flex items-center justify-center gap-2 w-36 py-2.5 bg-[#05058D] text-white rounded-xl hover:bg-blue-800 hover:shadow-lg hover:shadow-blue-900/20 hover:-translate-y-1 transition-all duration-300 font-medium text-sm"
+                >
+                  Yes, I have
+                </button>
+                <button
+                  onClick={handleSkip}
+                  disabled={loading}
+                  className="flex items-center justify-center gap-2 w-36 py-2.5 bg-white border border-gray-200 text-gray-600 rounded-xl hover:border-gray-300 hover:bg-gray-50 hover:-translate-y-1 transition-all duration-300 font-medium text-sm disabled:opacity-50"
+                >
+                  {loading ? "Saving..." : <>No, I don't <ArrowRight className="w-4 h-4 ml-1" /></>}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === "skipped" && (
+            <div className="flex-1 flex flex-col items-center justify-center py-8">
+              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-gray-200">
+                <ShieldAlert className="w-7 h-7 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">No Criminal Record Reported</h3>
+              <p className="text-gray-500 mb-6 text-sm text-center max-w-md">
+                You previously indicated that you do not have any criminal records. If you wish to provide record details or report documents, click below.
+              </p>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => {
+                    setStep("input");
+                    sessionStorage.setItem("candidate_criminal_step", "input");
+                  }}
+                  className="px-6 py-2.5 bg-[#05058D] text-white rounded-xl text-sm font-medium hover:bg-blue-800 transition shadow-sm"
+                >
+                  Provide Record Details
+                </button>
+                <button
+                  onClick={onNext}
+                  className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition"
+                >
+                  Continue →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === "input" && (
+            <div className="mt-8 flex-1">
+               <p className="text-gray-600 mb-6 text-sm">
+                 Please provide details about your criminal record and upload relevant documents below.
+               </p>
 
            <div className="mt-6">
              <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -163,7 +240,10 @@ function CriminalCheck({ onNext }) {
                value={details}
                placeholder="Please provide brief details about the criminal record"
                onChange={(e) => {
-                 setDetails(e.target.value);
+                 const val = e.target.value;
+                 setDetails(val);
+                 // Persist every keystroke so tab-switch doesn't lose data
+                 sessionStorage.setItem("candidate_criminal_details", val);
                  setError(false);
                }}
                className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-600 focus:outline-none text-sm"
@@ -257,6 +337,8 @@ function CriminalCheck({ onNext }) {
              </button>
            </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

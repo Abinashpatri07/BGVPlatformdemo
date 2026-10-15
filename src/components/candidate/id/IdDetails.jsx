@@ -53,29 +53,117 @@ const docFields = {
   },
 };
 
+// ── Name comparison helper ──────────────────────────────
+const normalizeName = (name) =>
+  (name || "").toLowerCase().replace(/[^a-z ]/g, "").trim();
+
+const compareNames = (docName, registeredName) => {
+  const doc = normalizeName(docName);
+  const reg = normalizeName(registeredName);
+  if (!doc || !reg) return false;
+  // Exact match
+  if (doc === reg) return true;
+  // Check if all words of registered name appear in doc name (subset match)
+  const regWords = reg.split(" ").filter(Boolean);
+  const docWords = doc.split(" ").filter(Boolean);
+  const matchCount = regWords.filter(w => docWords.includes(w)).length;
+  // At least 2 words must match OR > 60% of words match
+  return matchCount >= 2 || matchCount / regWords.length >= 0.6;
+};
+
 export default function IdDetails({ onNext }) {
-  const [data, setData] = useState({});
+  const [data, setData] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem("candidate_id_data");
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
   const [openCard, setOpenCard] = useState(null);
-  const [panVerification, setPanVerification] = useState({ status: "idle", registeredName: null });
-  const [dlVerification, setDlVerification] = useState({ status: "idle", registeredName: null });
-  const [voterVerification, setVoterVerification] = useState({ status: "idle", registeredName: null });
-  const [passportVerification, setPassportVerification] = useState({ status: "idle", registeredName: null });
+  const [nameMismatch, setNameMismatch] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem("candidate_id_nameMismatch");
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+  const [panVerification, setPanVerification] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem("candidate_panVerification");
+      return saved ? JSON.parse(saved) : { status: "idle", registeredName: null };
+    } catch {
+      return { status: "idle", registeredName: null };
+    }
+  });
+  const [dlVerification, setDlVerification] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem("candidate_dlVerification");
+      return saved ? JSON.parse(saved) : { status: "idle", registeredName: null };
+    } catch {
+      return { status: "idle", registeredName: null };
+    }
+  });
+  const [voterVerification, setVoterVerification] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem("candidate_voterVerification");
+      return saved ? JSON.parse(saved) : { status: "idle", registeredName: null };
+    } catch {
+      return { status: "idle", registeredName: null };
+    }
+  });
+  const [passportVerification, setPassportVerification] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem("candidate_passportVerification");
+      return saved ? JSON.parse(saved) : { status: "idle", registeredName: null };
+    } catch {
+      return { status: "idle", registeredName: null };
+    }
+  });
   const [uploadingDoc, setUploadingDoc] = useState(null);
+  const [filePreviews, setFilePreviews] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  useEffect(() => {
+    sessionStorage.setItem("candidate_id_data", JSON.stringify(data));
+  }, [data]);
+
+  useEffect(() => {
+    sessionStorage.setItem("candidate_id_nameMismatch", JSON.stringify(nameMismatch));
+  }, [nameMismatch]);
+
+  useEffect(() => {
+    sessionStorage.setItem("candidate_panVerification", JSON.stringify(panVerification));
+  }, [panVerification]);
+
+  useEffect(() => {
+    sessionStorage.setItem("candidate_dlVerification", JSON.stringify(dlVerification));
+  }, [dlVerification]);
+
+  useEffect(() => {
+    sessionStorage.setItem("candidate_voterVerification", JSON.stringify(voterVerification));
+  }, [voterVerification]);
+
+  useEffect(() => {
+    sessionStorage.setItem("candidate_passportVerification", JSON.stringify(passportVerification));
+  }, [passportVerification]);
 
   React.useEffect(() => {
     const fetchExistingData = async () => {
       try {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const candId = user.cand_id || 1;
+        const registeredName = user.name || "";
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         if (response.data && response.data.idDocs && response.data.idDocs.length > 0) {
           const loadedData = {};
+          const loadedMismatch = {};
           response.data.idDocs.forEach(doc => {
             const docType = doc.cand_iden_type;
-            if (docType) {
+            if (docType && docs.includes(docType)) {
               // Reconstruct the OCR-like fields object based on document type
               let fields = {};
               let docNumber = "";
@@ -131,18 +219,33 @@ export default function IdDetails({ onNext }) {
                 success: true // Force success state so it looks uploaded
               };
 
-              // Set dummy verification status based on what was saved
-              const verStatus = doc.iden_verification_status === 1 ? "success" : 
-                                doc.iden_verification_status === 2 ? "failed" : "idle";
+              // Correct DB status mapping:
+              // 2 = Verified / Success
+              // 3 = Rejected / Failed
+              // 1 = Verifying / In Progress
+              const verStatus = doc.iden_verification_status === 2 ? "success" : 
+                                doc.iden_verification_status === 3 ? "failed" : 
+                                doc.iden_verification_status === 1 ? "verifying" : "idle";
               const verStateObj = { status: verStatus, registeredName: doc.cand_full_name || "" };
               
-              if (docType === "PAN card") setPanVerification(verStateObj);
-              if (docType === "Driving license") setDlVerification(verStateObj);
-              if (docType === "Voter ID") setVoterVerification(verStateObj);
-              if (docType === "Passport") setPassportVerification(verStateObj);
+              if (docType === "PAN card") setPanVerification(prev => prev.status !== "idle" && prev.status !== "failed" ? prev : verStateObj);
+              if (docType === "Driving license") setDlVerification(prev => prev.status !== "idle" && prev.status !== "failed" ? prev : verStateObj);
+              if (docType === "Voter ID") setVoterVerification(prev => prev.status !== "idle" && prev.status !== "failed" ? prev : verStateObj);
+              if (docType === "Passport") setPassportVerification(prev => prev.status !== "idle" && prev.status !== "failed" ? prev : verStateObj);
+
+              // Check name match against registered name
+              let docName = "";
+              if (docType === "Passport") {
+                docName = `${fields.first_name || ""} ${fields.last_name || ""}`.trim();
+              } else {
+                docName = fields.full_name || "";
+              }
+              const isMatch = compareNames(docName, registeredName);
+              loadedMismatch[docType] = (doc.iden_verification_status === 3) || (!isMatch && !!registeredName);
             }
           });
-          setData(loadedData);
+          setData(prev => ({ ...loadedData, ...prev }));
+          setNameMismatch(prev => ({ ...loadedMismatch, ...prev }));
         }
       } catch (err) {
         console.error("Error fetching existing ID docs:", err);
@@ -251,6 +354,16 @@ export default function IdDetails({ onNext }) {
       }
     }
 
+    const previewUrl = URL.createObjectURL(file);
+    setFilePreviews(prev => ({
+      ...prev,
+      [docType]: {
+        url: previewUrl,
+        type: file.type,
+        name: file.name
+      }
+    }));
+
     setData((prev) => ({
       ...prev,
       [docType]: {
@@ -259,6 +372,20 @@ export default function IdDetails({ onNext }) {
         fields: extractedFields,
       },
     }));
+
+    // ── Name match check ─────────────────────────────────
+    const registeredUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const registeredName = registeredUser.name || "";
+
+    let docName = "";
+    if (docType === "Passport") {
+      docName = `${extractedFields.first_name || ""} ${extractedFields.last_name || ""}`.trim();
+    } else {
+      docName = extractedFields.full_name || "";
+    }
+
+    const isMatch = compareNames(docName, registeredName);
+    setNameMismatch(prev => ({ ...prev, [docType]: !isMatch }));
 
     setOpenCard(docType);
 
@@ -353,18 +480,65 @@ export default function IdDetails({ onNext }) {
     executeVerify(() => verifyPassportSource(fileNumber, formatDob(dob), name), setPassportVerification);
   };
 
+  const handleFieldChange = (docType, fieldKey, val) => {
+    setData((prev) => {
+      const current = prev[docType] || {};
+      const updated = {
+        ...prev,
+        [docType]: {
+          ...current,
+          fields: {
+            ...(current.fields || {}),
+            [fieldKey]: val
+          }
+        }
+      };
+      sessionStorage.setItem("candidate_id_data", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const removeFile = (docType) => {
     setData((prev) => {
       const updated = { ...prev };
       delete updated[docType];
+      sessionStorage.setItem("candidate_id_data", JSON.stringify(updated));
       return updated;
     });
 
+    setFilePreviews(prev => {
+      const copy = { ...prev };
+      if (copy[docType]?.url) {
+        try { URL.revokeObjectURL(copy[docType].url); } catch {}
+      }
+      delete copy[docType];
+      return copy;
+    });
+
     setOpenCard(null);
-    if (docType === "PAN card") setPanVerification({ status: "idle", registeredName: null });
-    if (docType === "Driving license") setDlVerification({ status: "idle", registeredName: null });
-    if (docType === "Voter ID") setVoterVerification({ status: "idle", registeredName: null });
-    if (docType === "Passport") setPassportVerification({ status: "idle", registeredName: null });
+    setNameMismatch(prev => { 
+      const u = { ...prev }; 
+      delete u[docType]; 
+      sessionStorage.setItem("candidate_id_nameMismatch", JSON.stringify(u));
+      return u; 
+    });
+
+    if (docType === "PAN card") {
+      setPanVerification({ status: "idle", registeredName: null });
+      sessionStorage.removeItem("candidate_panVerification");
+    }
+    if (docType === "Driving license") {
+      setDlVerification({ status: "idle", registeredName: null });
+      sessionStorage.removeItem("candidate_dlVerification");
+    }
+    if (docType === "Voter ID") {
+      setVoterVerification({ status: "idle", registeredName: null });
+      sessionStorage.removeItem("candidate_voterVerification");
+    }
+    if (docType === "Passport") {
+      setPassportVerification({ status: "idle", registeredName: null });
+      sessionStorage.removeItem("candidate_passportVerification");
+    }
   };
 
   const handleSubmit = async () => {
@@ -375,29 +549,21 @@ export default function IdDetails({ onNext }) {
     try {
       const documentsPayload = keys.map(docType => {
         const item = data[docType];
-        
-        let status = "success";
+
+        // If name mismatch → force fail status in DB
+        const hasMismatch = nameMismatch[docType] === true;
+
         let docNumber = "";
-        
-        if (docType === "PAN card") {
-          status = panVerification.status;
-          docNumber = item.fields.pan_number;
-        } else if (docType === "Driving license") {
-          status = dlVerification.status;
-          docNumber = item.fields.driving_licence_number;
-        } else if (docType === "Voter ID") {
-          status = voterVerification.status;
-          docNumber = item.fields.voter_id_number;
-        } else if (docType === "Passport") {
-          status = passportVerification.status;
-          docNumber = item.fields.passport_number;
-        }
+        if (docType === "PAN card")         docNumber = item.fields.pan_number;
+        else if (docType === "Driving license") docNumber = item.fields.driving_licence_number;
+        else if (docType === "Voter ID")    docNumber = item.fields.voter_id_number;
+        else if (docType === "Passport")   docNumber = item.fields.passport_number;
 
         return {
           doc_type: docType,
           doc_number: docNumber || "",
           ocr_data: item.fields,
-          verification_status: status,
+          verification_status: hasMismatch ? "failed" : "success",
           file_name: item.fileName
         };
       });
@@ -425,7 +591,7 @@ export default function IdDetails({ onNext }) {
       : docs;
 
   return (
-    <main className="bg-white rounded-xl shadow-sm max-w-4xl px-6 py-5 mx-auto">
+    <main className={`bg-white rounded-xl shadow-sm px-6 py-5 mx-auto transition-all duration-300 ${openCard ? 'max-w-6xl' : 'max-w-4xl'}`}>
       {/* Title */}
       <h1 className="text-2xl font-bold text-[#05058D] mb-4">
         ID Details
@@ -467,6 +633,7 @@ export default function IdDetails({ onNext }) {
               doc === "Voter ID" ? voterVerification :
               doc === "Passport" ? passportVerification : null
             }
+            nameMismatch={nameMismatch[doc] === true}
             onUpload={(e) => handleUpload(e, doc)}
             onToggle={() =>
               setOpenCard((prev) => (prev === doc ? null : doc))
@@ -480,12 +647,15 @@ export default function IdDetails({ onNext }) {
               fileName={data[doc].fileName}
               size={data[doc].size}
               fields={data[doc].fields}
+              preview={filePreviews[doc]}
               verificationState={
                 doc === "PAN card" ? panVerification :
                 doc === "Driving license" ? dlVerification :
                 doc === "Voter ID" ? voterVerification :
                 doc === "Passport" ? passportVerification : null
               }
+              nameMismatch={nameMismatch[doc] === true}
+              onChangeField={(fieldKey, val) => handleFieldChange(doc, fieldKey, val)}
               onRemove={() => removeFile(doc)}
               onOk={() => setOpenCard(null)}
             />

@@ -86,6 +86,10 @@ function ReferenceForm({ index, data, type, onChange }) {
   const [touched, setTouched] = useState({});
 
   const handleChange = (i, field, value) => {
+    // Phone: only digits, max 10
+    if (field === "phone") {
+      value = value.replace(/\D/g, "").slice(0, 10);
+    }
     onChange(i, field, value);
     // Re-validate on change if already touched
     if (touched[field]) {
