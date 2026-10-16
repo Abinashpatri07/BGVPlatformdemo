@@ -13,7 +13,14 @@ import {
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+const getDocUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  const clean = path.replace(/\\/g, "/");
+  return `${API}/${clean.startsWith("/") ? clean.slice(1) : clean}`;
+};
 
 function formatDate(dateStr) {
   if (!dateStr) return "N/A";
@@ -161,7 +168,7 @@ function DrugTestDetails() {
                       <p className="text-sm font-semibold text-gray-800">Drug Report</p>
                       <p className="text-xs text-gray-400">{drug.cand_drug_report}</p>
                     </div>
-                    <a href={`${API}/${drug.cand_drug_report}`} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-gray-600 transition">
+                    <a href={getDocUrl(drug.cand_drug_report)} target="_blank" rel="noreferrer" className="text-indigo-600 hover:text-indigo-800 transition p-1.5">
                       <Eye size={18} />
                     </a>
                   </div>

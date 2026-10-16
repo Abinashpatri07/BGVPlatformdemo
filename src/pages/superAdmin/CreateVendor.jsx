@@ -22,7 +22,7 @@ const SERVICES = [
   "Criminal Background Check",
   "Education Verification",
   "Prior Employment Check",
-  "Identity Address Verification",
+  "Identity & Address Verification",
   "Drug Test",
 ];
 

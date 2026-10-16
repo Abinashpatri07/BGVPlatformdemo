@@ -20,9 +20,18 @@ const ALL_SERVICES = [
   "Criminal Background Check",
   "Education Verification",
   "Prior Employment Check",
-  "Identity Address Verification",
+  "Identity & Address Verification",
   "Drug Test",
 ];
+
+// ── City ID → Name lookup (matches CreateVendor MOCK_CITIES) ─────────────────
+const CITY_MAP = {
+  101: "Mumbai",    102: "Pune",        103: "Nagpur",   104: "Nashik",    105: "Thane",
+  201: "Bangalore", 202: "Mysore",      203: "Hubli",    204: "Mangalore", 205: "Belgaum",
+  301: "New Delhi", 302: "Dwarka",      303: "Rohini",   304: "Janakpuri", 305: "Karol Bagh",
+  401: "Ahmedabad", 402: "Surat",       403: "Vadodara", 404: "Rajkot",    405: "Bhavnagar",
+  501: "Chennai",   502: "Coimbatore",  503: "Madurai",  504: "Trichy",    505: "Salem",
+};
 
 // ── Tag Input ──────────────────────────────────────────
 const TagInput = ({ tags, setTags, placeholder, error }) => {
@@ -111,6 +120,7 @@ export default function EditVendor() {
 
   const [form, setForm] = useState({
     vendorName: "",
+    cin: "",
     gst: "",
     fullName: "",
     email: "",
@@ -126,16 +136,19 @@ export default function EditVendor() {
   const [isLoading, setIsLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
 
-  // Add STATE_MAP to resolve IDs to names
+  // State ID → Name lookup (IDs 1-5 = mock, 6-30 = proper Indian state IDs)
   const STATE_MAP = {
-    1: "Andhra Pradesh", 2: "Arunachal Pradesh", 3: "Assam", 4: "Bihar",
-    5: "Chhattisgarh", 6: "Goa", 7: "Gujarat", 8: "Haryana", 9: "Himachal Pradesh",
-    10: "Jharkhand", 11: "Karnataka", 12: "Kerala", 13: "Madhya Pradesh",
-    14: "Maharashtra", 15: "Manipur", 16: "Meghalaya", 17: "Mizoram",
-    18: "Nagaland", 19: "Odisha", 20: "Punjab", 21: "Rajasthan",
-    22: "Sikkim", 23: "Tamil Nadu", 24: "Telangana", 25: "Tripura",
-    26: "Uttar Pradesh", 27: "Uttarakhand", 28: "West Bengal", 29: "Delhi NCR",
-    30: "Jammu & Kashmir"
+    1: "Maharashtra",   2: "Karnataka",      3: "Delhi",
+    4: "Gujarat",       5: "Tamil Nadu",
+    6: "Goa",           7: "Gujarat",         8: "Haryana",       9: "Himachal Pradesh",
+    10: "Jharkhand",    11: "Karnataka",      12: "Kerala",
+    13: "Madhya Pradesh", 14: "Maharashtra",  15: "Manipur",
+    16: "Meghalaya",    17: "Mizoram",        18: "Nagaland",
+    19: "Odisha",       20: "Punjab",         21: "Rajasthan",
+    22: "Sikkim",       23: "Tamil Nadu",     24: "Telangana",
+    25: "Tripura",      26: "Uttar Pradesh",  27: "Uttarakhand",
+    28: "West Bengal",  29: "Delhi NCR",      30: "Jammu & Kashmir",
+    36: "Telangana",
   };
 
   useEffect(() => {
@@ -147,25 +160,36 @@ export default function EditVendor() {
           const v = res.data.data;
           setForm({
             vendorName: v.company_name || "",
+            cin: v.cin || "",
             gst: v.gst_number || "",
-            fullName: `${v.poc_first_name} ${v.poc_last_name}`,
+            fullName: `${v.poc_first_name} ${v.poc_last_name}`.trim(),
             email: v.poc_email || "",
             phone: v.poc_mobile || "",
           });
 
-          // Map coverage states
-          const mappedStates = (v.coverage_states || []).map(sId => STATE_MAP[sId] || `State ${sId}`);
+          // Map coverage states & cities from structured coverage_areas
+          const coverageAreasData = v.coverage_areas || [];
+          const mappedStates = coverageAreasData.map(
+            ca => STATE_MAP[ca.stateId] || `State ${ca.stateId}`
+          );
+          const mappedCities = [
+            ...new Set(
+              coverageAreasData.flatMap(ca =>
+                ca.cityIds.map(cId => CITY_MAP[cId] || `City ${cId}`)
+              )
+            ),
+          ];
           setStates(mappedStates);
-          setCities(["Mumbai", "Bangalore"]); // Placeholder for cities as they aren't fully returned yet
+          setCities(mappedCities);
 
-          // Map services
-          // The ALL_SERVICES index mapping:
-          // 0: Criminal, 1: Education, 2: Employment, 3: Address, 4: Drug
+          // Map services — index matches ALL_SERVICES order
           const srvObj = {};
-          v.services.forEach(s => {
+          (v.services || []).forEach(s => {
             const index = ALL_SERVICES.indexOf(s.name);
             if (index !== -1) {
-              srvObj[index] = parseInt(s.sla) || "";
+              // sla comes as "X day SLA" from API — parse the number
+              const days = parseInt(s.sla);
+              srvObj[index] = isNaN(days) ? "" : days;
             }
           });
           setSelectedServices(srvObj);
@@ -282,7 +306,7 @@ export default function EditVendor() {
 
           <div className="space-y-4 -mt-3">
 
-            {/* ROW 1 — Company + GST */}
+            {/* ROW 1 — Company Name */}
             <div className="grid grid-cols-2 gap-4">
               <Field label={<>Vendor Company Name <span className="text-red-500">*</span></>} error={errors.vendorName}>
                 <input
@@ -301,6 +325,17 @@ export default function EditVendor() {
                 />
               </Field>
             </div>
+
+            {/* ROW 1b — CIN (optional) */}
+            <Field label="CIN (optional)" error={errors.cin}>
+              <input
+                value={form.cin}
+                onChange={(e) => handleChange("cin", e.target.value.toUpperCase())}
+                placeholder="U74999DL2026PTC123456"
+                maxLength={21}
+                className={inputClass(errors.cin)}
+              />
+            </Field>
 
             {/* ROW 2 — States + Cities (tag inputs) */}
             <div className="grid grid-cols-2 gap-4">

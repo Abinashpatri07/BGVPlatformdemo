@@ -14,6 +14,8 @@ import AddressDetails from "../pages/vendor/AddressDetails";
 import DrugTestDetails from "../pages/vendor/DrugTestDetails";
 import EducationDetails from "../pages/vendor/EducationDetails";
 import CriminalDetails from "../pages/vendor/CriminalDetails";
+import ReferenceDetails from "../pages/vendor/ReferenceDetails";
+import IdentityDetails from "../pages/vendor/IdentityDetails";
 
 function VendorRoutes() {
   return (
@@ -33,8 +35,9 @@ function VendorRoutes() {
         <Route path="drug-test-details" element={<DrugTestDetails />} />
         <Route path="education-details" element={<EducationDetails />} />
         <Route path="criminal-details" element={<CriminalDetails />} />
-        
-        
+        <Route path="reference-details" element={<ReferenceDetails />} />
+        <Route path="identity-details" element={<IdentityDetails />} />
+        <Route path="identification-details" element={<IdentityDetails />} />
       </Route>
       
       {/* Default route */}

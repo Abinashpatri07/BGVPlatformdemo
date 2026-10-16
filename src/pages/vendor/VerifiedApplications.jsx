@@ -124,12 +124,24 @@ const getStatusBadge = (status) => {
 
 const getDetailsLink = (caseType) => {
   switch (caseType) {
-    case "Employment Verification": return "/vendor/employment-details";
-    case "Education Verification": return "/vendor/education-details";
-    case "Address Verification": return "/vendor/address-details";
-    case "Criminal Check": return "/vendor/criminal-details";
-    case "Drug Test": return "/vendor/drug-test-details";
-    default: return "#";
+    case "Employment Verification":
+    case "Internship":
+      return "/vendor/employment-details";
+    case "Education Verification":
+      return "/vendor/education-details";
+    case "Address Verification":
+      return "/vendor/address-details";
+    case "Criminal Check":
+      return "/vendor/criminal-details";
+    case "Drug Test":
+      return "/vendor/drug-test-details";
+    case "Reference Check":
+      return "/vendor/reference-details";
+    case "Identification":
+    case "Identity Verification":
+      return "/vendor/identity-details";
+    default:
+      return "#";
   }
 };
 

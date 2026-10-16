@@ -236,12 +236,21 @@ function AddressDetails() {
             ].map((opt) => (
               <label
                 key={opt}
+                onClick={() => setDecision(opt)}
                 className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition ${
                   decision === opt
                     ? "border-indigo-600 bg-indigo-50/30 shadow-sm"
                     : "border-gray-200 hover:bg-gray-50"
                 }`}
               >
+                <input
+                  type="radio"
+                  name="vendor-address-decision"
+                  value={opt}
+                  checked={decision === opt}
+                  onChange={() => setDecision(opt)}
+                  className="hidden"
+                />
                 <div
                   className={`w-5 h-5 flex-shrink-0 rounded-full border-2 flex items-center justify-center ${
                     decision === opt

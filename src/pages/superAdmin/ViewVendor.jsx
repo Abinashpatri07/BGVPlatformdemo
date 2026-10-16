@@ -15,20 +15,20 @@ import {
 } from "lucide-react";
 
 // ── State ID → Name lookup ─────────────────────────────────
+// IDs 1-5 are the mock IDs used by CreateVendor
+// IDs 6-30 are proper Indian state IDs
 const STATE_MAP = {
-  1: "Andhra Pradesh",   2: "Arunachal Pradesh", 3: "Assam",
-  4: "Bihar",           5: "Chhattisgarh",       6: "Goa",
-  7: "Gujarat",         8: "Haryana",             9: "Himachal Pradesh",
-  10: "Jharkhand",      11: "Karnataka",          12: "Kerala",
-  13: "Madhya Pradesh", 14: "Maharashtra",        15: "Manipur",
-  16: "Meghalaya",      17: "Mizoram",            18: "Nagaland",
-  19: "Odisha",         20: "Punjab",             21: "Rajasthan",
-  22: "Sikkim",         23: "Tamil Nadu",         24: "Telangana",
-  25: "Tripura",        26: "Uttar Pradesh",      27: "Uttarakhand",
-  28: "West Bengal",    29: "Delhi",              30: "Jammu & Kashmir",
-  // Mock IDs from CreateVendor
-  1: "Maharashtra",     2: "Karnataka",           3: "Delhi",
+  1: "Maharashtra",     2: "Karnataka",       3: "Delhi",
   4: "Gujarat",         5: "Tamil Nadu",
+  6: "Goa",             7: "Gujarat",          8: "Haryana",          9: "Himachal Pradesh",
+  10: "Jharkhand",      11: "Karnataka",      12: "Kerala",
+  13: "Madhya Pradesh", 14: "Maharashtra",    15: "Manipur",
+  16: "Meghalaya",      17: "Mizoram",        18: "Nagaland",
+  19: "Odisha",         20: "Punjab",         21: "Rajasthan",
+  22: "Sikkim",         23: "Tamil Nadu",     24: "Telangana",
+  25: "Tripura",        26: "Uttar Pradesh",  27: "Uttarakhand",
+  28: "West Bengal",    29: "Delhi NCR",      30: "Jammu & Kashmir",
+  36: "Telangana",
 };
 
 // ── Quality Score Ring ─────────────────────────────────────
@@ -198,15 +198,9 @@ export default function ViewVendor() {
           <ArrowLeft size={15} /> Back
         </button>
 
-        {/* TITLE + EDIT BUTTON */}
-        <div className="flex items-start justify-between mb-1">
+        {/* TITLE */}
+        <div className="mb-1">
           <h1 className="text-2xl font-bold text-[#02027A]">View Vendor Details</h1>
-          <button
-            onClick={() => navigate(`/super-admin/edit-vendor/${vendor.vendor_id}`)}
-            className="bg-[#02027A] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-[#01016a] transition"
-          >
-            Edit Profile
-          </button>
         </div>
 
         {/* BREADCRUMB */}

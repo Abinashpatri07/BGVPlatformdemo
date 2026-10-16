@@ -13,7 +13,14 @@ import {
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+const getDocUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  const clean = path.replace(/\\/g, "/");
+  return `${API}/${clean.startsWith("/") ? clean.slice(1) : clean}`;
+};
 
 function formatDate(dateStr) {
   if (!dateStr) return "N/A";
@@ -171,36 +178,15 @@ function EmploymentDetails() {
                 <div>
                   <h3 className="text-lg font-bold text-gray-800 mb-6">Documents</h3>
                   <div className="space-y-4">
-                    {emp.cand_emp_payslip ? (
-                      <div className="flex items-center gap-4">
-                        <div className="flex-1 flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-lg">
-                          <div>
-                            <p className="text-sm font-semibold text-gray-800">Payslip</p>
-                            <p className="text-xs text-gray-400">{emp.cand_emp_payslip}</p>
-                          </div>
-                          <a href={`${API}/uploads/${emp.cand_emp_payslip}`} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-gray-600 transition">
-                            <Eye size={18} />
-                          </a>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-4">
-                        <div className="flex-shrink-0 p-1.5 bg-indigo-50 text-indigo-400 rounded-md">
-                          <FileBadge size={16} />
-                        </div>
-                        <div className="flex-1 border border-indigo-100 border-dashed rounded-lg p-3 bg-white text-center">
-                          <p className="text-sm text-gray-400">No payslip uploaded</p>
-                        </div>
-                      </div>
-                    )}
+                    {/* Service Letter */}
                     {emp.cand_emp_service ? (
                       <div className="flex items-center gap-4">
                         <div className="flex-1 flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-lg">
-                          <div>
+                          <div className="truncate max-w-[280px]">
                             <p className="text-sm font-semibold text-gray-800">Service Letter</p>
-                            <p className="text-xs text-gray-400">{emp.cand_emp_service}</p>
+                            <p className="text-xs text-gray-400 truncate">{emp.cand_emp_service}</p>
                           </div>
-                          <a href={`${API}/uploads/${emp.cand_emp_service}`} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-gray-600 transition">
+                          <a href={getDocUrl(emp.cand_emp_service)} target="_blank" rel="noreferrer" className="text-indigo-600 hover:text-indigo-800 p-1.5 transition">
                             <Eye size={18} />
                           </a>
                         </div>
@@ -212,6 +198,54 @@ function EmploymentDetails() {
                         </div>
                         <div className="flex-1 border border-indigo-100 border-dashed rounded-lg p-3 bg-white text-center">
                           <p className="text-sm text-gray-400">No service letter uploaded</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Joining Letter */}
+                    {emp.cand_emp_joining ? (
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1 flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-lg">
+                          <div className="truncate max-w-[280px]">
+                            <p className="text-sm font-semibold text-gray-800">Joining / Offer Letter</p>
+                            <p className="text-xs text-gray-400 truncate">{emp.cand_emp_joining}</p>
+                          </div>
+                          <a href={getDocUrl(emp.cand_emp_joining)} target="_blank" rel="noreferrer" className="text-indigo-600 hover:text-indigo-800 p-1.5 transition">
+                            <Eye size={18} />
+                          </a>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-4">
+                        <div className="flex-shrink-0 p-1.5 bg-indigo-50 text-indigo-400 rounded-md">
+                          <FileBadge size={16} />
+                        </div>
+                        <div className="flex-1 border border-indigo-100 border-dashed rounded-lg p-3 bg-white text-center">
+                          <p className="text-sm text-gray-400">No joining letter uploaded</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Payslip / Relieving */}
+                    {emp.cand_emp_payslip ? (
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1 flex items-center justify-between p-3 bg-gray-50 border border-gray-100 rounded-lg">
+                          <div className="truncate max-w-[280px]">
+                            <p className="text-sm font-semibold text-gray-800">Relieving Letter / Payslip</p>
+                            <p className="text-xs text-gray-400 truncate">{emp.cand_emp_payslip}</p>
+                          </div>
+                          <a href={getDocUrl(emp.cand_emp_payslip)} target="_blank" rel="noreferrer" className="text-indigo-600 hover:text-indigo-800 p-1.5 transition">
+                            <Eye size={18} />
+                          </a>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-4">
+                        <div className="flex-shrink-0 p-1.5 bg-indigo-50 text-indigo-400 rounded-md">
+                          <FileBadge size={16} />
+                        </div>
+                        <div className="flex-1 border border-indigo-100 border-dashed rounded-lg p-3 bg-white text-center">
+                          <p className="text-sm text-gray-400">No relieving / payslip uploaded</p>
                         </div>
                       </div>
                     )}

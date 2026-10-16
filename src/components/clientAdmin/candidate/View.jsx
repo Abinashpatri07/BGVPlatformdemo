@@ -14,6 +14,8 @@ import {
   Eye,
   ArrowLeft,
   Download,
+  FileText,
+  XCircle,
 } from "lucide-react";
 import { exportCandidateCompleteReport } from "../../../utils/exportCandidatePdf";
 
@@ -23,6 +25,52 @@ const Label = ({ label, value }) => (
     <p className="text-sm font-medium text-gray-700">{value}</p>
   </div>
 );
+
+// Renders a document preview: image, pdf link, or empty state
+const DocumentPreview = ({ url, noDocMessage }) => {
+  if (!url) {
+    return (
+      <div className="bg-white p-4 rounded-xl shadow border flex flex-col items-center justify-center min-h-[200px]">
+        <XCircle size={40} className="text-gray-300 mb-3" />
+        <p className="text-sm text-gray-400 font-medium text-center">
+          {noDocMessage || "No Document Available"}
+        </p>
+      </div>
+    );
+  }
+
+  const lUrl = url.toLowerCase();
+  const isPdf = lUrl.endsWith(".pdf") || lUrl.includes(".pdf");
+
+  return (
+    <div className="bg-white p-4 rounded-xl shadow border text-center">
+      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
+      {isPdf ? (
+        <div className="flex flex-col items-center justify-center min-h-[160px] bg-gray-50 rounded-lg">
+          <FileText size={48} className="text-[#01026E] mb-2" />
+          <p className="text-xs text-gray-500 mb-3">PDF Document</p>
+          <a
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-1 text-xs text-white bg-[#01026E] px-3 py-1.5 rounded-lg hover:bg-indigo-800 transition"
+          >
+            <Eye size={14} /> View Document
+          </a>
+        </div>
+      ) : (
+        <img
+          src={url}
+          alt="document"
+          className="rounded-lg shadow-sm mx-auto h-48 object-cover w-full"
+          onError={(e) => {
+            e.target.outerHTML = `<div class="flex flex-col items-center justify-center min-h-[160px] bg-gray-50 rounded-lg"><svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='#6b7280' stroke-width='1.5'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg><a href='${url}' target='_blank' class='mt-2 text-xs text-indigo-700 underline'>Open Document</a></div>`;
+          }}
+        />
+      )}
+    </div>
+  );
+};
 
 function View() {
   const { id } = useParams();
@@ -294,7 +342,7 @@ function View() {
                 <>
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold text-gray-800">
-                      Identity Details - {identityView.cand_iden_type || identityView.cand_ident_type || "National ID"}
+                      Identity Details — {identityView.cand_iden_type || identityView.cand_ident_type || "National ID"}
                     </h3>
                     <button 
                       onClick={() => setIdentityView(null)}
@@ -305,42 +353,50 @@ function View() {
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                      <div className="grid grid-cols-2 gap-5">
-                        <Label label="Cardholder Name" value={identityView.cand_full_name || `${candidateData.candidate_first_name} ${candidateData.candidate_last_name || ""}` } />
-                        <Label label="Document Type" value={identityView.cand_iden_type || identityView.cand_ident_type || "National ID"} />
-                        <Label label="ID Number" value={identityView.pan_number || identityView.driving_number || identityView.voter_number || identityView.passport_number || identityView.uan_number || identityView.cand_ident_number || "N/A"} />
-                        <Label label="Father / Guardian Name" value={identityView.cand_father_name || "N/A"} />
-                        <Label label="Date of Birth" value={identityView.cand_dob ? new Date(identityView.cand_dob).toLocaleDateString() : "N/A"} />
-                        <Label label="Gender" value={identityView.cand_gender || "N/A"} />
-                        <Label label="Issue Date" value={(identityView.driv_issue_date || identityView.pass_issue_date || identityView.voter_issue_date || identityView.cand_ident_issue_date) ? new Date(identityView.driv_issue_date || identityView.pass_issue_date || identityView.voter_issue_date || identityView.cand_ident_issue_date).toLocaleDateString() : "N/A"} />
-                        <Label label="Expiry Date" value={(identityView.pass_expiry_date || identityView.driv_expiry_date || identityView.cand_ident_expiry_date) ? new Date(identityView.pass_expiry_date || identityView.driv_expiry_date || identityView.cand_ident_expiry_date).toLocaleDateString() : "N/A"} />
-                        <div className="col-span-2">
-                          <Label label="Address on ID" value={identityView.cand_address || "N/A"} />
+                    {/* Left col-span-2: ID card visual + info grid */}
+                    <div className="lg:col-span-2 space-y-4">
+                      {/* ID card visual */}
+                      <div className="bg-gradient-to-br from-[#02027A] to-[#1E3A8A] p-6 rounded-xl text-white shadow-md flex flex-col justify-between min-h-[180px]">
+                        <div>
+                          <div className="flex justify-between items-center mb-4">
+                            <span className="text-xs uppercase tracking-wider text-indigo-200 font-semibold">Government of India</span>
+                            <span className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded font-medium">Verified</span>
+                          </div>
+                          <p className="text-xs text-indigo-200">Document Type</p>
+                          <h4 className="text-lg font-bold tracking-wide">{identityView.cand_iden_type || identityView.cand_ident_type || "National ID"}</h4>
+                        </div>
+                        <div className="my-3 py-3 border-y border-white/10">
+                          <p className="text-xs text-indigo-200">ID / Document Number</p>
+                          <p className="text-xl font-mono tracking-widest font-bold text-amber-300">
+                            {identityView.pan_number || identityView.driving_number || identityView.voter_number || identityView.passport_number || identityView.uan_number || identityView.cand_ident_number || "N/A"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-indigo-200">Name</p>
+                          <p className="text-sm font-semibold uppercase">{identityView.cand_full_name || `${candidateData.candidate_first_name} ${candidateData.candidate_last_name || ""}`}</p>
+                        </div>
+                      </div>
+
+                      {/* Info grid */}
+                      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div className="grid grid-cols-2 gap-5">
+                          <Label label="Cardholder Name" value={identityView.cand_full_name || `${candidateData.candidate_first_name} ${candidateData.candidate_last_name || ""}`} />
+                          <Label label="Document Type" value={identityView.cand_iden_type || identityView.cand_ident_type || "National ID"} />
+                          <Label label="ID Number" value={identityView.pan_number || identityView.driving_number || identityView.voter_number || identityView.passport_number || identityView.uan_number || identityView.cand_ident_number || "N/A"} />
+                          <Label label="Father / Guardian Name" value={identityView.cand_father_name || "N/A"} />
+                          <Label label="Date of Birth" value={identityView.cand_dob ? new Date(identityView.cand_dob).toLocaleDateString() : "N/A"} />
+                          <Label label="Gender" value={identityView.cand_gender || "N/A"} />
+                          <Label label="Issue Date" value={(identityView.driv_issue_date || identityView.pass_issue_date || identityView.voter_issue_date || identityView.cand_ident_issue_date) ? new Date(identityView.driv_issue_date || identityView.pass_issue_date || identityView.voter_issue_date || identityView.cand_ident_issue_date).toLocaleDateString() : "N/A"} />
+                          <Label label="Expiry Date" value={(identityView.pass_expiry_date || identityView.driv_expiry_date || identityView.cand_ident_expiry_date) ? new Date(identityView.pass_expiry_date || identityView.driv_expiry_date || identityView.cand_ident_expiry_date).toLocaleDateString() : "N/A"} />
+                          <div className="col-span-2">
+                            <Label label="Address on ID" value={identityView.cand_address || "N/A"} />
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-[#02027A] to-[#1E3A8A] p-6 rounded-xl text-white shadow-md flex flex-col justify-between min-h-[220px]">
-                      <div>
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="text-xs uppercase tracking-wider text-indigo-200 font-semibold">Government of India</span>
-                          <span className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded font-medium">Verified</span>
-                        </div>
-                        <p className="text-xs text-indigo-200">Document Type</p>
-                        <h4 className="text-lg font-bold tracking-wide">{identityView.cand_iden_type || identityView.cand_ident_type || "National ID"}</h4>
-                      </div>
-                      <div className="my-3 py-3 border-y border-white/10">
-                        <p className="text-xs text-indigo-200">ID / Document Number</p>
-                        <p className="text-xl font-mono tracking-widest font-bold text-amber-300">
-                          {identityView.pan_number || identityView.driving_number || identityView.voter_number || identityView.passport_number || identityView.uan_number || identityView.cand_ident_number || "N/A"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-indigo-200">Name</p>
-                        <p className="text-sm font-semibold uppercase">{identityView.cand_full_name || `${candidateData.candidate_first_name} ${candidateData.candidate_last_name || ""}`}</p>
-                      </div>
-                    </div>
+                    {/* Right: document preview */}
+                    <DocumentPreview url={identityView.cand_iden_doc || identityView.doc_file_path || null} noDocMessage="No Document Uploaded" />
                   </div>
                 </>
               )}
@@ -402,22 +458,17 @@ function View() {
                     <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
                       <div className="grid grid-cols-2 gap-5">
                         <Label label="Institute Name" value={showEducationView.cand_edu_institute || "N/A"} />
-                        <Label label="Degree" value={showEducationView.cand_edu_type || "N/A"} />
+                        <Label label="Degree" value={showEducationView.cand_edu_type || showEducationView.cand_edu_dgree || "N/A"} />
                         <Label label="Start Date" value={showEducationView.cand_edu_from_date ? new Date(showEducationView.cand_edu_from_date).toLocaleDateString() : "N/A"} />
                         <Label label="End Date" value={showEducationView.cand_edu_to_date ? new Date(showEducationView.cand_edu_to_date).toLocaleDateString() : "N/A"} />
-                        <Label label="Course" value={showEducationView.cand_edu_course || "N/A"} />
-                        <Label label="Percentage/CGPA" value={showEducationView.cand_edu_grade || "N/A"} />
+                        {/* FIX: actual DB column is cand_specialization, not cand_edu_course */}
+                        <Label label="Course / Specialization" value={showEducationView.cand_specialization || showEducationView.cand_edu_course || "N/A"} />
+                        <Label label="Percentage / CGPA" value={showEducationView.cand_edu_grade || "N/A"} />
                       </div>
                     </div>
 
-                    <div className="bg-white p-4 rounded-xl shadow border text-center">
-                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
-                      <img
-                        src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
-                        alt="certificate"
-                        className="rounded-lg shadow-sm mx-auto h-64 object-cover"
-                      />
-                    </div>
+                    {/* FIX: show actual document from cand_edu_certificate */}
+                    <DocumentPreview url={showEducationView.cand_edu_certificate || null} noDocMessage="No Certificate Uploaded" />
                   </div>
                 </>
               )}
@@ -484,15 +535,63 @@ function View() {
                         <Label label="From Date" value={showEmploymentView.cand_emp_from_date ? new Date(showEmploymentView.cand_emp_from_date).toLocaleDateString() : "N/A"} />
                         <Label label="To Date" value={showEmploymentView.cand_emp_to_date ? new Date(showEmploymentView.cand_emp_to_date).toLocaleDateString() : "Present"} />
                         <Label label="Designation" value={showEmploymentView.cand_emp_designation || "N/A"} />
-                        <Label label="Drawn CTC" value="N/A" />
+                        <Label label="Employment Type" value={showEmploymentView.cand_emp_type || "N/A"} />
+                      </div>
+
+                      {/* Documents Section */}
+                      <div className="mt-5 pt-4 border-t border-gray-100">
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Available Documents</p>
+                        <div className="flex flex-wrap gap-2">
+                          {showEmploymentView.cand_emp_joining && (
+                            <a
+                              href={showEmploymentView.cand_emp_joining}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition"
+                            >
+                              <FileText size={13} />
+                              Joining Letter
+                            </a>
+                          )}
+                          {showEmploymentView.cand_emp_payslip && (
+                            <a
+                              href={showEmploymentView.cand_emp_payslip}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition"
+                            >
+                              <FileText size={13} />
+                              Relieving / Payslip
+                            </a>
+                          )}
+                          {showEmploymentView.cand_emp_service && (
+                            <a
+                              href={showEmploymentView.cand_emp_service}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition"
+                            >
+                              <FileText size={13} />
+                              Service Letter
+                            </a>
+                          )}
+                          {!showEmploymentView.cand_emp_joining && !showEmploymentView.cand_emp_payslip && !showEmploymentView.cand_emp_service && (
+                            <span className="text-xs text-gray-400 italic">No document links available</span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="bg-white p-4 rounded-xl shadow border text-center">
-                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
-                      <img
-                        src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
-                        className="rounded-lg shadow-sm mx-auto h-64 object-cover"
+                    <div className="bg-white p-4 rounded-xl shadow border">
+                      <p className="text-sm text-[#01026E] mb-3 font-medium text-center">Document Preview</p>
+                      <DocumentPreview
+                        url={
+                          showEmploymentView.cand_emp_joining ||
+                          showEmploymentView.cand_emp_payslip ||
+                          showEmploymentView.cand_emp_service ||
+                          null
+                        }
+                        noDocMessage="No Document Uploaded"
                       />
                     </div>
                   </div>
@@ -511,24 +610,36 @@ function View() {
 
                   <div className="mt-4 mb-6 space-y-4">
                     {candidateData.criminal && candidateData.criminal.length > 0 ? (
-                      candidateData.criminal.map((item, idx) => (
-                        <div key={idx} className="bg-white border rounded-xl shadow-sm p-5 flex justify-between items-center">
-                          <div>
-                            <p className="text-sm font-medium text-gray-800">Criminal Record Exist</p>
-                            <p className="text-xs text-gray-400 mt-1">Case Number: {item.cand_crim_record || "N/A"}</p>
-                          </div>
+                      candidateData.criminal.map((item, idx) => {
+                        const hasCriminal = item.cand_crim_record === "Yes";
+                        return (
+                          <div key={idx} className="bg-white border rounded-xl shadow-sm p-5 flex justify-between items-center">
+                            <div>
+                              <p className={`text-sm font-medium ${hasCriminal ? "text-red-700" : "text-green-700"}`}>
+                                {hasCriminal ? "Criminal Record Exists" : "No Criminal Record"}
+                              </p>
+                              {hasCriminal && (
+                                <p className="text-xs text-gray-400 mt-1">Remarks: {item.cand_crim_remarks || "N/A"}</p>
+                              )}
+                            </div>
 
-                          <div
-                            onClick={() => setCriminalView(item)}
-                            className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
-                          >
-                            <Eye size={16} />
-                            <span className="text-sm font-medium">View</span>
+                            {hasCriminal && (
+                              <div
+                                onClick={() => setCriminalView(item)}
+                                className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
+                              >
+                                <Eye size={16} />
+                                <span className="text-sm font-medium">View</span>
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      ))
+                        );
+                      })
                     ) : (
-                      <p className="text-gray-500 text-sm">No criminal records found.</p>
+                      <div className="bg-white border rounded-xl shadow-sm p-6 flex items-center gap-3">
+                        <CheckCircle size={20} className="text-green-500" />
+                        <p className="text-sm font-medium text-green-700">No criminal records found for this candidate.</p>
+                      </div>
                     )}
                   </div>
                 </>
@@ -561,12 +672,11 @@ function View() {
                       </div>
                     </div>
 
-                    <div className="bg-white p-4 rounded-xl shadow border text-center">
-                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
-                      <img
-                        src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
-                        alt="document preview"
-                        className="rounded-lg shadow-sm mx-auto h-64 object-cover"
+                    <div className="bg-white p-4 rounded-xl shadow border">
+                      <p className="text-sm text-[#01026E] mb-3 font-medium text-center">Document Preview</p>
+                      <DocumentPreview
+                        url={criminalView.cand_crim_report || null}
+                        noDocMessage="No Document Provided"
                       />
                     </div>
                   </div>
@@ -635,12 +745,11 @@ function View() {
                       </div>
                     </div>
 
-                    <div className="bg-white p-4 rounded-xl shadow border text-center">
-                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
-                      <img
-                        src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
-                        alt="document preview"
-                        className="rounded-lg shadow-sm mx-auto h-64 object-cover"
+                    <div className="bg-white p-4 rounded-xl shadow border">
+                      <p className="text-sm text-[#01026E] mb-3 font-medium text-center">Document Preview</p>
+                      <DocumentPreview
+                        url={drugView.cand_drug_report || null}
+                        noDocMessage="No Report Uploaded"
                       />
                     </div>
                   </div>
@@ -659,14 +768,22 @@ function View() {
                 <div className="space-y-6 mb-6">
                   {candidateData.reference.map((item, idx) => (
                     <div key={idx} className="border rounded-xl p-5">
-                      <h4 className="font-medium text-[#01026E] mb-4">Reference {idx + 1}</h4>
+                      <h4 className="font-medium text-[#01026E] mb-4">
+                        Reference {idx + 1}
+                        {item.cand_ref_type && (
+                          <span className="ml-2 text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                            {item.cand_ref_type}
+                          </span>
+                        )}
+                      </h4>
                       <div className="grid grid-cols-2 gap-5">
+                        {/* FIX: correct DB field names from candidate_reference table */}
                         <Label label="Name" value={item.cand_ref_name || "N/A"} />
-                        <Label label="Phone no" value={item.cand_ref_contact || "N/A"} />
+                        <Label label="Phone No" value={item.cand_ref_phone || item.cand_ref_contact || "N/A"} />
                         <Label label="Email" value={item.cand_ref_email || "N/A"} />
-                        <Label label="Gender" value={item.cand_ref_gender || "N/A"} />
-                        <Label label="Institute/Company Name" value={item.cand_ref_institute || "N/A"} />
-                        <Label label="Designation" value={item.cand_ref_designation || "N/A"} />
+                        <Label label="Relationship" value={item.cand_ref_relation || item.cand_ref_relationship || "N/A"} />
+                        <Label label="Organization / Institute" value={item.cand_ref_org || item.cand_ref_institute || "N/A"} />
+                        <Label label="Designation / Role" value={item.cand_ref_designation || item.cand_ref_relation || "N/A"} />
                       </div>
                     </div>
                   ))}

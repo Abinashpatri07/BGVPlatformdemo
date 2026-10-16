@@ -256,7 +256,7 @@ const SetupClientPasswordPage = () => {
                       {otpSent ? "Verifying..." : "Sending OTP..."}
                     </>
                   ) : (
-                    otpSent ? "Verify & Set Password" : "Send OTP to Email"
+                    otpSent ? "Verify & Set Password" : "Send OTP"
                   )}
                 </button>
               </div>

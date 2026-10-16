@@ -341,12 +341,21 @@ export default function SuperAdminIdentificationDetails() {
               {["Verified", "Partially Verified", "Unable To Verify", "Verification Pending"].map((opt) => (
                 <label
                   key={opt}
+                  onClick={() => setDecision(opt)}
                   className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition ${
                     decision === opt
                       ? "border-indigo-600 bg-indigo-50/40 shadow-sm"
                       : "border-gray-200 hover:bg-gray-50"
                   }`}
                 >
+                  <input
+                    type="radio"
+                    name="identification-decision"
+                    value={opt}
+                    checked={decision === opt}
+                    onChange={() => setDecision(opt)}
+                    className="hidden"
+                  />
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                     decision === opt ? "border-indigo-800" : "border-gray-300"
                   }`}>
