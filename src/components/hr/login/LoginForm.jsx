@@ -203,7 +203,7 @@ export default function HRLoginForm() {
               Remember me
             </label>
             <button
-              onClick={() => navigate("/forgot-password")}
+              onClick={() => navigate("/hr/forgot-password")}
               className="text-sm text-gray-500 hover:text-indigo-600"
             >
               Forgot password

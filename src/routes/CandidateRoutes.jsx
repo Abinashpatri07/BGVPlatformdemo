@@ -8,6 +8,7 @@ import DigiLockerCallback from "../pages/candidate/DigiLockerCallback";
 import SetupPasswordPage from "../pages/candidate/SetupPasswordPage";
 import SetupVendorPasswordPage from "../pages/vendor/SetupVendorPasswordPage";
 import SetupClientPasswordPage from "../pages/clientAdmin/SetupClientPasswordPage";
+import SetupHRPasswordPage from "../pages/hr/SetupHRPasswordPage";
 
 function CandidateRoutes() {
   return (
@@ -16,6 +17,7 @@ function CandidateRoutes() {
       <Route path="setup-password" element={<SetupPasswordPage />} />
       <Route path="vendor-setup-password" element={<SetupVendorPasswordPage />} />
       <Route path="client-setup-password" element={<SetupClientPasswordPage />} />
+      <Route path="hr-setup-password" element={<SetupHRPasswordPage />} />
       <Route path="verification" element={<VerificationPage />} />
       <Route path="forgot-password" element={<ForgotPassword />} />
       <Route path="digilocker" element={<DigiLockerPage />} />
