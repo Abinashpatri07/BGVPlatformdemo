@@ -96,7 +96,7 @@ const SetupVendorPasswordPage = () => {
       if (response.data.success) {
         setSuccess(true);
         setTimeout(() => {
-          navigate("/vendor"); // Redirect to vendor login
+          navigate("/vendor/login"); // Redirect to vendor login
         }, 3000);
       }
     } catch (err) {
@@ -266,7 +266,7 @@ const SetupVendorPasswordPage = () => {
 
           {!success && (
             <div className="mt-6 text-center">
-              <Link to="/vendor" className="text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors">
+              <Link to="/vendor/login" className="text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors">
                 Back to Login
               </Link>
             </div>

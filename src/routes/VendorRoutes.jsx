@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import VendorLayout from "../layouts/VendorLayout";
 import VendorLogin from "../pages/vendor/VendorLogin";
+import VendorForgotPassword from "../pages/vendor/VendorForgotPassword";
 import VendorHome from "../pages/vendor/VendorHome";
 import VendorDashboard from "../pages/vendor/VendorDashboard";
 import VendorAnalytics from "../pages/vendor/VendorAnalytics";
@@ -21,6 +22,7 @@ function VendorRoutes() {
   return (
     <Routes>
       <Route path="login" element={<VendorLogin />} />
+      <Route path="forgot-password" element={<VendorForgotPassword />} />
       <Route element={<VendorLayout />}>
         <Route path="home" element={<VendorHome />} />
         <Route path="dashboard" element={<VendorDashboard />} />
