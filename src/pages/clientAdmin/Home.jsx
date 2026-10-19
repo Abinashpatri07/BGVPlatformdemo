@@ -10,6 +10,7 @@ function Home() {
   const [hrStats, setHrStats] = useState(null);
   const [candidateStats, setCandidateStats] = useState(null);
   const [recentProfiles, setRecentProfiles] = useState([]);
+  const [credits, setCredits] = useState(null);
 
   useEffect(() => {
     const fetchMetrics = async () => {
@@ -19,6 +20,7 @@ function Home() {
           setHrStats(res.data.data.hrStats);
           setCandidateStats(res.data.data.candidateStats);
           setRecentProfiles(res.data.data.recentProfiles || []);
+          setCredits(res.data.data.credits || null);
         }
       } catch (error) {
         console.error("Failed to fetch dashboard metrics:", error);
@@ -50,7 +52,7 @@ function Home() {
             {/* VERIFICATION CREDITS */}
             <div className="col-span-4">
               <div className="h-full">
-                <VerificationCredits />
+                <VerificationCredits data={credits} />
               </div>
             </div>
           </div>

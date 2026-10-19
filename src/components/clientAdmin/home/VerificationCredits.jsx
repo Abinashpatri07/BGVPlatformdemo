@@ -5,22 +5,22 @@ import {
   CircleDollarSign,
 } from "lucide-react";
 
-export function VerificationCredits() {
+export function VerificationCredits({ data }) {
 
   const credits = [
     {
       label: "Total Credits",
-      value: "5,000",
+      value: data ? Number(data.totalCredits || 0).toLocaleString() : "0",
       icon: <FileText size={18} className="text-white/80" />,
     },
     {
       label: "Credits Used",
-      value: "3,850",
+      value: data ? Number(data.creditsUsed || 0).toLocaleString() : "0",
       icon: <CreditCard size={18} className="text-white/80" />,
     },
     {
       label: "Available Remaining",
-      value: "1,150",
+      value: data ? Number(data.availableRemaining || 0).toLocaleString() : "0",
       icon: <Wallet size={18} className="text-white/80" />,
     },
   ];

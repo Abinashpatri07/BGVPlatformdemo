@@ -14,6 +14,8 @@ import {
   Eye,
   ArrowLeft,
   Download,
+  FileText,
+  XCircle,
 } from "lucide-react";
 import { exportCandidateCompleteReport } from "../../../utils/exportCandidatePdf";
 
@@ -23,6 +25,73 @@ const Label = ({ label, value }) => (
     <p className="text-sm font-medium text-gray-700">{value}</p>
   </div>
 );
+
+// Formats file path to full backend URL if relative
+const getDocUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  const clean = path.replace(/\\/g, "/");
+  const base = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  return `${base}/${clean.startsWith("/") ? clean.slice(1) : clean}`;
+};
+
+// Renders a document preview: image, pdf link, or empty state
+const DocumentPreview = ({ url, noDocMessage }) => {
+  const fullUrl = getDocUrl(url);
+
+  if (!fullUrl) {
+    return (
+      <div className="bg-white p-4 rounded-xl shadow border flex flex-col items-center justify-center min-h-[200px]">
+        <XCircle size={40} className="text-gray-300 mb-3" />
+        <p className="text-sm text-gray-400 font-medium text-center">
+          {noDocMessage || "No Document Available"}
+        </p>
+      </div>
+    );
+  }
+
+  const lUrl = fullUrl.toLowerCase();
+  const isPdf = lUrl.endsWith(".pdf") || lUrl.includes(".pdf");
+
+  return (
+    <div className="bg-white p-4 rounded-xl shadow border text-center">
+      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
+      {isPdf ? (
+        <div className="flex flex-col items-center justify-center min-h-[160px] bg-gray-50 rounded-lg">
+          <FileText size={48} className="text-[#01026E] mb-2" />
+          <p className="text-xs text-gray-500 mb-3">PDF Document</p>
+          <a
+            href={fullUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-1 text-xs text-white bg-[#01026E] px-3 py-1.5 rounded-lg hover:bg-indigo-800 transition"
+          >
+            <Eye size={14} /> View Document
+          </a>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <img
+            src={fullUrl}
+            alt="document"
+            className="rounded-lg shadow-sm mx-auto h-56 object-contain w-full bg-gray-50 border"
+            onError={(e) => {
+              e.target.outerHTML = `<div class="flex flex-col items-center justify-center min-h-[160px] bg-gray-50 rounded-lg"><svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='#6b7280' stroke-width='1.5'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg><a href='${fullUrl}' target='_blank' class='mt-2 text-xs text-indigo-700 underline font-medium'>Open Document</a></div>`;
+            }}
+          />
+          <a
+            href={fullUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-[#01026E] hover:underline font-medium"
+          >
+            <Eye size={13} /> Open Full View
+          </a>
+        </div>
+      )}
+    </div>
+  );
+};
 
 function View() {
   const { id } = useParams();
@@ -304,8 +373,23 @@ function View() {
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    {/* Left: Info Grid */}
+                    <div className="lg:col-span-7 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                      <div className="flex items-center justify-between pb-4 mb-4 border-b border-gray-100">
+                        <div>
+                          <h4 className="text-base font-bold text-gray-900">
+                            {identityView.cand_iden_type || identityView.cand_ident_type || "National ID"}
+                          </h4>
+                          <p className="text-xs text-gray-400 font-mono mt-0.5">
+                            ID: {identityView.pan_number || identityView.driving_number || identityView.voter_number || identityView.passport_number || identityView.uan_number || identityView.cand_ident_number || "N/A"}
+                          </p>
+                        </div>
+                        <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-3 py-1 rounded-full flex items-center gap-1 font-medium">
+                          <CheckCircle size={12} /> Verified
+                        </span>
+                      </div>
+
                       <div className="grid grid-cols-2 gap-5">
                         <Label label="Cardholder Name" value={identityView.cand_full_name || `${candidateData.candidate_first_name} ${candidateData.candidate_last_name || ""}`} />
                         <Label label="Document Type" value={identityView.cand_iden_type || identityView.cand_ident_type || "National ID"} />
@@ -321,25 +405,12 @@ function View() {
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-[#02027A] to-[#1E3A8A] p-6 rounded-xl text-white shadow-md flex flex-col justify-between min-h-[220px]">
-                      <div>
-                        <div className="flex justify-between items-center mb-4">
-                          <span className="text-xs uppercase tracking-wider text-indigo-200 font-semibold">Government of India</span>
-                          <span className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded font-medium">Verified</span>
-                        </div>
-                        <p className="text-xs text-indigo-200">Document Type</p>
-                        <h4 className="text-lg font-bold tracking-wide">{identityView.cand_iden_type || identityView.cand_ident_type || "National ID"}</h4>
-                      </div>
-                      <div className="my-3 py-3 border-y border-white/10">
-                        <p className="text-xs text-indigo-200">ID / Document Number</p>
-                        <p className="text-xl font-mono tracking-widest font-bold text-amber-300">
-                          {identityView.pan_number || identityView.driving_number || identityView.voter_number || identityView.passport_number || identityView.uan_number || identityView.cand_ident_number || "N/A"}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-indigo-200">Name</p>
-                        <p className="text-sm font-semibold uppercase">{identityView.cand_full_name || `${candidateData.candidate_first_name} ${candidateData.candidate_last_name || ""}`}</p>
-                      </div>
+                    {/* Right: Actual Uploaded Document Image / Preview */}
+                    <div className="lg:col-span-5">
+                      <DocumentPreview
+                        url={identityView.cand_iden_docu || identityView.cand_iden_doc || identityView.doc_file_path || null}
+                        noDocMessage="No Identity Document Uploaded"
+                      />
                     </div>
                   </div>
                 </>
@@ -402,22 +473,50 @@ function View() {
                     <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
                       <div className="grid grid-cols-2 gap-5">
                         <Label label="Institute Name" value={showEducationView.cand_edu_institute || "N/A"} />
-                        <Label label="Degree" value={showEducationView.cand_edu_type || "N/A"} />
+                        <Label label="Degree" value={showEducationView.cand_edu_type || showEducationView.cand_edu_dgree || "N/A"} />
                         <Label label="Start Date" value={showEducationView.cand_edu_from_date ? new Date(showEducationView.cand_edu_from_date).toLocaleDateString() : "N/A"} />
                         <Label label="End Date" value={showEducationView.cand_edu_to_date ? new Date(showEducationView.cand_edu_to_date).toLocaleDateString() : "N/A"} />
-                        <Label label="Course" value={showEducationView.cand_edu_course || "N/A"} />
-                        <Label label="Percentage/CGPA" value={showEducationView.cand_edu_grade || "N/A"} />
+                        <Label label="Course / Specialization" value={showEducationView.cand_specialization || showEducationView.cand_edu_course || "N/A"} />
+                        <Label label="Percentage / CGPA" value={showEducationView.cand_edu_grade || "N/A"} />
+                      </div>
+
+                      {/* Education Document Links */}
+                      <div className="mt-5 pt-4 border-t border-gray-100">
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Attached Documents</p>
+                        <div className="flex flex-wrap gap-2">
+                          {showEducationView.cand_edu_certificate && (
+                            <a
+                              href={getDocUrl(showEducationView.cand_edu_certificate)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition"
+                            >
+                              <FileText size={13} />
+                              Certificate
+                            </a>
+                          )}
+                          {showEducationView.cand_edu_marksheet && (
+                            <a
+                              href={getDocUrl(showEducationView.cand_edu_marksheet)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition"
+                            >
+                              <FileText size={13} />
+                              Marksheet
+                            </a>
+                          )}
+                          {!showEducationView.cand_edu_certificate && !showEducationView.cand_edu_marksheet && (
+                            <span className="text-xs text-gray-400 italic">No document links available</span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="bg-white p-4 rounded-xl shadow border text-center">
-                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
-                      <img
-                        src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
-                        alt="certificate"
-                        className="rounded-lg shadow-sm mx-auto h-64 object-cover"
-                      />
-                    </div>
+                    <DocumentPreview
+                      url={showEducationView.cand_edu_certificate || showEducationView.cand_edu_marksheet || null}
+                      noDocMessage="No Education Document Uploaded"
+                    />
                   </div>
                 </>
               )}
@@ -484,17 +583,65 @@ function View() {
                         <Label label="From Date" value={showEmploymentView.cand_emp_from_date ? new Date(showEmploymentView.cand_emp_from_date).toLocaleDateString() : "N/A"} />
                         <Label label="To Date" value={showEmploymentView.cand_emp_to_date ? new Date(showEmploymentView.cand_emp_to_date).toLocaleDateString() : "Present"} />
                         <Label label="Designation" value={showEmploymentView.cand_emp_designation || "N/A"} />
-                        <Label label="Drawn CTC" value="N/A" />
+                        <Label label="Employment Type" value={showEmploymentView.cand_emp_type || "N/A"} />
+                        {showEmploymentView.cand_emp_uan_number && (
+                          <Label label="UAN Number" value={showEmploymentView.cand_emp_uan_number} />
+                        )}
+                      </div>
+
+                      {/* Documents Section */}
+                      <div className="mt-5 pt-4 border-t border-gray-100">
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Available Documents</p>
+                        <div className="flex flex-wrap gap-2">
+                          {showEmploymentView.cand_emp_joining && (
+                            <a
+                              href={getDocUrl(showEmploymentView.cand_emp_joining)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition"
+                            >
+                              <FileText size={13} />
+                              Joining Letter
+                            </a>
+                          )}
+                          {showEmploymentView.cand_emp_payslip && (
+                            <a
+                              href={getDocUrl(showEmploymentView.cand_emp_payslip)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition"
+                            >
+                              <FileText size={13} />
+                              Relieving / Payslip
+                            </a>
+                          )}
+                          {showEmploymentView.cand_emp_service && (
+                            <a
+                              href={getDocUrl(showEmploymentView.cand_emp_service)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition"
+                            >
+                              <FileText size={13} />
+                              Service Letter
+                            </a>
+                          )}
+                          {!showEmploymentView.cand_emp_joining && !showEmploymentView.cand_emp_payslip && !showEmploymentView.cand_emp_service && (
+                            <span className="text-xs text-gray-400 italic">No document links available</span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="bg-white p-4 rounded-xl shadow border text-center">
-                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
-                      <img
-                        src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
-                        className="rounded-lg shadow-sm mx-auto h-64 object-cover"
-                      />
-                    </div>
+                    <DocumentPreview
+                      url={
+                        showEmploymentView.cand_emp_joining ||
+                        showEmploymentView.cand_emp_payslip ||
+                        showEmploymentView.cand_emp_service ||
+                        null
+                      }
+                      noDocMessage="No Employment Document Uploaded"
+                    />
                   </div>
                 </>
               )}
@@ -511,24 +658,37 @@ function View() {
 
                   <div className="mt-4 mb-6 space-y-4">
                     {candidateData.criminal && candidateData.criminal.length > 0 ? (
-                      candidateData.criminal.map((item, idx) => (
-                        <div key={idx} className="bg-white border rounded-xl shadow-sm p-5 flex justify-between items-center">
-                          <div>
-                            <p className="text-sm font-medium text-gray-800">Criminal Record Exist</p>
-                            <p className="text-xs text-gray-400 mt-1">Case Number: {item.cand_crim_record || "N/A"}</p>
-                          </div>
+                      candidateData.criminal.map((item, idx) => {
+                        const hasCriminal = item.cand_crim_record === "Yes" || !!item.cand_crim_report;
+                        return (
+                          <div key={idx} className="bg-white border rounded-xl shadow-sm p-5 flex justify-between items-center">
+                            <div>
+                              <p className={`text-sm font-medium ${hasCriminal ? "text-red-700" : "text-green-700"}`}>
+                                {hasCriminal ? "Criminal Record Report Exists" : "No Criminal Record"}
+                              </p>
+                              <p className="text-xs text-gray-400 mt-1">
+                                Case / Record: {item.cand_crim_record || "None"}
+                              </p>
+                              {item.cand_crim_remarks && (
+                                <p className="text-xs text-gray-400 mt-0.5">Remarks: {item.cand_crim_remarks}</p>
+                              )}
+                            </div>
 
-                          <div
-                            onClick={() => setCriminalView(item)}
-                            className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
-                          >
-                            <Eye size={16} />
-                            <span className="text-sm font-medium">View</span>
+                            <div
+                              onClick={() => setCriminalView(item)}
+                              className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition"
+                            >
+                              <Eye size={16} />
+                              <span className="text-sm font-medium">View</span>
+                            </div>
                           </div>
-                        </div>
-                      ))
+                        );
+                      })
                     ) : (
-                      <p className="text-gray-500 text-sm">No criminal records found.</p>
+                      <div className="bg-white border rounded-xl shadow-sm p-6 flex items-center gap-3">
+                        <CheckCircle size={20} className="text-green-500" />
+                        <p className="text-sm font-medium text-green-700">No criminal records found for this candidate.</p>
+                      </div>
                     )}
                   </div>
                 </>
@@ -550,7 +710,7 @@ function View() {
                     <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
                       <div className="grid grid-cols-2 gap-5">
                         <Label label="Name" value={`${candidateData.candidate_first_name} ${candidateData.candidate_last_name || ""}`} />
-                        <Label label="Case No" value={criminalView.cand_crim_record || "N/A"} />
+                        <Label label="Case No / Record" value={criminalView.cand_crim_record || "N/A"} />
                         <Label label="Date" value={criminalView.cand_crim_date ? new Date(criminalView.cand_crim_date).toLocaleDateString() : "N/A"} />
                         <div className="col-span-2">
                           <Label 
@@ -559,16 +719,27 @@ function View() {
                           />
                         </div>
                       </div>
+
+                      {criminalView.cand_crim_report && (
+                        <div className="mt-5 pt-4 border-t border-gray-100">
+                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Attached Report</p>
+                          <a
+                            href={getDocUrl(criminalView.cand_crim_report)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition"
+                          >
+                            <FileText size={13} />
+                            Criminal Report Document
+                          </a>
+                        </div>
+                      )}
                     </div>
 
-                    <div className="bg-white p-4 rounded-xl shadow border text-center">
-                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
-                      <img
-                        src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
-                        alt="document preview"
-                        className="rounded-lg shadow-sm mx-auto h-64 object-cover"
-                      />
-                    </div>
+                    <DocumentPreview
+                      url={criminalView.cand_crim_report || null}
+                      noDocMessage="No Criminal Document Uploaded"
+                    />
                   </div>
                 </>
               )}
@@ -590,6 +761,9 @@ function View() {
                           <div>
                             <p className="text-sm font-medium text-gray-800">Drug Test Report</p>
                             <p className="text-xs text-gray-400 mt-1">Report Number: {item.cand_drug_test || "N/A"}</p>
+                            {item.cand_drug_remarks && (
+                              <p className="text-xs text-gray-400 mt-0.5">Remarks: {item.cand_drug_remarks}</p>
+                            )}
                           </div>
 
                           <div
@@ -633,16 +807,27 @@ function View() {
                           />
                         </div>
                       </div>
+
+                      {drugView.cand_drug_report && (
+                        <div className="mt-5 pt-4 border-t border-gray-100">
+                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Attached Report</p>
+                          <a
+                            href={getDocUrl(drugView.cand_drug_report)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition"
+                          >
+                            <FileText size={13} />
+                            Drug Test Report Document
+                          </a>
+                        </div>
+                      )}
                     </div>
 
-                    <div className="bg-white p-4 rounded-xl shadow border text-center">
-                      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
-                      <img
-                        src="https://images.unsplash.com/photo-1586281380349-632531db7ed4"
-                        alt="document preview"
-                        className="rounded-lg shadow-sm mx-auto h-64 object-cover"
-                      />
-                    </div>
+                    <DocumentPreview
+                      url={drugView.cand_drug_report || null}
+                      noDocMessage="No Drug Test Document Uploaded"
+                    />
                   </div>
                 </>
               )}
@@ -683,3 +868,4 @@ function View() {
 }
 
 export default View;
+

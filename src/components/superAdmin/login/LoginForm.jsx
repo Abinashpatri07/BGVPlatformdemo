@@ -9,9 +9,9 @@ function LoginPopup({ type, title, message, onClose }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (onClose) onClose();
-    }, 3000);
+    }, isSuccess ? 3000 : 6000);
     return () => clearTimeout(timer);
-  }, [onClose]);
+  }, [onClose, isSuccess]);
 
   return (
     <div className="fixed top-6 right-6 z-[9999] animate-[fadeIn_0.3s_ease-out]">
