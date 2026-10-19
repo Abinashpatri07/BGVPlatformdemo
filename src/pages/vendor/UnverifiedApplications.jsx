@@ -295,6 +295,10 @@ function UnverifiedApplications() {
                           navigate(`/vendor/education-details?mode=${mode}&caseId=${row.id}`);
                         } else if (row.caseType.includes("Criminal Check")) {
                           navigate(`/vendor/criminal-details?mode=${mode}&caseId=${row.id}`);
+                        } else if (row.caseType.includes("Identification") || row.caseType.includes("Identity")) {
+                          navigate(`/vendor/identity-details?mode=${mode}&caseId=${row.id}`);
+                        } else if (row.caseType.includes("Reference")) {
+                          navigate(`/vendor/reference-details?mode=${mode}&caseId=${row.id}`);
                         }
                       }}
                     >

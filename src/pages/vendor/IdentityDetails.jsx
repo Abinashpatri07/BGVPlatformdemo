@@ -13,7 +13,10 @@ import {
   CheckSquare,
   MessageSquare,
   Loader2,
-  FileText
+  FileText,
+  Upload,
+  CloudUpload,
+  Trash2
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -38,6 +41,7 @@ export default function IdentityDetails() {
   const [selectedDocIndex, setSelectedDocIndex] = useState(0);
   const [decision, setDecision] = useState("Verified");
   const [remarks, setRemarks] = useState("");
+  const [evidenceFile, setEvidenceFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -72,10 +76,21 @@ export default function IdentityDetails() {
     setSubmitting(true);
     try {
       const token = localStorage.getItem("vendorToken");
+      const formData = new FormData();
+      formData.append("decision", decision);
+      formData.append("remarks", remarks);
+      if (evidenceFile) {
+        formData.append("evidenceFile", evidenceFile);
+      }
       await axios.post(
         `${API}/api/vendor/cases/${caseId}/verify`,
-        { decision, remarks },
-        { headers: { Authorization: `Bearer ${token}` } }
+        formData,
+        { 
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data"
+          } 
+        }
       );
       alert("Verification submitted successfully!");
       navigate(-1);
@@ -388,6 +403,60 @@ export default function IdentityDetails() {
                   </span>
                 </label>
               ))}
+            </div>
+          </div>
+
+          {/* Evidence Upload Screen */}
+          <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-3 border-b border-gray-100 pb-4 mb-6">
+              <div className="p-1.5 bg-indigo-50 rounded text-indigo-700">
+                <Upload size={20} />
+              </div>
+              <h2 className="text-lg font-bold text-indigo-900">
+                Evidence Upload (ID Match Proof / Offline Verification)
+              </h2>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-xs text-gray-500">
+                Attach verification report, official portal confirmation screenshot, or field check proof (PDF, PNG, JPG up to 10MB).
+              </p>
+
+              {evidenceFile ? (
+                <div className="flex items-center justify-between p-4 bg-indigo-50/50 border border-indigo-200 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <FileText className="text-indigo-600" size={24} />
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">{evidenceFile.name}</p>
+                      <p className="text-xs text-gray-500">{(evidenceFile.size / 1024).toFixed(1)} KB</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setEvidenceFile(null)}
+                    className="p-1 text-red-500 hover:bg-red-50 rounded transition"
+                    title="Remove file"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-indigo-200 hover:border-indigo-400 bg-indigo-50/20 hover:bg-indigo-50/40 rounded-xl cursor-pointer transition">
+                  <CloudUpload size={36} className="text-indigo-600 mb-2" />
+                  <span className="text-sm font-semibold text-indigo-950">Click to upload verification evidence</span>
+                  <span className="text-xs text-gray-400 mt-1">PDF, JPG, JPEG, PNG</span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept=".pdf,.png,.jpg,.jpeg"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        setEvidenceFile(e.target.files[0]);
+                      }
+                    }}
+                  />
+                </label>
+              )}
             </div>
           </div>
 
