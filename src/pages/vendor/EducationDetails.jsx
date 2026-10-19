@@ -13,7 +13,14 @@ import {
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+const getDocUrl = (path) => {
+  if (!path) return "#";
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  const clean = path.replace(/\\/g, "/");
+  return `${API}/${clean.startsWith("/") ? clean.slice(1) : clean}`;
+};
 
 function formatDate(dateStr) {
   if (!dateStr) return "N/A";
@@ -195,7 +202,7 @@ function EducationDetails() {
                             <p className="text-sm font-semibold text-gray-800">Mark sheet</p>
                             <p className="text-xs text-gray-400">{edu.cand_edu_marksheet}</p>
                           </div>
-                          <a href={`${API}/uploads/${edu.cand_edu_marksheet}`} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-gray-600 transition">
+                          <a href={getDocUrl(edu.cand_edu_marksheet)} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-gray-600 transition">
                             <Eye size={18} />
                           </a>
                         </div>
@@ -217,7 +224,7 @@ function EducationDetails() {
                             <p className="text-sm font-semibold text-gray-800">Certificate</p>
                             <p className="text-xs text-gray-400">{edu.cand_edu_certificate}</p>
                           </div>
-                          <a href={`${API}/uploads/${edu.cand_edu_certificate}`} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-gray-600 transition">
+                          <a href={getDocUrl(edu.cand_edu_certificate)} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-gray-600 transition">
                             <Eye size={18} />
                           </a>
                         </div>

@@ -26,9 +26,19 @@ const Label = ({ label, value }) => (
   </div>
 );
 
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+const resolveDocUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  const clean = path.replace(/\\/g, "/");
+  return `${API_BASE}/${clean.startsWith("/") ? clean.slice(1) : clean}`;
+};
+
 // Renders a document preview: image, pdf link, or empty state
 const DocumentPreview = ({ url, noDocMessage }) => {
-  if (!url) {
+  const resolvedUrl = resolveDocUrl(url);
+  if (!resolvedUrl) {
     return (
       <div className="bg-white p-4 rounded-xl shadow border flex flex-col items-center justify-center min-h-[200px]">
         <XCircle size={40} className="text-gray-300 mb-3" />
@@ -39,7 +49,7 @@ const DocumentPreview = ({ url, noDocMessage }) => {
     );
   }
 
-  const lUrl = url.toLowerCase();
+  const lUrl = resolvedUrl.toLowerCase();
   const isPdf = lUrl.endsWith(".pdf") || lUrl.includes(".pdf");
 
   return (
@@ -50,7 +60,7 @@ const DocumentPreview = ({ url, noDocMessage }) => {
           <FileText size={48} className="text-[#01026E] mb-2" />
           <p className="text-xs text-gray-500 mb-3">PDF Document</p>
           <a
-            href={url}
+            href={resolvedUrl}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-1 text-xs text-white bg-[#01026E] px-3 py-1.5 rounded-lg hover:bg-indigo-800 transition"
@@ -60,11 +70,11 @@ const DocumentPreview = ({ url, noDocMessage }) => {
         </div>
       ) : (
         <img
-          src={url}
+          src={resolvedUrl}
           alt="document"
           className="rounded-lg shadow-sm mx-auto h-48 object-cover w-full"
           onError={(e) => {
-            e.target.outerHTML = `<div class="flex flex-col items-center justify-center min-h-[160px] bg-gray-50 rounded-lg"><svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='#6b7280' stroke-width='1.5'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg><a href='${url}' target='_blank' class='mt-2 text-xs text-indigo-700 underline'>Open Document</a></div>`;
+            e.target.outerHTML = `<div class="flex flex-col items-center justify-center min-h-[160px] bg-gray-50 rounded-lg"><svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='#6b7280' stroke-width='1.5'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg><a href='${resolvedUrl}' target='_blank' class='mt-2 text-xs text-indigo-700 underline'>Open Document</a></div>`;
           }}
         />
       )}
@@ -544,7 +554,7 @@ function View() {
                         <div className="flex flex-wrap gap-2">
                           {showEmploymentView.cand_emp_joining && (
                             <a
-                              href={showEmploymentView.cand_emp_joining}
+                              href={resolveDocUrl(showEmploymentView.cand_emp_joining)}
                               target="_blank"
                               rel="noreferrer"
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition"
@@ -555,7 +565,7 @@ function View() {
                           )}
                           {showEmploymentView.cand_emp_payslip && (
                             <a
-                              href={showEmploymentView.cand_emp_payslip}
+                              href={resolveDocUrl(showEmploymentView.cand_emp_payslip)}
                               target="_blank"
                               rel="noreferrer"
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition"
@@ -566,7 +576,7 @@ function View() {
                           )}
                           {showEmploymentView.cand_emp_service && (
                             <a
-                              href={showEmploymentView.cand_emp_service}
+                              href={resolveDocUrl(showEmploymentView.cand_emp_service)}
                               target="_blank"
                               rel="noreferrer"
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition"
