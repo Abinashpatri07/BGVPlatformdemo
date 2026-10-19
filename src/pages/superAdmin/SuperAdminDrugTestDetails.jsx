@@ -155,14 +155,27 @@ function SuperAdminDrugTestDetails() {
               </div>
 
               {/* Show candidate-submitted data from DB */}
-              {drugRecord.cand_drug_date && (
-                <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                  <div className="grid grid-cols-2 gap-4">
-                    <Field label="Test Date" value={drugRecord.cand_drug_date ? new Date(drugRecord.cand_drug_date).toLocaleDateString("en-IN") : null} />
-                    <Field label="Reported Status" value={drugRecord.cand_drug_test === "Yes" ? "Positive" : drugRecord.cand_drug_test === "No" ? "Negative" : drugRecord.cand_drug_test} />
+              <div className="mb-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">
+                  Candidate Submission Details
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <Field 
+                    label="Drug Test Taken?" 
+                    value={drugRecord.cand_drug_test === "Yes" ? "Yes" : drugRecord.cand_drug_test === "No" ? "No" : (drugRecord.cand_drug_test || "Not Specified")} 
+                  />
+                  <Field 
+                    label="Test Date" 
+                    value={drugRecord.cand_drug_date ? new Date(drugRecord.cand_drug_date).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"} 
+                  />
+                  <div className="col-span-2">
+                    <Field 
+                      label="Candidate Remarks / Substance Details" 
+                      value={drugRecord.cand_drug_remarks || "None provided"} 
+                    />
                   </div>
                 </div>
-              )}
+              </div>
 
               <div className="mb-4">
                 <p className="text-sm text-gray-500 mb-4">

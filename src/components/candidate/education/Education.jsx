@@ -162,6 +162,48 @@ function Education({ onNext }) {
     }));
   };
 
+  const handleUploadMarksheet = (e, docName) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const allowed = [
+      "application/pdf",
+      "image/png",
+      "image/jpeg",
+      "image/jpg",
+    ];
+
+    if (!allowed.includes(file.type)) {
+      setFiles((prev) => ({
+        ...prev,
+        [docName]: { ...prev[docName], error: "Only PDF / JPG / PNG allowed for marksheet" },
+      }));
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setFiles((prev) => ({
+        ...prev,
+        [docName]: {
+          ...prev[docName],
+          error: "Marksheet file size exceeds 5MB limit.",
+        },
+      }));
+      return;
+    }
+
+    setFiles((prev) => ({
+      ...prev,
+      [docName]: {
+        ...prev[docName],
+        marksheetFileName: file.name,
+        marksheetFileObject: file,
+        marksheetSize: (file.size / 1024 / 1024).toFixed(2),
+        error: null,
+      },
+    }));
+  };
+
   // ── Field change handler ─────────────────────────────────────────────────
   const handleFieldChange = (docName, field, value) => {
     setFiles((prev) => ({
@@ -250,6 +292,15 @@ function Education({ onNext }) {
             item.existingFileUrl
           );
         }
+        if (item.marksheetFileObject) {
+          formData.append(`marksheet_${docName}`, item.marksheetFileObject);
+        }
+        if (item.existingMarksheetUrl) {
+          formData.append(
+            `existingMarksheetUrl_${docName}`,
+            item.existingMarksheetUrl
+          );
+        }
       });
 
       formData.append("educationData", JSON.stringify(educationData));
@@ -325,6 +376,7 @@ function Education({ onNext }) {
                   setOpenCard(openCard === doc ? null : doc)
                 }
                 onUpload={(e) => handleUpload(e, doc)}
+                onUploadMarksheet={(e) => handleUploadMarksheet(e, doc)}
                 inputRef={(el) => (fileRefs.current[doc] = el)}
                 onOpenFile={() => fileRefs.current[doc]?.click()}
                 onChangeField={(field, val) =>

@@ -260,21 +260,57 @@ export default function SuperAdminIdentificationDetails() {
                   </div>
                 </div>
 
-                {/* Right side: Realistic Digital Document Preview */}
-                <div className="lg:col-span-5 bg-slate-50 p-6 rounded-2xl border border-slate-200 text-center flex flex-col items-center justify-center">
+                {/* Right side: Realistic Digital Document Preview / Exact Uploaded File */}
+                <div className="lg:col-span-5 bg-slate-50 p-6 rounded-2xl border border-slate-200 text-center flex flex-col items-center justify-start">
                   <div className="flex items-center justify-between w-full mb-3 px-1">
-                    <p className="text-xs text-[#01026E] font-bold uppercase tracking-wider">Document Preview</p>
+                    <p className="text-xs text-[#01026E] font-bold uppercase tracking-wider">Candidate Uploaded Document</p>
                     <span className="text-[11px] font-medium text-slate-500">{activeDoc?.cand_iden_type}</span>
                   </div>
 
                   {activeDoc?.cand_iden_docu ? (
-                    <img
-                      src={activeDoc.cand_iden_docu.startsWith("http") ? activeDoc.cand_iden_docu : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/${activeDoc.cand_iden_docu}`}
-                      alt="Identity document preview"
-                      className="rounded-xl shadow-md max-h-72 object-contain border border-slate-200 bg-white"
-                    />
+                    (() => {
+                      const cleanPath = activeDoc.cand_iden_docu.replace(/\\/g, "/");
+                      const docUrl = cleanPath.startsWith("http")
+                        ? cleanPath
+                        : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/${cleanPath.startsWith("/") ? cleanPath.slice(1) : cleanPath}`;
+                      const isPdf = cleanPath.toLowerCase().endsWith(".pdf");
+
+                      return (
+                        <div className="w-full flex flex-col items-center gap-3">
+                          <div className="w-full bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm flex items-center justify-center p-2 min-h-[260px] max-h-[380px]">
+                            {isPdf ? (
+                              <iframe
+                                src={docUrl}
+                                title="Uploaded Document PDF"
+                                className="w-full h-72 rounded-lg border border-slate-100"
+                              />
+                            ) : (
+                              <img
+                                src={docUrl}
+                                alt="Candidate Uploaded Document"
+                                className="rounded-lg max-h-72 w-auto max-w-full object-contain select-none"
+                              />
+                            )}
+                          </div>
+
+                          <div className="flex items-center justify-between w-full pt-2 px-1 text-xs text-slate-500">
+                            <span className="truncate max-w-[200px] text-left font-mono text-[11px]">
+                              {cleanPath.split("/").pop()}
+                            </span>
+                            <a
+                              href={docUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold transition"
+                            >
+                              <Eye size={14} /> Open Full Size
+                            </a>
+                          </div>
+                        </div>
+                      );
+                    })()
                   ) : (
-                    /* Digital ID Card Mockup */
+                    /* Digital ID Card Mockup fallback if candidate has not uploaded document image */
                     <div className="w-full max-w-sm rounded-2xl overflow-hidden shadow-lg border border-slate-300 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-5 relative text-left select-none">
                       <div className="flex justify-between items-start border-b border-white/15 pb-3 mb-4">
                         <div>

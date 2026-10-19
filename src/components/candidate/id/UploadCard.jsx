@@ -32,13 +32,9 @@ export default function UploadCard({
             <p className="text-[11px] mt-0.5 flex items-center gap-1 text-red-500 font-medium">
               {nameMismatch ? "Name mismatch detected" : "Verification failed"}
             </p>
-          ) : verificationState?.status === "verifying" ? (
-            <p className="text-[11px] mt-0.5 flex items-center gap-1 text-blue-600">
-              Verifying document details...
-            </p>
           ) : (
             <p className="text-[11px] mt-0.5 flex items-center gap-1 text-green-600">
-              {verificationState?.status === "success" ? "Verified successfully" : "Uploaded successfully"}
+              Uploaded successfully
             </p>
           )}
         </div>

@@ -267,9 +267,11 @@ function ReviewContent({ candidateData }) {
             </h4>
             <Field label="Institute Name" value={edu.cand_edu_institute || "N/A"} />
             <Field label="Start Date" value={formatDate(edu.cand_edu_from_date)} />
-            <Field label="End Date" value={formatDate(edu.cand_edu_to_date)} />
+            <Field label="End Date / Passing Year" value={edu.cand_edu_to_date ? formatDate(edu.cand_edu_to_date) : "N/A"} />
             <Field label="Course" value={edu.cand_specialization || "N/A"} />
             <Field label="Percentage/CGPA" value={edu.cand_edu_grade || "N/A"} />
+            <Field label="Degree Certificate" value={edu.cand_edu_certificate ? "Uploaded" : "Not Provided"} verified={!!edu.cand_edu_certificate} />
+            <Field label="Marksheet" value={edu.cand_edu_marksheet ? "Uploaded" : "Not Provided"} verified={!!edu.cand_edu_marksheet} />
           </React.Fragment>
         )) : <p className="text-sm text-gray-500 col-span-1 sm:col-span-2 md:col-span-3">No education details added.</p>}
       </Section>

@@ -4,15 +4,26 @@ import { Pencil } from "lucide-react";
 function EmploymentCard({ employments, onAddNew, onFinalSubmit, onEdit }) {
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
-    const date = new Date(dateStr);
-    return date.toLocaleString("default", { month: "short" }) + " " + date.getFullYear();
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return String(dateStr);
+      return date.toLocaleString("default", { month: "short" }) + " " + date.getFullYear();
+    } catch {
+      return String(dateStr);
+    }
   };
 
   const getMonths = (fromDate, toDate) => {
     if (!fromDate || !toDate) return 0;
-    const from = new Date(fromDate);
-    const to = new Date(toDate);
-    return (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());
+    try {
+      const from = new Date(fromDate);
+      const to = new Date(toDate);
+      if (isNaN(from.getTime()) || isNaN(to.getTime())) return 0;
+      const months = (to.getFullYear() - from.getFullYear()) * 12 + (to.getMonth() - from.getMonth());
+      return months >= 0 ? months : 0;
+    } catch {
+      return 0;
+    }
   };
 
   return (

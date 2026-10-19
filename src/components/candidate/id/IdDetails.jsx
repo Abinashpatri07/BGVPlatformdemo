@@ -123,6 +123,7 @@ export default function IdDetails({ onNext }) {
   });
   const [uploadingDoc, setUploadingDoc] = useState(null);
   const [filePreviews, setFilePreviews] = useState({});
+  const [rawFiles, setRawFiles] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
@@ -364,6 +365,11 @@ export default function IdDetails({ onNext }) {
       }
     }));
 
+    setRawFiles(prev => ({
+      ...prev,
+      [docType]: file
+    }));
+
     setData((prev) => ({
       ...prev,
       [docType]: {
@@ -547,7 +553,10 @@ export default function IdDetails({ onNext }) {
 
     setIsSubmitting(true);
     try {
-      const documentsPayload = keys.map(docType => {
+      const formData = new FormData();
+      formData.append("cand_id", candId);
+
+      const documentsPayload = keys.map((docType, index) => {
         const item = data[docType];
 
         // If name mismatch → force fail status in DB
@@ -559,21 +568,23 @@ export default function IdDetails({ onNext }) {
         else if (docType === "Voter ID")    docNumber = item.fields.voter_id_number;
         else if (docType === "Passport")   docNumber = item.fields.passport_number;
 
+        if (rawFiles[docType]) {
+          formData.append(`doc_file_${index}`, rawFiles[docType]);
+        }
+
         return {
           doc_type: docType,
           doc_number: docNumber || "",
           ocr_data: item.fields,
           verification_status: hasMismatch ? "failed" : "success",
-          file_name: item.fileName
+          file_name: item.fileName,
+          cand_iden_docu: item.existingUrl || null
         };
       });
 
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const candId = user.cand_id || 1;
-      await submitCandidateIdDocuments({
-        cand_id: candId,
-        documents: documentsPayload
-      });
+      formData.append("documents", JSON.stringify(documentsPayload));
+
+      await submitCandidateIdDocuments(formData);
 
       setSubmitSuccess(true);
       setTimeout(() => {

@@ -188,7 +188,10 @@ function SuperAdminAddressDetails() {
                         <p className="text-xs text-gray-400">Captured during verification</p>
                       </div>
                       <a 
-                        href={addrRecord.cand_photo.startsWith("http") ? addrRecord.cand_photo : `${API_BASE}/${addrRecord.cand_photo}`}
+                        href={(() => {
+                          const p = addrRecord.cand_photo.replace(/\\/g, "/");
+                          return p.startsWith("http") ? p : `${API_BASE}/${p.startsWith("/") ? p.slice(1) : p}`;
+                        })()}
                         target="_blank"
                         rel="noreferrer"
                         className="p-1.5 hover:bg-gray-200 rounded text-gray-600 transition"

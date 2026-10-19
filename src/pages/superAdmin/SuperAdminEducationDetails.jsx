@@ -18,8 +18,26 @@ const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const fmtDate = (d) => {
   if (!d) return "—";
-  try { return new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }); }
-  catch { return String(d); }
+  if (typeof d === "number" || (/^\d{4}$/).test(String(d).trim())) return String(d).trim();
+  try {
+    const dt = new Date(d);
+    if (isNaN(dt.getTime())) return String(d);
+    return dt.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  } catch {
+    return String(d);
+  }
+};
+
+const fmtYear = (d) => {
+  if (!d) return "—";
+  if (typeof d === "number" || (/^\d{4}$/).test(String(d).trim())) return String(d).trim();
+  try {
+    const dt = new Date(d);
+    if (!isNaN(dt.getTime())) return String(dt.getFullYear());
+    return String(d);
+  } catch {
+    return String(d);
+  }
 };
 
 const getDocUrl = (path) => {
@@ -165,7 +183,7 @@ function SuperAdminEducationDetails() {
                       <Field label="Degree / Course" value={edu.cand_edu_dgree} />
                     </div>
                     <Field label="Start Date" value={fmtDate(edu.cand_edu_from_date)} />
-                    <Field label="End Date" value={fmtDate(edu.cand_edu_to_date)} />
+                    <Field label="End Date / Passing Year" value={fmtYear(edu.cand_edu_to_date) !== "—" ? `${fmtDate(edu.cand_edu_to_date)} (Year: ${fmtYear(edu.cand_edu_to_date)})` : fmtDate(edu.cand_edu_to_date)} />
                     <Field label="Specialization" value={edu.cand_specialization} />
                     <Field label="Percentage / CGPA" value={edu.cand_edu_grade} />
                   </div>

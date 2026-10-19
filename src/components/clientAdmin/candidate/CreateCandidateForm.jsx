@@ -16,6 +16,7 @@ function CreateCandidateForm() {
   const [successMessage, setSuccessMessage] = useState("");
   const [generalError, setGeneralError]     = useState("");
   const [loading, setLoading]               = useState(false);
+  const [holdWarning, setHoldWarning]       = useState("");
 
   const {
     register,
@@ -33,6 +34,7 @@ function CreateCandidateForm() {
     setEmailMessage("");
     setSuccessMessage("");
     setGeneralError("");
+    setHoldWarning("");
 
     try {
       const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -62,9 +64,18 @@ function CreateCandidateForm() {
 
       if (response.data.success) {
         const caseId = response.data.caseId || response.data.data?.case_id || "BGV";
-        setSuccessMessage(`Candidate Created Successfully! Case ID: ${caseId} ✅`);
+        if (response.data.isOnHold) {
+          // Candidate created but put on hold due to insufficient credits
+          setHoldWarning(
+            `⚠️ Candidate created (${caseId}) but placed ON HOLD due to insufficient billing credits. Please recharge your wallet to proceed.`
+          );
+        } else {
+          setSuccessMessage(`Candidate Created Successfully! Case ID: ${caseId} ✅${
+            response.data.creditMessage ? ` | ${response.data.creditMessage}` : ""
+          }`);
+        }
         reset();
-        setTimeout(() => navigate("/admin/candidates"), 2000);
+        setTimeout(() => navigate("/admin/candidates"), 3000);
       }
 
     } catch (error) {
@@ -153,6 +164,44 @@ function CreateCandidateForm() {
                 className="mt-5 border-2 border-lime-500 text-lime-500 hover:bg-lime-50 px-10 py-2.5 rounded-xl text-sm font-medium transition"
               >
                 Okay
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* HOLD WARNING MODAL — Candidate created but on hold due to zero credits */}
+      {holdWarning && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-9999">
+          <div className="relative bg-white w-96 rounded-3xl overflow-hidden shadow-2xl text-center pb-8">
+            {/* ORANGE TOP */}
+            <div className="relative h-36 bg-orange-500 rounded-b-[50%] flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-9 h-9 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                </svg>
+              </div>
+            </div>
+            {/* CONTENT */}
+            <div className="px-8 mt-6">
+              <h2 className="text-xl font-bold text-orange-500 leading-tight">Candidate On Hold</h2>
+              <p className="text-gray-600 text-sm mt-4 leading-6">
+                Candidate was created but placed <strong>On Hold</strong> due to insufficient billing credits.
+                Please recharge your wallet to proceed with verification.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate("/admin/billing")}
+                className="mt-5 border-2 border-orange-500 text-orange-500 hover:bg-orange-50 px-10 py-2.5 rounded-xl text-sm font-medium transition"
+              >
+                Recharge Wallet
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate("/admin/candidates")}
+                className="mt-3 block mx-auto text-gray-400 text-xs hover:underline"
+              >
+                Go to Candidates
               </button>
             </div>
           </div>
