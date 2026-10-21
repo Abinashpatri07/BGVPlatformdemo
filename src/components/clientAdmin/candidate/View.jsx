@@ -29,19 +29,35 @@ const Label = ({ label, value }) => (
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const resolveDocUrl = (path) => {
-  if (!path) return null;
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  const clean = path.replace(/\\/g, "/");
-  return `${API_BASE}/${clean.startsWith("/") ? clean.slice(1) : clean}`;
+  if (!path || typeof path !== "string") return null;
+  const trimmed = path.trim();
+  if (!trimmed) return null;
+  if (
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("blob:") ||
+    trimmed.startsWith("data:")
+  ) {
+    return trimmed;
+  }
+  let clean = trimmed.replace(/\\/g, "/");
+  if (clean.startsWith("/")) clean = clean.slice(1);
+  if (!clean.startsWith("uploads/")) {
+    clean = `uploads/${clean}`;
+  }
+  return `${API_BASE}/${clean}`;
 };
 
-// Renders a document preview: image, pdf link, or empty state
-const DocumentPreview = ({ url, noDocMessage }) => {
+// Renders an enhanced document preview: image, pdf view/link, or clean empty state
+const DocumentPreview = ({ url, title = "Document Preview", noDocMessage }) => {
   const resolvedUrl = resolveDocUrl(url);
+
   if (!resolvedUrl) {
     return (
-      <div className="bg-white p-4 rounded-xl shadow border flex flex-col items-center justify-center min-h-[200px]">
-        <XCircle size={40} className="text-gray-300 mb-3" />
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center min-h-[220px]">
+        <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+          <XCircle size={28} className="text-gray-300" />
+        </div>
         <p className="text-sm text-gray-400 font-medium text-center">
           {noDocMessage || "No Document Available"}
         </p>
@@ -51,33 +67,102 @@ const DocumentPreview = ({ url, noDocMessage }) => {
 
   const lUrl = resolvedUrl.toLowerCase();
   const isPdf = lUrl.endsWith(".pdf") || lUrl.includes(".pdf");
+  const fileName = resolvedUrl.split("/").pop();
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow border text-center">
-      <p className="text-sm text-[#01026E] mb-3 font-medium">Document Preview</p>
-      {isPdf ? (
-        <div className="flex flex-col items-center justify-center min-h-[160px] bg-gray-50 rounded-lg">
-          <FileText size={48} className="text-[#01026E] mb-2" />
-          <p className="text-xs text-gray-500 mb-3">PDF Document</p>
-          <a
-            href={resolvedUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-1 text-xs text-white bg-[#01026E] px-3 py-1.5 rounded-lg hover:bg-indigo-800 transition"
-          >
-            <Eye size={14} /> View Document
-          </a>
-        </div>
-      ) : (
-        <img
-          src={resolvedUrl}
-          alt="document"
-          className="rounded-lg shadow-sm mx-auto h-48 object-cover w-full"
-          onError={(e) => {
-            e.target.outerHTML = `<div class="flex flex-col items-center justify-center min-h-[160px] bg-gray-50 rounded-lg"><svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='#6b7280' stroke-width='1.5'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg><a href='${resolvedUrl}' target='_blank' class='mt-2 text-xs text-indigo-700 underline'>Open Document</a></div>`;
-          }}
-        />
-      )}
+    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between">
+      <div className="flex items-center justify-between mb-3 border-b border-gray-100 pb-2">
+        <p className="text-sm font-semibold text-[#01026E]">{title}</p>
+        <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">
+          {isPdf ? "PDF" : "Image"}
+        </span>
+      </div>
+
+      <div className="flex-1 flex flex-col items-center justify-center">
+        {isPdf ? (
+          <div className="w-full flex flex-col items-center justify-center py-6 px-4 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+            <div className="w-14 h-14 bg-red-50 text-red-600 rounded-xl flex items-center justify-center mb-3 shadow-sm">
+              <FileText size={32} />
+            </div>
+            <p className="text-xs font-semibold text-gray-700 mb-1">PDF Document</p>
+            <p className="text-[11px] text-gray-400 mb-4 max-w-[200px] truncate text-center" title={fileName}>
+              {fileName}
+            </p>
+            <div className="flex items-center gap-2">
+              <a
+                href={resolvedUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs text-white bg-[#01026E] px-3.5 py-1.5 rounded-lg hover:bg-indigo-800 transition font-medium shadow-sm"
+              >
+                <Eye size={14} /> View PDF
+              </a>
+              <a
+                href={resolvedUrl}
+                download
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-gray-700 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition font-medium"
+                title="Download"
+              >
+                <Download size={13} />
+              </a>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full space-y-3">
+            <div className="relative group overflow-hidden rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center min-h-[180px] max-h-[250px] p-1">
+              <img
+                src={resolvedUrl}
+                alt={title}
+                className="max-h-[240px] w-auto max-w-full object-contain mx-auto transition-transform duration-200 group-hover:scale-105"
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  const parent = e.target.parentElement;
+                  if (parent) {
+                    parent.innerHTML = `
+                      <div class="flex flex-col items-center justify-center p-6 text-center">
+                        <svg class="w-10 h-10 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <p class="text-xs text-gray-500 mb-2">Unable to display preview directly</p>
+                        <a href="${resolvedUrl}" target="_blank" class="text-xs font-semibold text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded border border-indigo-200 hover:bg-indigo-100">
+                          Open Document &rarr;
+                        </a>
+                      </div>
+                    `;
+                  }
+                }}
+              />
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[11px] text-gray-400 truncate max-w-[150px]" title={fileName}>
+                {fileName}
+              </span>
+              <div className="flex items-center gap-2">
+                <a
+                  href={resolvedUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-[#01026E] hover:underline font-medium"
+                >
+                  <Eye size={13} /> Full View
+                </a>
+                <a
+                  href={resolvedUrl}
+                  download
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 font-medium"
+                  title="Download"
+                >
+                  <Download size={13} />
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -91,6 +176,12 @@ function View() {
   const [criminalView, setCriminalView] = useState(null);
   const [drugView, setDrugView] = useState(null);
   const [identityView, setIdentityView] = useState(null);
+
+  // States to toggle between multiple attached documents
+  const [selectedEduDoc, setSelectedEduDoc] = useState(null);
+  const [selectedEduDocType, setSelectedEduDocType] = useState("");
+  const [selectedEmpDoc, setSelectedEmpDoc] = useState(null);
+  const [selectedEmpDocType, setSelectedEmpDocType] = useState("");
 
   const [candidateData, setCandidateData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -239,6 +330,10 @@ function View() {
                   setCriminalView(null);
                   setDrugView(null);
                   setIdentityView(null);
+                  setSelectedEduDoc(null);
+                  setSelectedEduDocType("");
+                  setSelectedEmpDoc(null);
+                  setSelectedEmpDocType("");
                 }}
                 className={`flex items-center gap-2 px-4 py-1.5 rounded-full whitespace-nowrap transition ${
                   isActive
@@ -402,11 +497,30 @@ function View() {
                             <Label label="Address on ID" value={identityView.cand_address || "N/A"} />
                           </div>
                         </div>
+
+                        {/* Direct Document Action Link */}
+                        {(identityView.cand_iden_docu || identityView.cand_iden_doc || identityView.doc_file_path) && (
+                          <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
+                            <span className="text-xs font-semibold text-gray-500">Attached ID Document</span>
+                            <a
+                              href={resolveDocUrl(identityView.cand_iden_docu || identityView.cand_iden_doc || identityView.doc_file_path)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition"
+                            >
+                              <FileText size={13} /> Open Original ID File
+                            </a>
+                          </div>
+                        )}
                       </div>
                     </div>
 
                     {/* Right: document preview */}
-                    <DocumentPreview url={identityView.cand_iden_doc || identityView.doc_file_path || null} noDocMessage="No Document Uploaded" />
+                    <DocumentPreview
+                      url={identityView.cand_iden_docu || identityView.cand_iden_doc || identityView.doc_file_path || null}
+                      title={`${identityView.cand_iden_type || identityView.cand_ident_type || "Identity"} Document`}
+                      noDocMessage="No Identity Document Uploaded"
+                    />
                   </div>
                 </>
               )}
@@ -438,7 +552,13 @@ function View() {
                           <div className="flex items-center gap-4 text-gray-500">
                             <div 
                               className="flex items-center gap-1 cursor-pointer hover:text-black text-sm"
-                              onClick={() => setShowEducationView(item)}
+                              onClick={() => {
+                                setShowEducationView(item);
+                                const defaultDoc = item.cand_edu_certificate || item.cand_edu_marksheet || null;
+                                const defaultType = item.cand_edu_certificate ? "Degree / Certificate" : item.cand_edu_marksheet ? "Marksheet" : "Education Document";
+                                setSelectedEduDoc(defaultDoc);
+                                setSelectedEduDocType(defaultType);
+                              }}
                             >
                               <Eye size={16} /> View
                             </div>
@@ -457,7 +577,11 @@ function View() {
                       Education Details
                     </h3>
                     <button 
-                      onClick={() => setShowEducationView(null)}
+                      onClick={() => {
+                        setShowEducationView(null);
+                        setSelectedEduDoc(null);
+                        setSelectedEduDocType("");
+                      }}
                       className="text-sm text-[#01026E] border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
                     >
                       Back to List
@@ -465,20 +589,66 @@ function View() {
                   </div>
 
                   <div className="grid grid-cols-3 gap-6">
-                    <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
+                    <div className="col-span-2 bg-white p-5 rounded-xl shadow-sm border border-gray-100">
                       <div className="grid grid-cols-2 gap-5">
                         <Label label="Institute Name" value={showEducationView.cand_edu_institute || "N/A"} />
                         <Label label="Degree" value={showEducationView.cand_edu_type || showEducationView.cand_edu_dgree || "N/A"} />
                         <Label label="Start Date" value={showEducationView.cand_edu_from_date ? new Date(showEducationView.cand_edu_from_date).toLocaleDateString() : "N/A"} />
                         <Label label="End Date" value={showEducationView.cand_edu_to_date ? new Date(showEducationView.cand_edu_to_date).toLocaleDateString() : "N/A"} />
-                        {/* FIX: actual DB column is cand_specialization, not cand_edu_course */}
                         <Label label="Course / Specialization" value={showEducationView.cand_specialization || showEducationView.cand_edu_course || "N/A"} />
                         <Label label="Percentage / CGPA" value={showEducationView.cand_edu_grade || "N/A"} />
                       </div>
+
+                      {/* Education Attached Documents Switcher */}
+                      <div className="mt-5 pt-4 border-t border-gray-100">
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Attached Documents (Click to Preview)</p>
+                        <div className="flex flex-wrap gap-2">
+                          {showEducationView.cand_edu_certificate && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedEduDoc(showEducationView.cand_edu_certificate);
+                                setSelectedEduDocType("Degree / Certificate");
+                              }}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition ${
+                                selectedEduDoc === showEducationView.cand_edu_certificate
+                                  ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                                  : "text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100"
+                              }`}
+                            >
+                              <FileText size={13} />
+                              Certificate
+                            </button>
+                          )}
+                          {showEducationView.cand_edu_marksheet && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedEduDoc(showEducationView.cand_edu_marksheet);
+                                setSelectedEduDocType("Marksheet");
+                              }}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition ${
+                                selectedEduDoc === showEducationView.cand_edu_marksheet
+                                  ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                                  : "text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-100"
+                              }`}
+                            >
+                              <FileText size={13} />
+                              Marksheet
+                            </button>
+                          )}
+                          {!showEducationView.cand_edu_certificate && !showEducationView.cand_edu_marksheet && (
+                            <span className="text-xs text-gray-400 italic">No document links available</span>
+                          )}
+                        </div>
+                      </div>
                     </div>
 
-                    {/* FIX: show actual document from cand_edu_certificate */}
-                    <DocumentPreview url={showEducationView.cand_edu_certificate || null} noDocMessage="No Certificate Uploaded" />
+                    <DocumentPreview
+                      url={selectedEduDoc || showEducationView.cand_edu_certificate || showEducationView.cand_edu_marksheet || null}
+                      title={selectedEduDocType || "Education Document"}
+                      noDocMessage="No Education Document Uploaded"
+                    />
                   </div>
                 </>
               )}
@@ -510,7 +680,13 @@ function View() {
                           </div>
 
                           <div
-                            onClick={() => setShowEmploymentView(item)}
+                            onClick={() => {
+                              setShowEmploymentView(item);
+                              const defaultDoc = item.cand_emp_joining || item.cand_emp_payslip || item.cand_emp_service || null;
+                              const defaultType = item.cand_emp_joining ? "Joining Letter" : item.cand_emp_payslip ? "Relieving / Payslip" : item.cand_emp_service ? "Service Letter" : "Employment Document";
+                              setSelectedEmpDoc(defaultDoc);
+                              setSelectedEmpDocType(defaultType);
+                            }}
                             className="flex items-center gap-2 text-[#01026E] cursor-pointer bg-indigo-50 px-3 py-1.5 rounded-lg"
                           >
                             <Eye size={16} />
@@ -530,7 +706,11 @@ function View() {
                       Employment Details
                     </h3>
                     <button 
-                      onClick={() => setShowEmploymentView(null)}
+                      onClick={() => {
+                        setShowEmploymentView(null);
+                        setSelectedEmpDoc(null);
+                        setSelectedEmpDocType("");
+                      }}
                       className="text-sm text-[#01026E] border border-[#01026E] px-4 py-1.5 rounded-lg hover:bg-indigo-50"
                     >
                       Back to List
@@ -538,7 +718,7 @@ function View() {
                   </div>
 
                   <div className="grid grid-cols-3 gap-6">
-                    <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
+                    <div className="col-span-2 bg-white p-5 rounded-xl shadow-sm border border-gray-100">
                       <div className="grid grid-cols-2 gap-5">
                         <Label label="Employee ID" value={showEmploymentView.cand_emp_empid || "N/A"} />
                         <Label label="Company Name" value={showEmploymentView.cand_emp_company || "N/A"} />
@@ -548,42 +728,60 @@ function View() {
                         <Label label="Employment Type" value={showEmploymentView.cand_emp_type || "N/A"} />
                       </div>
 
-                      {/* Documents Section */}
+                      {/* Documents Section with Interactive Switcher */}
                       <div className="mt-5 pt-4 border-t border-gray-100">
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Available Documents</p>
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Available Documents (Click to Preview)</p>
                         <div className="flex flex-wrap gap-2">
                           {showEmploymentView.cand_emp_joining && (
-                            <a
-                              href={resolveDocUrl(showEmploymentView.cand_emp_joining)}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition"
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedEmpDoc(showEmploymentView.cand_emp_joining);
+                                setSelectedEmpDocType("Joining Letter");
+                              }}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition ${
+                                selectedEmpDoc === showEmploymentView.cand_emp_joining
+                                  ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                                  : "text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100"
+                              }`}
                             >
                               <FileText size={13} />
                               Joining Letter
-                            </a>
+                            </button>
                           )}
                           {showEmploymentView.cand_emp_payslip && (
-                            <a
-                              href={resolveDocUrl(showEmploymentView.cand_emp_payslip)}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition"
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedEmpDoc(showEmploymentView.cand_emp_payslip);
+                                setSelectedEmpDocType("Relieving / Payslip");
+                              }}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition ${
+                                selectedEmpDoc === showEmploymentView.cand_emp_payslip
+                                  ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                                  : "text-emerald-700 bg-emerald-50 border-emerald-200 hover:bg-emerald-100"
+                              }`}
                             >
                               <FileText size={13} />
                               Relieving / Payslip
-                            </a>
+                            </button>
                           )}
                           {showEmploymentView.cand_emp_service && (
-                            <a
-                              href={resolveDocUrl(showEmploymentView.cand_emp_service)}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded-lg hover:bg-purple-100 transition"
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedEmpDoc(showEmploymentView.cand_emp_service);
+                                setSelectedEmpDocType("Service Letter");
+                              }}
+                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition ${
+                                selectedEmpDoc === showEmploymentView.cand_emp_service
+                                  ? "bg-purple-600 text-white border-purple-600 shadow-sm"
+                                  : "text-purple-700 bg-purple-50 border-purple-200 hover:bg-purple-100"
+                              }`}
                             >
                               <FileText size={13} />
                               Service Letter
-                            </a>
+                            </button>
                           )}
                           {!showEmploymentView.cand_emp_joining && !showEmploymentView.cand_emp_payslip && !showEmploymentView.cand_emp_service && (
                             <span className="text-xs text-gray-400 italic">No document links available</span>
@@ -592,18 +790,17 @@ function View() {
                       </div>
                     </div>
 
-                    <div className="bg-white p-4 rounded-xl shadow border">
-                      <p className="text-sm text-[#01026E] mb-3 font-medium text-center">Document Preview</p>
-                      <DocumentPreview
-                        url={
-                          showEmploymentView.cand_emp_joining ||
-                          showEmploymentView.cand_emp_payslip ||
-                          showEmploymentView.cand_emp_service ||
-                          null
-                        }
-                        noDocMessage="No Document Uploaded"
-                      />
-                    </div>
+                    <DocumentPreview
+                      url={
+                        selectedEmpDoc ||
+                        showEmploymentView.cand_emp_joining ||
+                        showEmploymentView.cand_emp_payslip ||
+                        showEmploymentView.cand_emp_service ||
+                        null
+                      }
+                      title={selectedEmpDocType || "Employment Document"}
+                      noDocMessage="No Employment Document Uploaded"
+                    />
                   </div>
                 </>
               )}
@@ -668,7 +865,7 @@ function View() {
                   </div>
 
                   <div className="grid grid-cols-3 gap-6">
-                    <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
+                    <div className="col-span-2 bg-white p-5 rounded-xl shadow-sm border border-gray-100">
                       <div className="grid grid-cols-2 gap-5">
                         <Label label="Name" value={`${candidateData.candidate_first_name} ${candidateData.candidate_last_name || ""}`} />
                         <Label label="Case No" value={criminalView.cand_crim_record || "N/A"} />
@@ -680,15 +877,27 @@ function View() {
                           />
                         </div>
                       </div>
+
+                      {criminalView.cand_crim_report && (
+                        <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
+                          <span className="text-xs font-semibold text-gray-500">Verification Report File</span>
+                          <a
+                            href={resolveDocUrl(criminalView.cand_crim_report)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition"
+                          >
+                            <FileText size={13} /> Open Original Report
+                          </a>
+                        </div>
+                      )}
                     </div>
 
-                    <div className="bg-white p-4 rounded-xl shadow border">
-                      <p className="text-sm text-[#01026E] mb-3 font-medium text-center">Document Preview</p>
-                      <DocumentPreview
-                        url={criminalView.cand_crim_report || null}
-                        noDocMessage="No Document Provided"
-                      />
-                    </div>
+                    <DocumentPreview
+                      url={criminalView.cand_crim_report || null}
+                      title="Criminal Report"
+                      noDocMessage="No Document Provided"
+                    />
                   </div>
                 </>
               )}
@@ -741,7 +950,7 @@ function View() {
                   </div>
 
                   <div className="grid grid-cols-3 gap-6">
-                    <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
+                    <div className="col-span-2 bg-white p-5 rounded-xl shadow-sm border border-gray-100">
                       <div className="grid grid-cols-2 gap-5">
                         <Label label="Name" value={`${candidateData.candidate_first_name} ${candidateData.candidate_last_name || ""}`} />
                         <Label label="Test Id" value={drugView.cand_drug_test || "N/A"} />
@@ -753,15 +962,27 @@ function View() {
                           />
                         </div>
                       </div>
+
+                      {drugView.cand_drug_report && (
+                        <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
+                          <span className="text-xs font-semibold text-gray-500">Test Report File</span>
+                          <a
+                            href={resolveDocUrl(drugView.cand_drug_report)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition"
+                          >
+                            <FileText size={13} /> Open Original Report
+                          </a>
+                        </div>
+                      )}
                     </div>
 
-                    <div className="bg-white p-4 rounded-xl shadow border">
-                      <p className="text-sm text-[#01026E] mb-3 font-medium text-center">Document Preview</p>
-                      <DocumentPreview
-                        url={drugView.cand_drug_report || null}
-                        noDocMessage="No Report Uploaded"
-                      />
-                    </div>
+                    <DocumentPreview
+                      url={drugView.cand_drug_report || null}
+                      title="Drug Test Report"
+                      noDocMessage="No Report Uploaded"
+                    />
                   </div>
                 </>
               )}

@@ -9,12 +9,6 @@ function Field({ label, value, verified = false }) {
 
       <div className="w-full border border-gray-200 rounded-lg px-3 py-2 bg-gray-50/50 flex justify-between items-center gap-2 hover:bg-white transition-colors">
         <span className="text-sm text-gray-800 font-medium break-words">{value || "N/A"}</span>
-
-        {verified && (
-          <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase whitespace-nowrap">
-            Verified
-          </span>
-        )}
       </div>
     </div>
   );

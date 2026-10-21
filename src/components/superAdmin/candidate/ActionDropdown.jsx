@@ -5,7 +5,7 @@ import {
 
 function ActionDropdown({
   onView, onEdit, onEmail, onAssignHr,
-  onAuditLog, onHold, onRemoveHold, onReject,
+  onHold, onRemoveHold, onReject,
   candidateStatus
 }) {
 
@@ -24,9 +24,6 @@ function ActionDropdown({
       </button>
       <button onClick={handleClick(onEmail)} className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition">
         <Mail size={16} className="text-blue-500" /> Send Email
-      </button>
-      <button onClick={handleClick(onAuditLog)} className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition">
-        <ClipboardList size={16} /> Audit Log
       </button>
 
       {candidateStatus !== "Rejected" && candidateStatus !== "On Hold" && (

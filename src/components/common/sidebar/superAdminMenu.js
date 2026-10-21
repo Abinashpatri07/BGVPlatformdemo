@@ -75,7 +75,6 @@ export const superAdminMenu = [
       "/super-admin/create-candidate",
       "/super-admin/view/",
       "/super-admin/edit-candidate",
-      "/super-admin/audit",
     ],
   },
 

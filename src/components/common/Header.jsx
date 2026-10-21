@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import logo from "../../assets/logo.png";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   User,
   KeyRound,
@@ -87,9 +87,8 @@ const PasswordField = ({ field, label, placeholder, form, errors, show, onToggle
         value={form[field]}
         placeholder={placeholder}
         onChange={(e) => onChange(field, e.target.value)}
-        className={`w-full border rounded-lg px-4 py-2 text-sm pr-10 focus:outline-none focus:ring-2 focus:ring-[#02027A]/30 ${
-          errors[field] ? "border-red-400" : "border-gray-200"
-        }`}
+        className={`w-full border rounded-lg px-4 py-2 text-sm pr-10 focus:outline-none focus:ring-2 focus:ring-[#02027A]/30 ${errors[field] ? "border-red-400" : "border-gray-200"
+          }`}
       />
       <button
         type="button"
@@ -134,7 +133,7 @@ function ChangePasswordModal({ onClose }) {
   const handleSave = () => {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
-    
+
     // TODO: Connect this to the actual backend change-password endpoint based on role
     alert("Change password backend integration is coming soon!");
     onClose();
@@ -198,25 +197,46 @@ function ChangePasswordModal({ onClose }) {
 // ── Main Header ───────────────────────────────────────────
 export default function Header() {
   const [user, setUser] = useState({
-  name: "",
-  email: "",
-  role: "",
-});
+    name: "",
+    email: "",
+    role: "",
+  });
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [modal, setModal] = useState(null);
 
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    let storedUser;
-    if (window.location.pathname.includes("/vendor")) {
-      storedUser = JSON.parse(localStorage.getItem("vendorUser"));
-    } else {
-      storedUser = JSON.parse(localStorage.getItem("user"));
+    let storedUser = null;
+    const path = location.pathname;
+
+    try {
+      if (path.includes("/vendor") || localStorage.getItem("vendorToken")) {
+        const vendorData = localStorage.getItem("vendorUser");
+        if (vendorData) storedUser = JSON.parse(vendorData);
+      } else if (path.includes("/super-admin")) {
+        const superAdminData = localStorage.getItem("user");
+        if (superAdminData) storedUser = JSON.parse(superAdminData);
+      } else {
+        const normalUser = localStorage.getItem("user");
+        if (normalUser) storedUser = JSON.parse(normalUser);
+      }
+    } catch (e) {
+      console.error("Error loading user in Header:", e);
     }
-    if (storedUser) setUser(storedUser);
-  }, []);
+
+    if (storedUser) {
+      setUser({
+        name: storedUser.name || storedUser.fullName || storedUser.poc_name || storedUser.username || "",
+        email: storedUser.email || storedUser.poc_email || "",
+        role: storedUser.role || (path.includes("/vendor") ? "Vendor" : ""),
+        avatar: storedUser.avatar || null,
+        phone: storedUser.phone || storedUser.mobile || storedUser.poc_mobile || ""
+      });
+    }
+  }, [location.pathname]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -234,42 +254,36 @@ export default function Header() {
   };
 
   const handleLogout = () => {
-  setDropdownOpen(false);
+    setDropdownOpen(false);
 
-  // Vendor-specific logout
-  if (window.location.pathname.includes("/vendor")) {
-    localStorage.removeItem("vendorToken");
-    localStorage.removeItem("vendorRefreshToken");
-    localStorage.removeItem("vendorRole");
-    localStorage.removeItem("vendorUser");
-    navigate("/vendor/login", { state: { message: "Logout Successful!" } });
-    return;
-  }
+    const path = window.location.pathname;
 
-  // Get role before clearing
-  const role = localStorage.getItem("role");
+    // Determine redirect URL from path first (most reliable)
+    let redirectTo = "/";
 
-  // Clear storage for others
-  localStorage.clear();
-  sessionStorage.clear();
+    if (path.includes("/super-admin")) {
+      redirectTo = "/super-admin/login";
+    } else if (path.includes("/vendor")) {
+      redirectTo = "/vendor/login";
+    } else if (path.includes("/hr")) {
+      redirectTo = "/hr/login";
+    } else if (path.includes("/admin")) {
+      redirectTo = "/admin/login";
+    } else {
+      // Fallback to localStorage role
+      const role = localStorage.getItem("role");
+      if (role === "super-admin") redirectTo = "/super-admin/login";
+      else if (role === "hr") redirectTo = "/hr/login";
+      else if (role === "admin" || role === "client_admin") redirectTo = "/admin/login";
+      else if (role === "candidate") redirectTo = "/";
+    }
 
-  // Redirect based on role
-  if (role === "candidate") {
-    navigate("/", { state: { message: "Logout Successful!" } });
-  }
-  else if (role === "hr") {
-    navigate("/hr/login", { state: { message: "Logout Successful!" } });
-  }
-  else if (role === "admin" || role === "client_admin") {
-    navigate("/admin/login", { state: { message: "Logout Successful!" } });
-  }
-  else if (role === "super-admin") {
-    navigate("/super-admin/login", { state: { message: "Logout Successful!" } });
-  }
-  else {
-    navigate("/", { state: { message: "Logout Successful!" } });
-  }
-};
+    // Clear all storage
+    localStorage.clear();
+    sessionStorage.clear();
+
+    navigate(redirectTo, { state: { message: "Logout Successful!" } });
+  };
 
   return (
     <>
@@ -319,7 +333,7 @@ export default function Header() {
                 {user.avatar ? (
                   <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  getInitials(user.name || "User")
+                  getInitials(user.name || (location.pathname.includes("/vendor") ? "Vendor" : "User"))
                 )}
               </div>
 
@@ -361,12 +375,12 @@ export default function Header() {
                 <hr className="my-1 border-gray-100" />
 
                 <button
-  onClick={handleLogout}
-  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition"
->
-  <LogOut size={15} />
-  Logout
-</button>
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition"
+                >
+                  <LogOut size={15} />
+                  Logout
+                </button>
               </div>
             )}
           </div>

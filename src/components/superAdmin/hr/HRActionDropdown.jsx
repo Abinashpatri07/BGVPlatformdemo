@@ -1,19 +1,36 @@
 import { useState } from "react";
-
-import { Eye, Pencil, Mail, Ban } from "lucide-react";
+import axios from "axios";
+import { Eye, Pencil, Mail, Ban, Loader2 } from "lucide-react";
 
 import TerminateModal from "./TerminateModal";
 
 function HRActionDropdown({ onView, onEdit, candidateId = "EMP-0002", hrId, onTerminateSuccess }) {
   const [showTerminate, setShowTerminate] = useState(false);
-
   const [showEmailSuccess, setShowEmailSuccess] = useState(false);
+  const [emailMessage, setEmailMessage] = useState("");
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   /* EMAIL */
-  const handleEmail = () => {
-    // API CALL HERE
+  const handleEmail = async (e) => {
+    e?.stopPropagation();
+    if (!hrId) return;
 
-    setShowEmailSuccess(true);
+    try {
+      setSendingEmail(true);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/hr/send-email/${hrId}`);
+      if (res.data.success) {
+        setEmailMessage(res.data.message || "Invitation & Password Setup email has been sent successfully.");
+        setShowEmailSuccess(true);
+      } else {
+        alert(res.data.message || "Failed to send email");
+      }
+    } catch (err) {
+      console.error("send-email error:", err);
+      const msg = err.response?.data?.message || "Failed to send email. Please check server settings.";
+      alert(msg);
+    } finally {
+      setSendingEmail(false);
+    }
   };
 
   return (
@@ -51,7 +68,7 @@ function HRActionDropdown({ onView, onEdit, candidateId = "EMP-0002", hrId, onTe
               </h2>
 
               <p className="text-sm text-gray-500">
-                We've Sent You An Email — Please Check Your Inbox.
+                {emailMessage || "We've sent an invitation & password setup link to the HR's email address."}
               </p>
 
               <button
@@ -91,11 +108,16 @@ function HRActionDropdown({ onView, onEdit, candidateId = "EMP-0002", hrId, onTe
         {/* EMAIL */}
         <button
           type="button"
+          disabled={sendingEmail}
           onClick={handleEmail}
-          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 transition"
+          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 transition disabled:opacity-50"
         >
-          <Mail size={17} className="text-blue-500" />
-          Send Email
+          {sendingEmail ? (
+            <Loader2 size={17} className="text-blue-500 animate-spin" />
+          ) : (
+            <Mail size={17} className="text-blue-500" />
+          )}
+          {sendingEmail ? "Sending..." : "Send Email"}
         </button>
 
         {/* TERMINATE */}

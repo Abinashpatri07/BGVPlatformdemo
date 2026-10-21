@@ -1,14 +1,33 @@
 import { useState } from "react";
-import { Eye, Pencil, Mail, Ban } from "lucide-react";
+import { Eye, Pencil, Mail, Ban, Loader2 } from "lucide-react";
+import axiosInstance from "../../../API/axiosInstance";
 import TerminateModal from "./TerminateModal";
 
 function HRActionDropdown({ onView, onEdit, onTerminate, hrId, hrName = "this HR" }) {
   const [showTerminate, setShowTerminate] = useState(false);
   const [showEmailSuccess, setShowEmailSuccess] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailMessage, setEmailMessage] = useState("");
 
-  const handleEmail = (e) => {
+  const handleEmail = async (e) => {
     e.stopPropagation();
-    setShowEmailSuccess(true);
+    if (!hrId) return;
+    try {
+      setSendingEmail(true);
+      const res = await axiosInstance.post(`/api/client-admin/hr/send-email/${hrId}`);
+      if (res.data.success) {
+        setEmailMessage(res.data.message || "Invitation & password setup email sent successfully.");
+        setShowEmailSuccess(true);
+      } else {
+        alert(res.data.message || "Failed to send email");
+      }
+    } catch (err) {
+      console.error("send-hr-email error:", err);
+      const msg = err.response?.data?.message || "Failed to send email. Please check server settings.";
+      alert(msg);
+    } finally {
+      setSendingEmail(false);
+    }
   };
 
   const handleTerminateSuccess = () => {
@@ -51,7 +70,9 @@ function HRActionDropdown({ onView, onEdit, onTerminate, hrId, hrName = "this HR
               <h2 className="text-xl font-bold text-gray-900 mb-2">
                 E-Mail Has Been Sent Successfully
               </h2>
-              <p className="text-sm text-gray-500">Take A Look In Inbox.</p>
+              <p className="text-sm text-gray-500">
+                {emailMessage || "Take a look in the inbox for setup instructions."}
+              </p>
               <button
                 onClick={() => setShowEmailSuccess(false)}
                 className="mt-7 border border-purple-600 text-purple-600 hover:bg-purple-50 px-10 py-2.5 rounded-xl text-sm font-medium transition"
@@ -91,11 +112,16 @@ function HRActionDropdown({ onView, onEdit, onTerminate, hrId, hrName = "this HR
         </button>
 
         <button
+          disabled={sendingEmail}
           onClick={handleEmail}
-          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 transition"
+          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 transition disabled:opacity-50"
         >
-          <Mail size={17} className="text-blue-500" />
-          Send Email
+          {sendingEmail ? (
+            <Loader2 size={17} className="text-blue-500 animate-spin" />
+          ) : (
+            <Mail size={17} className="text-blue-500" />
+          )}
+          {sendingEmail ? "Sending..." : "Send Email"}
         </button>
 
         <button

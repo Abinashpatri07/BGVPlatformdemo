@@ -44,9 +44,6 @@ import EditHr from "../pages/superAdmin/EditHr";
 /* CANDIDATES */
 import Candidates from "../pages/superAdmin/Candidates";
 
-/* AUDIT */
-import AuditPage from "../pages/superAdmin/AuditPage";
-
 /* ASSIGN VERIFICATION */
 import AssignVerificationOfficer from "../pages/superAdmin/AssignVerificationOfficerPage";
 import CreateCandidateForm from "../components/superAdmin/candidate/CreateCandidateForm";
@@ -129,9 +126,6 @@ function SuperAdminRoutes() {
         <Route path="cases/verified" element={<SuperAdminVerifiedApplications />} />
         <Route path="cases/refuted" element={<SuperAdminRefuteApplications />} />
         <Route path="cases/unverified" element={<SuperAdminUnverifiedApplications />} />
-
-        {/* AUDIT */}
-        <Route path="audit" element={<AuditPage />} />
 
         {/* ASSIGN VERIFICATION */}
         <Route

@@ -138,8 +138,8 @@ const BulkUpload = () => {
 
     try {
       const formData = new FormData();
-      formData.append("file", file);
-      formData.append("createdById", 15); // Send HR's user ID
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      formData.append("createdById", storedUser.id || storedUser.users_id || 1);
 
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/candidates/multiple_candidate_add`,

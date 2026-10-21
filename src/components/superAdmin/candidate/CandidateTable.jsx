@@ -390,7 +390,6 @@ function CandidateTable({
                             onEdit={() => { navigate(`/super-admin/edit-candidate/${item.id}`); setOpenMenu(null); }}
                             onEmail={() => { handleSendEmail(item); setOpenMenu(null); }}
                             onAssignHr={() => { setAssignHRCandidate(item); setShowAssignHRModal(true); setOpenMenu(null); }}
-                            onAuditLog={() => { navigate("/super-admin/audit"); setOpenMenu(null); }}
                             onHold={() => { setOnHoldCandidate(item); setShowOnHoldModal(true); setOpenMenu(null); }}
                             onRemoveHold={() => { setRemoveHoldCandidate(item); setShowRemoveHoldModal(true); setOpenMenu(null); }}
                             onReject={() => { setSelectedCandidate(item); setShowRejectModal(true); setOpenMenu(null); }}

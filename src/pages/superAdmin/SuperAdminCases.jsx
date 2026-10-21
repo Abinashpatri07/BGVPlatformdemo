@@ -128,8 +128,16 @@ const getStatusBadge = (status) => {
         </span>
       );
     case "Refute":
+    case "Rejected":
       return (
         <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#FEE2E2] text-[#B91C1C]">
+          {status}
+        </span>
+      );
+    case "Hold":
+    case "On Hold":
+      return (
+        <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
           {status}
         </span>
       );
@@ -459,6 +467,7 @@ function SuperAdminCases() {
                 <option value="In Progress">In Progress</option>
                 <option value="Verified">Verified</option>
                 <option value="Refute">Refute</option>
+                <option value="Hold">Hold</option>
                 <option value="Unverified">Unverified</option>
               </select>
             </div>
@@ -577,7 +586,17 @@ function SuperAdminCases() {
                       </td>
                       <td className="px-5 py-2.5 text-sm text-gray-700">+91 {row.phone}</td>
                       <td className="px-5 py-2.5 text-sm text-gray-700">{row.tat}</td>
-                      <td className="px-5 py-2.5">{getStatusBadge(row.status)}</td>
+                      <td className="px-5 py-2.5">
+                        <div className="flex flex-col gap-1">
+                          {getStatusBadge(row.status)}
+                          {row.vendorName && (
+                            <span className="text-[10px] text-gray-500 font-medium flex items-center gap-1 mt-0.5">
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                              {row.vendorName}
+                            </span>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-5 py-2.5 text-center w-20">
                         <div className="relative inline-block text-left">
                           <button 
@@ -596,8 +615,7 @@ function SuperAdminCases() {
                                 className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-[#EEF2FF] hover:text-[#4338CA] transition-colors"
                                 onClick={() => {
                                   setOpenDropdownId(null);
-                                  const isEdit = row.status === "Assigned" || row.status === "Unverified";
-                                  const mode = isEdit ? "edit" : "view";
+                                  const mode = "view";
                                   if (row.caseType.includes("Identification")) {
                                     navigate(`/super-admin/identification-details?mode=${mode}&caseId=${row.id}`);
                                   } else if (row.caseType.includes("Employment Verification") || row.caseType.includes("Internship")) {
@@ -620,17 +638,19 @@ function SuperAdminCases() {
                                 <Eye size={15} />
                                 View Details
                               </button>
-                              <button
-                                className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-[#EEF2FF] hover:text-[#4338CA] transition-colors border-t border-gray-100"
-                                onClick={() => {
-                                  setOpenDropdownId(null);
-                                  setAssignVendorCaseIds([row.id]);
-                                  setShowBulkAssignVendorModal(true);
-                                }}
-                              >
-                                <UserPlus size={15} />
-                                Assign Vendor
-                              </button>
+                              {(!row.vendorId && !["Assigned", "In Progress", "Verified", "Refute", "Hold"].includes(row.status)) && (
+                                <button
+                                  className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-[#EEF2FF] hover:text-[#4338CA] transition-colors border-t border-gray-100"
+                                  onClick={() => {
+                                    setOpenDropdownId(null);
+                                    setAssignVendorCaseIds([row.id]);
+                                    setShowBulkAssignVendorModal(true);
+                                  }}
+                                >
+                                  <UserPlus size={15} />
+                                  Assign Vendor
+                                </button>
+                              )}
                             </div>
                           )}
                         </div>

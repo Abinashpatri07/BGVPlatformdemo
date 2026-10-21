@@ -44,6 +44,8 @@ export default function IdentityDetails() {
   const [evidenceFile, setEvidenceFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [caseStatus, setCaseStatus] = useState("");
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
     if (!caseId) {
@@ -59,6 +61,7 @@ export default function IdentityDetails() {
         if (res.data.success) {
           setCandidate(res.data.candidate || {});
           setRecords(res.data.records || []);
+          setCaseStatus(res.data.caseStatus || res.data.status || "");
         }
       })
       .catch((err) => {
@@ -164,7 +167,51 @@ export default function IdentityDetails() {
             </p>
           </div>
         </div>
+        {/* Case Status Badge at Top */}
+        {caseStatus && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500 font-medium">Case Status:</span>
+            <span className={`px-4 py-1.5 rounded-full text-sm font-semibold ${
+              caseStatus === "Verified" ? "bg-emerald-100 text-emerald-700 border border-emerald-200" :
+              caseStatus === "Assigned" ? "bg-purple-100 text-purple-700 border border-purple-200" :
+              caseStatus === "Refute" ? "bg-red-100 text-red-700 border border-red-200" :
+              caseStatus === "Unverified" ? "bg-amber-100 text-amber-700 border border-amber-200" :
+              "bg-gray-100 text-gray-700 border border-gray-200"
+            }`}>
+              {caseStatus}
+            </span>
+          </div>
+        )}
       </div>
+
+      {/* Document Preview Modal */}
+      {previewUrl && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setPreviewUrl(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-gray-100">
+              <h3 className="font-semibold text-gray-800">Document Preview</h3>
+              <button onClick={() => setPreviewUrl(null)} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 transition">
+                ✕
+              </button>
+            </div>
+            <div className="p-4">
+              {previewUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                <img src={previewUrl} alt="Document preview" className="w-full rounded-lg" />
+              ) : previewUrl.match(/\.pdf$/i) ? (
+                <iframe src={previewUrl} className="w-full h-[60vh] rounded-lg border border-gray-100" title="PDF Preview" />
+              ) : (
+                <div className="text-center py-10">
+                  <FileText size={40} className="mx-auto text-indigo-400 mb-3" />
+                  <p className="text-gray-600 mb-4">Cannot preview this file type directly.</p>
+                  <a href={previewUrl} target="_blank" rel="noreferrer" className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition">
+                    Open in New Tab
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* CANDIDATE INFO */}
       <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
@@ -230,7 +277,7 @@ export default function IdentityDetails() {
               }`}
             >
               <CreditCard size={14} />
-              {doc.cand_ident_name || `Document ${idx + 1}`}
+              {doc.cand_iden_type || doc.cand_ident_name || `Document ${idx + 1}`}
             </button>
           ))}
         </div>
@@ -247,13 +294,13 @@ export default function IdentityDetails() {
             {/* Left: Document Metadata */}
             <div>
               <h3 className="text-lg font-bold text-gray-900 mb-6">
-                {activeDoc.cand_ident_name || "Identity Document"} Information
+                {activeDoc.cand_iden_type || activeDoc.cand_ident_name || "Identity Document"} Information
               </h3>
               <div className="grid grid-cols-2 gap-y-6 gap-x-4">
                 <div>
                   <p className="text-xs text-gray-500 mb-1">Document Type</p>
                   <p className="text-sm font-semibold text-gray-900">
-                    {activeDoc.cand_ident_name || "N/A"}
+                    {activeDoc.cand_iden_type || activeDoc.cand_ident_name || "N/A"}
                   </p>
                 </div>
                 <div>
@@ -274,22 +321,41 @@ export default function IdentityDetails() {
                     {getExpiryDate(activeDoc)}
                   </p>
                 </div>
+                {activeDoc.cand_iden_docu && (
+                  <div className="col-span-2">
+                    <p className="text-xs text-gray-500 mb-1">Identity Document File</p>
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                      <FileText size={18} className="text-indigo-600" />
+                      <span className="text-xs text-gray-600 truncate flex-1 font-mono">
+                        {activeDoc.cand_iden_docu.split("/").pop() || activeDoc.cand_iden_docu}
+                      </span>
+                      <button
+                        onClick={() => setPreviewUrl(getDocUrl(activeDoc.cand_iden_docu))}
+                        className="text-indigo-600 hover:text-indigo-800 p-1.5 hover:bg-indigo-50 rounded transition flex items-center gap-1 text-xs font-medium"
+                        title="Preview document"
+                      >
+                        <Eye size={16} />
+                        Preview
+                      </button>
+                    </div>
+                  </div>
+                )}
                 {activeDoc.cand_ident_front_file && (
                   <div className="col-span-2">
                     <p className="text-xs text-gray-500 mb-1">Front Document File</p>
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
                       <FileText size={18} className="text-indigo-600" />
-                      <span className="text-xs text-gray-600 truncate flex-1">
-                        {activeDoc.cand_ident_front_file}
+                      <span className="text-xs text-gray-600 truncate flex-1 font-mono">
+                        {activeDoc.cand_ident_front_file.split("/").pop() || activeDoc.cand_ident_front_file}
                       </span>
-                      <a
-                        href={getDocUrl(activeDoc.cand_ident_front_file)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-indigo-600 hover:text-indigo-800 p-1"
+                      <button
+                        onClick={() => setPreviewUrl(getDocUrl(activeDoc.cand_ident_front_file))}
+                        className="text-indigo-600 hover:text-indigo-800 p-1.5 hover:bg-indigo-50 rounded transition flex items-center gap-1 text-xs font-medium"
+                        title="Preview document"
                       >
                         <Eye size={16} />
-                      </a>
+                        Preview
+                      </button>
                     </div>
                   </div>
                 )}
@@ -298,17 +364,17 @@ export default function IdentityDetails() {
                     <p className="text-xs text-gray-500 mb-1">Back Document File</p>
                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
                       <FileText size={18} className="text-indigo-600" />
-                      <span className="text-xs text-gray-600 truncate flex-1">
-                        {activeDoc.cand_ident_back_file}
+                      <span className="text-xs text-gray-600 truncate flex-1 font-mono">
+                        {activeDoc.cand_ident_back_file.split("/").pop() || activeDoc.cand_ident_back_file}
                       </span>
-                      <a
-                        href={getDocUrl(activeDoc.cand_ident_back_file)}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-indigo-600 hover:text-indigo-800 p-1"
+                      <button
+                        onClick={() => setPreviewUrl(getDocUrl(activeDoc.cand_ident_back_file))}
+                        className="text-indigo-600 hover:text-indigo-800 p-1.5 hover:bg-indigo-50 rounded transition flex items-center gap-1 text-xs font-medium"
+                        title="Preview document"
                       >
                         <Eye size={16} />
-                      </a>
+                        Preview
+                      </button>
                     </div>
                   </div>
                 )}

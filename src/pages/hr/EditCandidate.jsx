@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import {
   User, MapPin, IdCard, GraduationCap, Briefcase,
-  ShieldCheck, Users, CheckCircle, Eye, Trash2, Pencil, Loader2
+  ShieldCheck, Users, CheckCircle, Eye, Trash2, Pencil, Loader2,
+  FileText, Download, XCircle
 } from "lucide-react";
 import PhoneInputPkg from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
@@ -11,6 +12,139 @@ import 'react-phone-input-2/lib/style.css';
 const PhoneInput = PhoneInputPkg.default || PhoneInputPkg;
 
 const BASE = `${import.meta.env.VITE_API_URL}/api/candidates`;
+
+const resolveDocUrl = (path) => {
+  if (!path || typeof path !== "string") return null;
+  const trimmed = path.trim();
+  if (!trimmed) return null;
+  if (
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("blob:") ||
+    trimmed.startsWith("data:")
+  ) {
+    return trimmed;
+  }
+  let clean = trimmed.replace(/\\/g, "/");
+  if (clean.startsWith("/")) clean = clean.slice(1);
+  if (!clean.startsWith("uploads/")) {
+    clean = `uploads/${clean}`;
+  }
+  return `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/${clean}`;
+};
+
+const DocumentPreviewCard = ({ url, title = "Document Preview" }) => {
+  const resolvedUrl = resolveDocUrl(url);
+
+  if (!resolvedUrl) {
+    return (
+      <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center min-h-[220px]">
+        <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+          <XCircle size={28} className="text-gray-300" />
+        </div>
+        <p className="text-sm text-gray-400 font-medium">No document uploaded</p>
+      </div>
+    );
+  }
+
+  const lUrl = resolvedUrl.toLowerCase();
+  const isPdf = lUrl.endsWith(".pdf") || lUrl.includes(".pdf");
+  const fileName = resolvedUrl.split("/").pop();
+
+  return (
+    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-between">
+      <div className="flex items-center justify-between mb-3 border-b border-gray-100 pb-2">
+        <p className="text-sm font-semibold text-[#01026E]">{title}</p>
+        <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">
+          {isPdf ? "PDF" : "Image"}
+        </span>
+      </div>
+
+      <div className="flex-1 flex flex-col items-center justify-center">
+        {isPdf ? (
+          <div className="w-full flex flex-col items-center justify-center py-6 px-4 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+            <div className="w-12 h-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center mb-2 shadow-sm">
+              <FileText size={28} />
+            </div>
+            <p className="text-xs font-semibold text-gray-700 mb-1">PDF Document</p>
+            <p className="text-[11px] text-gray-400 mb-3 max-w-[180px] truncate text-center" title={fileName}>
+              {fileName}
+            </p>
+            <div className="flex items-center gap-2">
+              <a
+                href={resolvedUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs text-white bg-[#01026E] px-3 py-1.5 rounded-lg hover:bg-indigo-800 transition font-medium"
+              >
+                <Eye size={13} /> View PDF
+              </a>
+              <a
+                href={resolvedUrl}
+                download
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-gray-700 bg-white border border-gray-200 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 transition font-medium"
+                title="Download"
+              >
+                <Download size={13} />
+              </a>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full space-y-2">
+            <div className="relative group overflow-hidden rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center min-h-[170px] max-h-[240px] p-1">
+              <img
+                src={resolvedUrl}
+                alt={title}
+                className="max-h-[230px] w-auto max-w-full object-contain mx-auto"
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  const parent = e.target.parentElement;
+                  if (parent) {
+                    parent.innerHTML = `
+                      <div class="flex flex-col items-center justify-center p-4 text-center">
+                        <p class="text-xs text-gray-400 mb-2">Preview unavailable</p>
+                        <a href="${resolvedUrl}" target="_blank" class="text-xs font-medium text-indigo-700 underline">
+                          Open File &rarr;
+                        </a>
+                      </div>
+                    `;
+                  }
+                }}
+              />
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[11px] text-gray-400 truncate max-w-[140px]" title={fileName}>
+                {fileName}
+              </span>
+              <div className="flex items-center gap-2">
+                <a
+                  href={resolvedUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-[#01026E] hover:underline font-medium"
+                >
+                  <Eye size={13} /> Full View
+                </a>
+                <a
+                  href={resolvedUrl}
+                  download
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 font-medium"
+                  title="Download"
+                >
+                  <Download size={13} />
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 /* ─── helpers ─── */
 const statusBadge = (s) => {
@@ -235,16 +369,33 @@ function IdentityTab({ candId }) {
       {docs.length === 0 ? (
         <p className="text-sm text-gray-400 mt-4">No identity documents found.</p>
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-6">
           {docs.map((doc) => {
             const { label, cls } = statusBadge(doc.verification_status);
+            const docUrl = doc.doc_file_path || doc.cand_iden_docu;
             return (
-              <div key={doc.id_doc_id} className="border rounded-xl p-4 shadow-sm">
-                <div className="flex justify-between items-center mb-3">
-                  <h4 className="font-medium text-[#01026E]">{docTypeLabel(doc.doc_type)}</h4>
+              <div key={doc.id_doc_id} className="border rounded-xl p-5 shadow-sm bg-white">
+                <div className="flex justify-between items-center mb-4 pb-2 border-b">
+                  <h4 className="font-medium text-[#01026E] text-base">{docTypeLabel(doc.doc_type)}</h4>
                   <span className={`text-xs px-3 py-1 rounded-full ${cls}`}>{label}</span>
                 </div>
-                <Field label="ID Number" value={doc.doc_number} />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                  <div className="space-y-4">
+                    <Field label="ID Number" value={doc.doc_number} />
+                    <Field label="Document Type" value={docTypeLabel(doc.doc_type)} />
+                    {doc.upload_date && (
+                      <div className="text-xs text-gray-400">
+                        Uploaded on: <span className="font-medium text-gray-600">{fmtDate(doc.upload_date)}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <DocumentPreviewCard
+                      url={docUrl}
+                      title={`${docTypeLabel(doc.doc_type)} Proof`}
+                    />
+                  </div>
+                </div>
               </div>
             );
           })}
@@ -259,6 +410,7 @@ function EducationTab({ candId }) {
   const [list, setList]         = useState([]);
   const [loading, setLoading]   = useState(true);
   const [viewItem, setViewItem] = useState(null);
+  const [docType, setDocType]   = useState("certificate");
 
   useEffect(() => {
     axios.get(`${BASE}/${candId}/education`)
@@ -271,11 +423,17 @@ function EducationTab({ candId }) {
 
   if (viewItem) {
     const { label, cls } = statusBadge(viewItem.verification_status);
+    const hasCert = Boolean(viewItem.doc_file_path || viewItem.cand_edu_certificate);
+    const hasMarksheet = Boolean(viewItem.marksheet_file_path || viewItem.cand_edu_marksheet);
+    const certUrl = viewItem.doc_file_path || viewItem.cand_edu_certificate;
+    const marksheetUrl = viewItem.marksheet_file_path || viewItem.cand_edu_marksheet;
+    const activeUrl = docType === "marksheet" ? marksheetUrl : certUrl;
+
     return (
       <>
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Education Details</h3>
-        <div className="grid grid-cols-3 gap-6">
-          <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white p-5 rounded-xl shadow border">
             <div className="flex justify-between items-center mb-4">
               <h4 className="font-medium text-[#01026E]">{viewItem.degree} — {viewItem.institution_name}</h4>
               <span className={`text-xs px-3 py-1 rounded-full ${cls}`}>{label}</span>
@@ -291,15 +449,40 @@ function EducationTab({ candId }) {
               <Field label="Roll Number"      value={viewItem.roll_number} />
             </div>
           </div>
-          <div className="bg-white p-4 rounded-xl shadow border text-center">
-            <p className="text-sm text-[#01026E] mb-3 font-medium">Preview</p>
-            {viewItem.doc_file_path
-              ? <img src={`${import.meta.env.VITE_API_URL}/${viewItem.doc_file_path}`} alt="cert" className="rounded-lg shadow-sm mx-auto h-64 object-cover" />
-              : <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 text-sm">No document uploaded</div>
-            }
+          <div className="flex flex-col gap-3">
+            {(hasCert || hasMarksheet) && (
+              <div className="flex bg-gray-100 p-1 rounded-lg">
+                <button
+                  type="button"
+                  onClick={() => setDocType("certificate")}
+                  className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition ${
+                    docType === "certificate"
+                      ? "bg-white text-[#01026E] shadow-sm"
+                      : "text-gray-600 hover:text-black"
+                  }`}
+                >
+                  Certificate
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDocType("marksheet")}
+                  className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition ${
+                    docType === "marksheet"
+                      ? "bg-white text-[#01026E] shadow-sm"
+                      : "text-gray-600 hover:text-black"
+                  }`}
+                >
+                  Marksheet
+                </button>
+              </div>
+            )}
+            <DocumentPreviewCard
+              url={activeUrl}
+              title={docType === "marksheet" ? "Marksheet Document" : "Degree / Certificate"}
+            />
           </div>
         </div>
-        <button onClick={() => setViewItem(null)} className="mt-4 text-sm text-[#01026E] underline">← Back to list</button>
+        <button onClick={() => { setViewItem(null); setDocType("certificate"); }} className="mt-4 text-sm text-[#01026E] underline">← Back to list</button>
       </>
     );
   }
@@ -342,6 +525,7 @@ function EmploymentTab({ candId }) {
   const [list, setList]         = useState([]);
   const [loading, setLoading]   = useState(true);
   const [viewItem, setViewItem] = useState(null);
+  const [docType, setDocType]   = useState("joining");
 
   useEffect(() => {
     axios.get(`${BASE}/${candId}/employment`)
@@ -353,11 +537,20 @@ function EmploymentTab({ candId }) {
   if (loading) return <Skeleton />;
 
   if (viewItem) {
+    const joiningUrl = viewItem.doc_file_path || viewItem.cand_emp_joining;
+    const payslipUrl = viewItem.payslip_file_path || viewItem.cand_emp_payslip;
+    const serviceUrl = viewItem.service_file_path || viewItem.cand_emp_service;
+    const hasAnyDocs = Boolean(joiningUrl || payslipUrl || serviceUrl);
+    const activeUrl =
+      docType === "payslip" ? payslipUrl :
+      docType === "service" ? serviceUrl :
+      joiningUrl;
+
     return (
       <>
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Employment Details</h3>
-        <div className="grid grid-cols-3 gap-6">
-          <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white p-5 rounded-xl shadow border">
             <div className="grid grid-cols-2 gap-5">
               <Field label="Employee ID"   value={viewItem.employee_id} />
               <Field label="Company Name"  value={viewItem.employer_name} />
@@ -377,15 +570,55 @@ function EmploymentTab({ candId }) {
               </div>
             )}
           </div>
-          <div className="bg-white p-4 rounded-xl shadow border text-center">
-            <p className="text-sm text-[#01026E] mb-3 font-medium">Preview</p>
-            {viewItem.doc_file_path
-              ? <img src={`${import.meta.env.VITE_API_URL}/${viewItem.doc_file_path}`} alt="doc" className="rounded-lg shadow-sm mx-auto h-64 object-cover" />
-              : <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 text-sm">No document uploaded</div>
-            }
+          <div className="flex flex-col gap-3">
+            {hasAnyDocs && (
+              <div className="flex bg-gray-100 p-1 rounded-lg">
+                <button
+                  type="button"
+                  onClick={() => setDocType("joining")}
+                  className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition ${
+                    docType === "joining"
+                      ? "bg-white text-[#01026E] shadow-sm"
+                      : "text-gray-600 hover:text-black"
+                  }`}
+                >
+                  Joining
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDocType("payslip")}
+                  className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition ${
+                    docType === "payslip"
+                      ? "bg-white text-[#01026E] shadow-sm"
+                      : "text-gray-600 hover:text-black"
+                  }`}
+                >
+                  Payslip
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDocType("service")}
+                  className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition ${
+                    docType === "service"
+                      ? "bg-white text-[#01026E] shadow-sm"
+                      : "text-gray-600 hover:text-black"
+                  }`}
+                >
+                  Service
+                </button>
+              </div>
+            )}
+            <DocumentPreviewCard
+              url={activeUrl}
+              title={
+                docType === "payslip" ? "Payslip / Relieving" :
+                docType === "service" ? "Service Certificate" :
+                "Joining Letter"
+              }
+            />
           </div>
         </div>
-        <button onClick={() => setViewItem(null)} className="mt-4 text-sm text-[#01026E] underline">← Back to list</button>
+        <button onClick={() => { setViewItem(null); setDocType("joining"); }} className="mt-4 text-sm text-[#01026E] underline">← Back to list</button>
       </>
     );
   }
@@ -441,11 +674,12 @@ function BackgroundTab({ candId }) {
 
   if (viewItem) {
     const isCriminal = viewItem.type === "criminal";
+    const docUrl = viewItem.data.doc_file_path || viewItem.data.cand_crim_report || viewItem.data.cand_drug_report;
     return (
       <>
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Background Details</h3>
-        <div className="grid grid-cols-3 gap-6">
-          <div className="col-span-2 bg-white p-5 rounded-xl shadow border">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white p-5 rounded-xl shadow border">
             <div className="grid grid-cols-2 gap-5">
               {isCriminal ? (
                 <>
@@ -465,12 +699,11 @@ function BackgroundTab({ candId }) {
               )}
             </div>
           </div>
-          <div className="bg-white p-4 rounded-xl shadow border text-center">
-            <p className="text-sm text-[#01026E] mb-3 font-medium">Preview</p>
-            {viewItem.data.doc_file_path
-              ? <img src={`${import.meta.env.VITE_API_URL}/${viewItem.data.doc_file_path}`} className="rounded-lg shadow-sm mx-auto h-64 object-cover" />
-              : <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 text-sm">No document uploaded</div>
-            }
+          <div>
+            <DocumentPreviewCard
+              url={docUrl}
+              title={isCriminal ? "Criminal Check Report" : "Drug Test Report"}
+            />
           </div>
         </div>
         <button onClick={() => setViewItem(null)} className="mt-4 text-sm text-[#01026E] underline">← Back</button>

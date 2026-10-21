@@ -38,7 +38,6 @@ function ActionDropdown({
       </button>
 
       {/* EDIT */}
-      {/* 
       <button
         onClick={handleClick(onEdit)}
         className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 text-sm text-gray-700 transition"
@@ -46,7 +45,6 @@ function ActionDropdown({
         <Pencil size={16} />
         Edit
       </button>
-      */}
 
       {/* SEND EMAIL */}
       <button

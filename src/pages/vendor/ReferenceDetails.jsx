@@ -13,7 +13,8 @@ import {
   FileText,
   Upload,
   CloudUpload,
-  Trash2
+  Trash2,
+  Eye
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -35,6 +36,7 @@ function ReferenceDetails() {
   const [candidate, setCandidate] = useState({});
   const [records, setRecords] = useState([]);
   const [error, setError] = useState("");
+  const [caseStatus, setCaseStatus] = useState("");
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -55,6 +57,7 @@ function ReferenceDetails() {
         if (res.data.success) {
           setCandidate(res.data.candidate || {});
           setRecords(res.data.records || []);
+          setCaseStatus(res.data.caseStatus || res.data.status || "");
         }
       })
       .catch((err) => {
@@ -113,23 +116,42 @@ function ReferenceDetails() {
   return (
     <div className="w-full max-w-[1600px] mx-auto space-y-6 animate-fade-in pb-10 px-4 mt-4">
       {/* HEADER SECTION */}
-      <div className="flex items-center gap-4 border-b border-indigo-100 pb-4">
-        <button
-          onClick={() => navigate(-1)}
-          className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <div className="p-2 bg-indigo-50 rounded-lg text-indigo-700 border border-indigo-100">
-          <Users size={24} />
+      <div className="flex items-center justify-between gap-4 border-b border-indigo-100 pb-4">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => navigate(-1)}
+            className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <div className="p-2 bg-indigo-50 rounded-lg text-indigo-700 border border-indigo-100">
+            <Users size={24} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-indigo-900">
+              Reference Check Details
+            </h1>
+            {caseId && (
+              <p className="text-xs text-gray-500 font-medium">
+                Case ID: CASE-{String(caseId).padStart(5, "0")}
+              </p>
+            )}
+          </div>
         </div>
-        <h1 className="text-2xl font-bold text-indigo-900">
-          Reference Check Details
-        </h1>
-        {caseId && (
-          <span className="ml-auto text-sm text-gray-500 font-medium">
-            Case ID: CASE-{String(caseId).padStart(5, "0")}
-          </span>
+        {/* Case Status Badge at Top */}
+        {caseStatus && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500 font-medium">Case Status:</span>
+            <span className={`px-4 py-1.5 rounded-full text-sm font-semibold ${
+              caseStatus === "Verified" ? "bg-emerald-100 text-emerald-700 border border-emerald-200" :
+              caseStatus === "Assigned" ? "bg-purple-100 text-purple-700 border border-purple-200" :
+              caseStatus === "Refute" ? "bg-red-100 text-red-700 border border-red-200" :
+              caseStatus === "Unverified" ? "bg-amber-100 text-amber-700 border border-amber-200" :
+              "bg-gray-100 text-gray-700 border border-gray-200"
+            }`}>
+              {caseStatus}
+            </span>
+          </div>
         )}
       </div>
 

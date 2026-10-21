@@ -260,24 +260,33 @@ function Sidebar({
   /* LOGOUT */
   const handleLogout = () => {
 
-    // Get role before clearing
-    const role = localStorage.getItem("role");
+    const path = window.location.pathname;
+
+    // Determine redirect from path (most reliable)
+    let redirectTo = "/";
+
+    if (path.includes("/super-admin")) {
+      redirectTo = "/super-admin/login";
+    } else if (path.includes("/vendor")) {
+      redirectTo = "/vendor/login";
+    } else if (path.includes("/hr")) {
+      redirectTo = "/hr/login";
+    } else if (path.includes("/admin")) {
+      redirectTo = "/admin/login";
+    } else {
+      // Fallback to localStorage role
+      const role = localStorage.getItem("role");
+      if (role === "super-admin") redirectTo = "/super-admin/login";
+      else if (role === "hr") redirectTo = "/hr/login";
+      else if (role === "admin" || role === "client_admin") redirectTo = "/admin/login";
+      else if (role === "vendor") redirectTo = "/vendor/login";
+    }
 
     // Clear everything
     localStorage.clear();
+    sessionStorage.clear();
 
-    // REDIRECT BASED ON ROLE
-    if (role === "admin" || role === "client_admin") {
-      navigate("/admin/login", { state: { message: "Logout Successful!" } });
-    } else if (role === "hr") {
-      navigate("/hr/login", { state: { message: "Logout Successful!" } });
-    } else if (role === "super-admin") {
-      navigate("/super-admin/login", { state: { message: "Logout Successful!" } });
-    } else if (role === "vendor") {
-      navigate("/vendor/login", { state: { message: "Logout Successful!" } });
-    } else {
-      navigate("/", { state: { message: "Logout Successful!" } });
-    }
+    navigate(redirectTo, { state: { message: "Logout Successful!" } });
   };
 
   /* SIDEBAR EXPAND */

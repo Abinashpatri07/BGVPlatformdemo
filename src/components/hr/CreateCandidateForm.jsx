@@ -36,8 +36,8 @@ function CreateCandidateForm() {
     setGeneralError("");
 
     try {
-      // TODO: createdById ko auth/session se lo — abhi hardcoded
-      const createdById = 1; // logged-in HR ka users_id
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const createdById = storedUser.id || storedUser.users_id || 1;
 
       let normalizedPhone = (data.phone || "").toString().replace(/[\s\-()+]/g, "");
       if (normalizedPhone.startsWith("91") && normalizedPhone.length === 12) {

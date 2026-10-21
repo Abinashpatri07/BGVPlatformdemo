@@ -40,6 +40,8 @@ function DrugTestDetails() {
   const [candidate, setCandidate] = useState({});
   const [drug, setDrug] = useState(null);
   const [error, setError] = useState("");
+  const [caseStatus, setCaseStatus] = useState("");
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
     if (!caseId) { setLoading(false); return; }
@@ -50,6 +52,7 @@ function DrugTestDetails() {
       if (res.data.success) {
         setCandidate(res.data.candidate || {});
         setDrug(res.data.drug || null);
+        setCaseStatus(res.data.caseStatus || res.data.status || "");
       }
     }).catch(err => {
       setError("Failed to load data.");
@@ -86,16 +89,63 @@ function DrugTestDetails() {
     <div className="w-full max-w-[1600px] mx-auto space-y-8 animate-fade-in pb-10 px-4 mt-4">
 
       {/* Header */}
-      <div className="flex items-center gap-4 border-b border-indigo-100 pb-4">
-        <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition">
-          <ChevronLeft size={20} />
-        </button>
-        <div className="p-2 bg-indigo-50 rounded-lg text-indigo-700 border border-indigo-100">
-          <TestTube2 size={24} />
+      <div className="flex items-center justify-between border-b border-indigo-100 pb-4">
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition">
+            <ChevronLeft size={20} />
+          </button>
+          <div className="p-2 bg-indigo-50 rounded-lg text-indigo-700 border border-indigo-100">
+            <TestTube2 size={24} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-indigo-900">Drug Test Details</h1>
+            <span className="text-xs text-gray-500 font-medium">Case ID: CASE-{String(caseId).padStart(5, '0')}</span>
+          </div>
         </div>
-        <h1 className="text-2xl font-bold text-indigo-900">Drug Test Details</h1>
-        <span className="ml-auto text-sm text-gray-500 font-medium">Case ID: CASE-{String(caseId).padStart(5, '0')}</span>
+        {/* Case Status Badge at Top */}
+        {caseStatus && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500 font-medium">Case Status:</span>
+            <span className={`px-4 py-1.5 rounded-full text-sm font-semibold ${
+              caseStatus === "Verified" ? "bg-emerald-100 text-emerald-700 border border-emerald-200" :
+              caseStatus === "Assigned" ? "bg-purple-100 text-purple-700 border border-purple-200" :
+              caseStatus === "Refute" ? "bg-red-100 text-red-700 border border-red-200" :
+              caseStatus === "Unverified" ? "bg-amber-100 text-amber-700 border border-amber-200" :
+              "bg-gray-100 text-gray-700 border border-gray-200"
+            }`}>
+              {caseStatus}
+            </span>
+          </div>
+        )}
       </div>
+
+      {/* Document Preview Modal */}
+      {previewUrl && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setPreviewUrl(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-gray-100">
+              <h3 className="font-semibold text-gray-800">Document Preview</h3>
+              <button onClick={() => setPreviewUrl(null)} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 transition">
+                ✕
+              </button>
+            </div>
+            <div className="p-4">
+              {previewUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                <img src={previewUrl} alt="Document preview" className="w-full rounded-lg" />
+              ) : previewUrl.match(/\.pdf$/i) ? (
+                <iframe src={previewUrl} className="w-full h-[60vh] rounded-lg border border-gray-100" title="PDF Preview" />
+              ) : (
+                <div className="text-center py-10">
+                  <p className="text-gray-600 mb-4">Cannot preview this file type directly.</p>
+                  <a href={previewUrl} target="_blank" rel="noreferrer" className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-700 transition">
+                    Open in New Tab
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Candidate Info */}
       <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
@@ -168,9 +218,14 @@ function DrugTestDetails() {
                       <p className="text-sm font-semibold text-gray-800">Drug Report</p>
                       <p className="text-xs text-gray-400">{drug.cand_drug_report}</p>
                     </div>
-                    <a href={getDocUrl(drug.cand_drug_report)} target="_blank" rel="noreferrer" className="text-indigo-600 hover:text-indigo-800 transition p-1.5">
+                    <button
+                      onClick={() => setPreviewUrl(getDocUrl(drug.cand_drug_report))}
+                      className="text-indigo-600 hover:text-indigo-800 transition p-1.5 flex items-center gap-1 text-xs font-medium"
+                      title="Preview Document"
+                    >
                       <Eye size={18} />
-                    </a>
+                      Preview
+                    </button>
                   </div>
                 </div>
               ) : (

@@ -6,11 +6,10 @@ import {
   Eye,
   CheckCircle2,
   FileWarning,
-  CheckSquare,
-  MessageSquare,
-  Mic,
   ChevronLeft,
-  Loader2
+  Loader2,
+  Building2,
+  Clock
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
@@ -33,10 +32,7 @@ const Field = ({ label, value }) => (
 
 function SuperAdminCriminalDetails() {
   const [recordIdentified, setRecordIdentified] = useState("No Record Found");
-  const [decision, setDecision] = useState("Verified");
-  const [remarks, setRemarks] = useState("");
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [caseData, setCaseData] = useState(null);
   const [candidate, setCandidate] = useState(null);
   const [records, setRecords] = useState([]);
@@ -72,25 +68,6 @@ function SuperAdminCriminalDetails() {
     };
     fetchDetails();
   }, [caseIdParam]);
-
-  const handleSaveDecision = async () => {
-    if (!caseIdParam) return;
-    try {
-      setSaving(true);
-      await axios.post(`${API_BASE}/api/superadmin/cases/update-decision`, {
-        caseId: caseIdParam,
-        decision,
-        remarks
-      });
-      alert("Criminal background verification decision saved successfully!");
-      navigate(-1);
-    } catch (err) {
-      console.error("Save decision error:", err);
-      alert("Failed to save decision: " + (err.response?.data?.message || err.message));
-    } finally {
-      setSaving(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -272,99 +249,48 @@ function SuperAdminCriminalDetails() {
           </div>
         </div>
 
-        {/* Verification Decision Section */}
+        {/* Case Verification Status */}
         <div className="bg-white rounded-xl p-8 border border-gray-100 shadow-sm">
           <div className="flex items-center gap-3 border-b border-gray-100 pb-4 mb-6">
-            <div className="p-1.5 bg-indigo-50 rounded text-indigo-700">
-              <CheckSquare size={20} />
+            <div className="p-1.5 bg-indigo-50 rounded text-indigo-700"><ShieldCheck size={20} /></div>
+            <h2 className="text-lg font-bold text-indigo-900">Case Verification Status</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+              <p className="text-xs text-gray-400 font-medium mb-1">Current Status</p>
+              {(() => {
+                const s = parseInt(caseData?.verificationStatus);
+                const labels = { 1: "Pending", 2: "Assigned", 3: "In Progress", 4: "Verified", 5: "Refuted", 6: "On Hold" };
+                const colors = { 1: "bg-blue-50 text-blue-700", 2: "bg-purple-50 text-purple-700", 3: "bg-blue-50 text-blue-700", 4: "bg-emerald-50 text-emerald-700", 5: "bg-red-50 text-red-700", 6: "bg-amber-50 text-amber-700" };
+                return <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${colors[s] || "bg-gray-100 text-gray-700"}`}>{labels[s] || "Unverified"}</span>;
+              })()}
             </div>
-            <h2 className="text-lg font-bold text-indigo-900">
-              Verification Decision
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            {[
-              "Verified",
-              "Partially Verified",
-              "Unable To Verify",
-              "Verification Pending"
-            ].map((opt) => (
-              <label
-                key={opt}
-                onClick={() => setDecision(opt)}
-                className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition ${
-                  decision === opt
-                    ? "border-indigo-600 bg-indigo-50/30 shadow-sm"
-                    : "border-gray-200 hover:bg-gray-50"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="criminal-decision"
-                  value={opt}
-                  checked={decision === opt}
-                  onChange={() => setDecision(opt)}
-                  className="hidden"
-                />
-                <div
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                    decision === opt
-                      ? "border-indigo-800"
-                      : "border-gray-300"
-                  }`}
-                >
-                  {decision === opt && (
-                    <div className="w-2.5 h-2.5 bg-indigo-800 rounded-full" />
-                  )}
-                </div>
-                <span
-                  className={`text-sm font-semibold ${
-                    decision === opt ? "text-gray-900" : "text-gray-700"
-                  }`}
-                >
-                  {opt}
-                </span>
-              </label>
-            ))}
-          </div>
-
-          {/* Remarks */}
-          <div className="pt-4 border-t border-gray-100">
-            <label className="block text-xs font-semibold text-gray-700 mb-2">
-              Verification Remarks / Findings
-            </label>
-            <div className="relative">
-              <textarea
-                rows="3"
-                value={remarks}
-                onChange={(e) => setRemarks(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 bg-gray-50/50 p-4 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white resize-none"
-                placeholder="Enter criminal background findings or court verification remarks..."
-              />
-              <div className="absolute bottom-4 right-4 text-gray-400">
-                <Mic size={18} />
+            <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+              <p className="text-xs text-gray-400 font-medium mb-1">Assigned Vendor</p>
+              <div className="flex items-center gap-2">
+                <Building2 size={14} className="text-indigo-500 shrink-0" />
+                <p className="text-sm font-semibold text-gray-900 truncate">{caseData?.vendorName || "Not Assigned"}</p>
+              </div>
+            </div>
+            <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+              <p className="text-xs text-gray-400 font-medium mb-1">Assigned Date</p>
+              <div className="flex items-center gap-2">
+                <Clock size={14} className="text-indigo-500 shrink-0" />
+                <p className="text-sm font-semibold text-gray-900">
+                  {caseData?.assignedDate ? new Date(caseData.assignedDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
+                </p>
               </div>
             </div>
           </div>
-
-          {/* Actions */}
-          <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="px-5 py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition"
-            >
-              Back to Cases
-            </button>
-            <button
-              type="button"
-              disabled={saving}
-              onClick={handleSaveDecision}
-              className="px-6 py-2.5 text-xs font-semibold text-white bg-[#05058D] hover:bg-blue-800 rounded-xl transition shadow-sm disabled:opacity-50 flex items-center gap-2"
-            >
-              {saving && <Loader2 size={14} className="animate-spin" />}
-              Save Decision
+          {caseData?.verificationComment && (
+            <div className="mb-4 p-4 rounded-xl bg-indigo-50/50 border border-indigo-100">
+              <p className="text-xs text-indigo-600 font-semibold mb-1">Verification Remarks (by Vendor)</p>
+              <p className="text-sm text-gray-700">{caseData.verificationComment}</p>
+            </div>
+          )}
+          <div className="flex justify-end pt-4 border-t border-gray-100">
+            <button type="button" onClick={() => navigate(-1)} className="px-5 py-2.5 text-xs font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition">
+              ← Back to Cases
             </button>
           </div>
         </div>

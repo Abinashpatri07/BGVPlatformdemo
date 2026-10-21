@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   RefreshCw,
   ListFilter,
@@ -11,157 +11,90 @@ import {
   ChevronRight as ChevronRightSmall
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-
-const tableData = [
-  {
-    id: 1,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Employment Verification",
-    name: "Arjun Sharma",
-    email: "arjun.sharma@email.com",
-    phone: "1234567890",
-    tat: "2 Days",
-    status: "Verified",
-  },
-  {
-    id: 2,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Education Verification",
-    name: "Ananya Iyer",
-    email: "ananya.iyer@email.com",
-    phone: "1234567890",
-    tat: "5 Days",
-    status: "Verified",
-  },
-  {
-    id: 3,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Address Verification",
-    name: "Rohan Malhotra",
-    email: "rohan.m@workspace.in",
-    phone: "1234567890",
-    tat: "1 Day",
-    status: "Verified",
-  },
-  {
-    id: 4,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Criminal Check",
-    name: "Meera Deshmukh",
-    email: "meera.d@talent.io",
-    phone: "1234567890",
-    tat: "3 Days",
-    status: "Verified",
-  },
-  {
-    id: 5,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Education Verification",
-    name: "Niten Sharma",
-    email: "nitenkumar34@gmail.com",
-    phone: "1234567890",
-    tat: "2 Days",
-    status: "Verified",
-  },
-  {
-    id: 6,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Address Verification",
-    name: "Kavya Patel",
-    email: "k.patel@company.com",
-    phone: "1234567890",
-    tat: "1 Day",
-    status: "Verified",
-  },
-  {
-    id: 7,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Drug Test",
-    name: "Ishaan Verma",
-    email: "ishaan.verma@talent.io",
-    phone: "1234567890",
-    tat: "4 Days",
-    status: "Verified",
-  },
-  {
-    id: 8,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Address Verification",
-    name: "Niten Sharma",
-    email: "nitenkumar34@gmail.com",
-    phone: "1234567890",
-    tat: "5 Days",
-    status: "Verified",
-  },
-  {
-    id: 9,
-    caseId: "CASE-6567FAFB",
-    candidateId: "CAND_100421",
-    caseType: "Education Verification",
-    name: "Ishaan Verma",
-    email: "ishaan.verma@talent.io",
-    phone: "1234567890",
-    tat: "3 Days",
-    status: "Verified",
-  },
-];
+import axios from "axios";
 
 const getStatusBadge = (status) => {
+  const map = {
+    Verified: "bg-[#DCFCE7] text-[#15803D]",
+    Assigned: "bg-[#F3E8FF] text-[#7E22CE]",
+    Refute: "bg-[#FEE2E2] text-[#B91C1C]",
+    Unverified: "bg-[#F1F5F9] text-[#64748B]",
+    "In Progress": "bg-[#FEF3C7] text-[#B45309]",
+    Hold: "bg-[#FEF3C7] text-[#B45309]",
+  };
+  const cls = map[status] || "bg-gray-100 text-gray-800";
   return (
-    <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#DCFCE7] text-[#15803D]">
+    <span className={`px-3 py-1 rounded-full text-xs font-medium ${cls}`}>
       {status}
     </span>
   );
 };
 
-const getDetailsLink = (caseType) => {
-  switch (caseType) {
-    case "Employment Verification":
-    case "Internship":
-      return "/vendor/employment-details";
-    case "Education Verification":
-      return "/vendor/education-details";
-    case "Address Verification":
-      return "/vendor/address-details";
-    case "Criminal Check":
-      return "/vendor/criminal-details";
-    case "Drug Test":
-      return "/vendor/drug-test-details";
-    case "Reference Check":
-      return "/vendor/reference-details";
-    case "Identification":
-    case "Identity Verification":
-      return "/vendor/identity-details";
-    default:
-      return "#";
-  }
-};
-
 function VerifiedApplications() {
   const navigate = useNavigate();
   const [selectedRows, setSelectedRows] = useState([]);
+  const [cases, setCases] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const toggleRow = (id) => {
-    if (selectedRows.includes(id)) {
-      setSelectedRows(selectedRows.filter((rowId) => rowId !== id));
-    } else {
-      setSelectedRows([...selectedRows, id]);
+  const fetchCases = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("vendorToken");
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/vendor/cases/assigned`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data.success) {
+        setCases(res.data.data.filter(c => c.status === "Verified"));
+      }
+    } catch (err) {
+      console.error("Failed to fetch verified cases:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => { fetchCases(); }, []);
+
+  const toggleRow = (id) => {
+    setSelectedRows(prev =>
+      prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]
+    );
+  };
+
   const toggleAll = () => {
-    if (selectedRows.length === tableData.length) {
-      setSelectedRows([]);
-    } else {
-      setSelectedRows(tableData.map((row) => row.id));
+    if (selectedRows.length === cases.length) setSelectedRows([]);
+    else setSelectedRows(cases.map(r => r.id));
+  };
+
+  const filtered = cases.filter(c => {
+    if (!searchTerm) return true;
+    const t = searchTerm.toLowerCase();
+    return (
+      (c.caseId && c.caseId.toLowerCase().includes(t)) ||
+      (c.candidateId && c.candidateId.toLowerCase().includes(t)) ||
+      (c.name && c.name.toLowerCase().includes(t)) ||
+      (c.caseType && c.caseType.toLowerCase().includes(t))
+    );
+  });
+
+  const handleAction = (row) => {
+    const mode = "view";
+    const id = row.id;
+    if (row.caseType.includes("Employment") || row.caseType === "Internship") {
+      navigate(`/vendor/employment-details?mode=${mode}&caseId=${id}`);
+    } else if (row.caseType.includes("Address")) {
+      navigate(`/vendor/address-details?mode=${mode}&caseId=${id}`);
+    } else if (row.caseType.includes("Drug")) {
+      navigate(`/vendor/drug-test-details?mode=${mode}&caseId=${id}`);
+    } else if (row.caseType.includes("Education")) {
+      navigate(`/vendor/education-details?mode=${mode}&caseId=${id}`);
+    } else if (row.caseType.includes("Criminal")) {
+      navigate(`/vendor/criminal-details?mode=${mode}&caseId=${id}`);
+    } else if (row.caseType.includes("Identification") || row.caseType.includes("Identity")) {
+      navigate(`/vendor/identity-details?mode=${mode}&caseId=${id}`);
+    } else if (row.caseType.includes("Reference")) {
+      navigate(`/vendor/reference-details?mode=${mode}&caseId=${id}`);
     }
   };
 
@@ -185,17 +118,17 @@ function VerifiedApplications() {
           <button className="px-6 py-2 bg-gray-100 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition shadow-sm">
             All
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm">
+          <button onClick={fetchCases} className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm">
             <RefreshCw size={16} />
             Refresh
           </button>
           <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm">
             <ListFilter size={16} />
-            Short by Name
+            Sort by Name
           </button>
           <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm">
             <Calendar size={16} />
-            Short by Date
+            Sort by Date
           </button>
         </div>
 
@@ -208,6 +141,8 @@ function VerifiedApplications() {
             <input
               type="text"
               placeholder="Search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 border border-gray-300 bg-gray-50/50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#4338CA]/30 w-64 shadow-sm"
             />
           </div>
@@ -221,92 +156,82 @@ function VerifiedApplications() {
       {/* TABLE SECTION */}
       <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm mt-4">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-base">
+          <table className="w-full text-left text-sm">
             <thead className="bg-gray-50 text-gray-700 font-semibold border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4 w-12">
+                <th className="px-3 py-1.5 w-12">
                   <input
                     type="checkbox"
                     className="w-4 h-4 rounded border-gray-300 text-[#4338CA] focus:ring-[#4338CA]"
-                    checked={
-                      selectedRows.length === tableData.length &&
-                      tableData.length > 0
-                    }
+                    checked={selectedRows.length === filtered.length && filtered.length > 0}
                     onChange={toggleAll}
                   />
                 </th>
-                <th className="px-6 py-4">Case ID</th>
-                <th className="px-6 py-4">Candidate ID</th>
-                <th className="px-6 py-4">Case Type</th>
-                <th className="px-6 py-4">Name</th>
-                <th className="px-6 py-4">Phone</th>
-                <th className="px-6 py-4">TAT</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-center">Action</th>
+                <th className="px-3 py-1.5">Case ID</th>
+                <th className="px-3 py-1.5">Candidate ID</th>
+                <th className="px-3 py-1.5">Case Type</th>
+                <th className="px-3 py-1.5">Name</th>
+                <th className="px-3 py-1.5">Phone</th>
+                <th className="px-3 py-1.5">TAT</th>
+                <th className="px-3 py-1.5">Status</th>
+                <th className="px-3 py-1.5 text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {tableData.map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-gray-50 transition-colors duration-150"
-                >
-                  <td className="px-6 py-4">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 rounded border-gray-300 text-[#4338CA] focus:ring-[#4338CA]"
-                      checked={selectedRows.includes(row.id)}
-                      onChange={() => toggleRow(row.id)}
-                    />
-                  </td>
-                  <td className="px-6 py-4 font-medium text-gray-900">
-                    {row.caseId}
-                  </td>
-                  <td className="px-6 py-4 text-gray-700">{row.candidateId}</td>
-                  <td className="px-6 py-4">
-                    <div className="text-gray-900 font-medium">
-                      {row.caseType.split(" ")[0]}
-                    </div>
-                    {row.caseType.split(" ")[1] && (
-                      <div className="text-gray-500 text-xs">
-                        {row.caseType.split(" ").slice(1).join(" ")}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-gray-900 font-medium">{row.name}</div>
-                    <div className="text-gray-500 text-xs">{row.email}</div>
-                  </td>
-                  <td className="px-6 py-4 text-gray-700">+91 {row.phone}</td>
-                  <td className="px-6 py-4 text-gray-700">{row.tat}</td>
-                  <td className="px-6 py-4">{getStatusBadge(row.status)}</td>
-                  <td className="px-6 py-4 text-gray-400">
-                    <button 
-                      className="p-1 hover:bg-gray-200 rounded transition inline-flex justify-center items-center"
-                      onClick={() => {
-                        const mode = "view";
-                        if (row.caseType.includes("Employment Verification")) {
-                          navigate(`/vendor/employment-details?mode=${mode}&caseId=${row.id}`);
-                        } else if (row.caseType.includes("Address Verification")) {
-                          navigate(`/vendor/address-details?mode=${mode}&caseId=${row.id}`);
-                        } else if (row.caseType.includes("Drug Test")) {
-                          navigate(`/vendor/drug-test-details?mode=${mode}&caseId=${row.id}`);
-                        } else if (row.caseType.includes("Education Verification")) {
-                          navigate(`/vendor/education-details?mode=${mode}&caseId=${row.id}`);
-                        } else if (row.caseType.includes("Criminal Check")) {
-                          navigate(`/vendor/criminal-details?mode=${mode}&caseId=${row.id}`);
-                        } else if (row.caseType.includes("Identification") || row.caseType.includes("Identity")) {
-                          navigate(`/vendor/identity-details?mode=${mode}&caseId=${row.id}`);
-                        } else if (row.caseType.includes("Reference")) {
-                          navigate(`/vendor/reference-details?mode=${mode}&caseId=${row.id}`);
-                        }
-                      }}
-                    >
-                      <Eye size={18} />
-                    </button>
-                  </td>
+              {loading ? (
+                <tr>
+                  <td colSpan="9" className="text-center py-10 text-gray-500">Loading cases...</td>
                 </tr>
-              ))}
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan="9" className="text-center py-10 text-gray-500">No verified cases found.</td>
+                </tr>
+              ) : (
+                filtered.map((row) => (
+                  <tr
+                    key={row.id}
+                    className={`hover:bg-gray-50 transition-colors duration-150 ${selectedRows.includes(row.id) ? "bg-green-50" : ""}`}
+                  >
+                    <td className="px-3 py-1.5">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 rounded border-gray-300 text-[#4338CA] focus:ring-[#4338CA]"
+                        checked={selectedRows.includes(row.id)}
+                        onChange={() => toggleRow(row.id)}
+                      />
+                    </td>
+                    <td className="px-3 py-1.5 font-medium text-gray-900">
+                      {row.caseId}
+                    </td>
+                    <td className="px-3 py-1.5 text-gray-700">{row.candidateId}</td>
+                    <td className="px-3 py-1.5">
+                      <div className="text-gray-900 font-medium">
+                        {row.caseType.split(" ")[0]}
+                      </div>
+                      {row.caseType.split(" ")[1] && (
+                        <div className="text-gray-500 text-xs">
+                          {row.caseType.split(" ").slice(1).join(" ")}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-3 py-1.5">
+                      <div className="text-gray-900 font-medium">{row.name}</div>
+                      <div className="text-gray-500 text-xs">{row.email}</div>
+                    </td>
+                    <td className="px-3 py-1.5 text-gray-700">+91 {row.phone}</td>
+                    <td className="px-3 py-1.5 text-gray-700">{row.tat}</td>
+                    <td className="px-3 py-1.5">{getStatusBadge(row.status)}</td>
+                    <td className="px-3 py-1.5 text-gray-400 text-center">
+                      <button
+                        className="p-1 hover:bg-gray-200 rounded transition inline-flex justify-center items-center"
+                        onClick={() => handleAction(row)}
+                      >
+                        <Eye size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -320,7 +245,7 @@ function VerifiedApplications() {
               <option>10</option>
               <option>20</option>
             </select>
-            <span>out of 40</span>
+            <span>out of {filtered.length}</span>
           </div>
 
           <div className="flex items-center gap-1">
@@ -330,25 +255,6 @@ function VerifiedApplications() {
             </button>
             <button className="w-8 h-8 flex items-center justify-center rounded bg-[#EEF2FF] text-[#4338CA] font-semibold border border-[#C7D2FE]">
               1
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition">
-              2
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition">
-              3
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition">
-              4
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition">
-              5
-            </button>
-            <span className="px-1 text-gray-400">...</span>
-            <button className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition">
-              8
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded hover:bg-gray-100 transition">
-              9
             </button>
             <button className="flex items-center gap-1 px-3 py-1 hover:bg-gray-100 rounded transition font-medium text-gray-700">
               Next
