@@ -1,9 +1,10 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { Mail, ArrowLeft, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE = API_BASE_URL;
 
 export default function HRForgotPassword() {
   const navigate = useNavigate();

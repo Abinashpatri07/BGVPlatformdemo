@@ -4,5 +4,8 @@
       "source": "/(.*)",
       "destination": "/"
     }
-  ]
+  ],
+  "env": {
+    "VITE_API_URL": "https://bgvplatform-backend.onrender.com"
+  }
 }

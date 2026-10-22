@@ -1,10 +1,11 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import { MoreVertical } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../../API/axiosInstance";
 import HRActionDropdown from "../hr/HRActionDropdown";
 
-const BASE_URL = `${import.meta.env.VITE_API_URL}`;
+const BASE_URL = `${API_BASE_URL}`;
 
 function TableSection({ page = 1, limit = 10, onDataLoaded }) {
   const [data, setData]           = useState([]);

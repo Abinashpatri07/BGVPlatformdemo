@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axiosInstance from "../../../API/axiosInstance";
@@ -31,7 +32,7 @@ const getDocUrl = (path) => {
   if (!path) return null;
   if (path.startsWith("http://") || path.startsWith("https://")) return path;
   const clean = path.replace(/\\/g, "/");
-  const base = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const base = API_BASE_URL;
   return `${base}/${clean.startsWith("/") ? clean.slice(1) : clean}`;
 };
 

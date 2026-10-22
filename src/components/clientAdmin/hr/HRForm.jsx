@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axiosInstance from "../../../API/axiosInstance";
@@ -111,7 +112,7 @@ function HRForm({ mode = "view" }) {
 
   const fetchHrDetails = async () => {
     try {
-      const res = await axiosInstance.get(`${import.meta.env.VITE_API_URL}/api/client-admin/hr/get-all?clientId=1`);
+      const res = await axiosInstance.get(`${API_BASE_URL}/api/client-admin/hr/get-all?clientId=1`);
       if (res.data.success) {
         const hr = res.data.data.find((item) => item.id === parseInt(id));
         if (hr) {
@@ -146,7 +147,7 @@ function HRForm({ mode = "view" }) {
     setShowConfirm(false);
     setLoading(true);
     try {
-      const res = await axiosInstance.patch(`${import.meta.env.VITE_API_URL}/api/client-admin/hr/update/${id}`, formData);
+      const res = await axiosInstance.patch(`${API_BASE_URL}/api/client-admin/hr/update/${id}`, formData);
       if (res.data.success) {
         setShowSuccess(true);
       }

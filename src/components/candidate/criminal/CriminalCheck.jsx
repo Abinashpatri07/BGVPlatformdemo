@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import React, { useRef, useState } from "react";
 import axiosInstance from "../../../API/axiosInstance";
 import { ArrowRight, ShieldAlert, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
@@ -33,7 +34,7 @@ function CriminalCheck({ onNext }) {
       try {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const candId = user.cand_id || 1;
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const API_BASE = API_BASE_URL;
         const response = await axiosInstance.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         if (response.data && response.data.criminal) {
           const crim = response.data.criminal;
@@ -71,7 +72,7 @@ function CriminalCheck({ onNext }) {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const candId = user.cand_id || 1;
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const API_BASE = API_BASE_URL;
       await axiosInstance.post(`${API_BASE}/api/candidate/submit/criminal`, { 
         cand_id: candId,
         has_record: false,
@@ -131,7 +132,7 @@ function CriminalCheck({ onNext }) {
         formData.append("reportFile", file);
       }
 
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const API_BASE = API_BASE_URL;
       await axiosInstance.post(`${API_BASE}/api/candidate/submit/criminal`, formData);
 
       sessionStorage.setItem("candidate_criminal_step", "input");

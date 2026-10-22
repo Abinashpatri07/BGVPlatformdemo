@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../API/config.js";
 // src/pages/superAdmin/Analytics.jsx
 
 import { useState, useMemo, useEffect } from "react";
@@ -9,7 +10,7 @@ import SLABreachTable from "../../components/superAdmin/analytics/SLABreachTable
 import TATTable from "../../components/superAdmin/analytics/TATTable";
 import MISTable from "../../components/superAdmin/analytics/MISTable";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE = API_BASE_URL;
 
 export default function Analytics() {
   const [activeTab, setActiveTab] = useState("MIS");

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../API/config.js";
 import { useState, useEffect } from "react";
 import axiosInstance from "../../API/axiosInstance";
 import Header from "../../components/common/Header";
@@ -49,7 +50,7 @@ export default function VerificationPage() {
       try {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const candId = user.cand_id || 1;
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const API_BASE = API_BASE_URL;
         const response = await axiosInstance.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         if (response.data) {
           setSubmittedData(response.data);
@@ -71,7 +72,7 @@ export default function VerificationPage() {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const candId = user.cand_id || 1;
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const API_BASE = API_BASE_URL;
       const response = await axiosInstance.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
       if (response.data) {
         setSubmittedData(response.data);

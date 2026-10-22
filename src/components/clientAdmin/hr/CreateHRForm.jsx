@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import { useState } from "react";
 import axiosInstance from "../../../API/axiosInstance";
 import { useNavigate } from "react-router-dom";
@@ -69,7 +70,7 @@ function CreateHRForm() {
       }
       // Default to clientId 1 for development as mentioned in the plan
       const payload = { ...formData, phone: cleanPhone, clientId: 1 };
-      const res = await axiosInstance.post(`${import.meta.env.VITE_API_URL}/api/client-admin/hr/create`, payload);
+      const res = await axiosInstance.post(`${API_BASE_URL}/api/client-admin/hr/create`, payload);
       if (res.data.success) {
         setShowSuccessModal(true);
       }

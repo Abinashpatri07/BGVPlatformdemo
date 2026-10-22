@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import React, { useState } from "react";
 import { Building2, UserCircle, CheckCircle2 } from "lucide-react";
 import axiosInstance from "../../../API/axiosInstance";
@@ -207,7 +208,7 @@ export default function CreateClientForm({ onSubmit, onCancel }) {
       }
 
       const response = await axiosInstance.post(
-        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/client/create-client`,
+        `${API_BASE_URL}/api/client/create-client`,
         {
           ...form,
           phone: cleanPhone,

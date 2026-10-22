@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import { useState } from "react";
 import axiosInstance from "../../../API/axiosInstance";
 import DigiLockerCard from "../digilocker/DigiLockerCard";
@@ -22,7 +23,7 @@ export default function DigiLockerPage() {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const candId = user.cand_id || user.id || 1;
 
-      const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const API_BASE = API_BASE_URL;
       setDebugInfo(`⏳ API call: ${API_BASE}/api/candidate/ekyc/digilocker/initiate (cand_id=${candId})`);
 
       const response = await axiosInstance.post(`${API_BASE}/api/candidate/ekyc/digilocker/initiate`, {

@@ -1,9 +1,10 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE = API_BASE_URL;
 
 /* ── LOGIN POPUP ─────────────────────────────────────────── */
 function LoginPopup({ type, title, message, onClose }) {

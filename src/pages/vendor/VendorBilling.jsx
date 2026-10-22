@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../API/config.js";
 import React, { useState, useRef, useEffect } from "react";
 import axiosInstance from "../../API/axiosInstance";
 import {
@@ -13,7 +14,7 @@ import {
   Loader2
 } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API = API_BASE_URL;
 
 function VendorBilling() {
   const [isDateOpen, setIsDateOpen] = useState(false);

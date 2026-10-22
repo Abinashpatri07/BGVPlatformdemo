@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../API/config.js";
 import { useState } from "react";
 import axiosInstance from "../../API/axiosInstance";
 import * as XLSX from "xlsx";
@@ -46,7 +47,7 @@ const Candidates = () => {
     setExportState({ status: "loading", message: `Preparing ${type} export...` });
     try {
       const { data: res } = await axiosInstance.get(
-        `${import.meta.env.VITE_API_URL}/api/client-admin/candidate/list?limit=100000`
+        `${API_BASE_URL}/api/client-admin/candidate/list?limit=100000`
       );
 
       if (!res.success || !res.data || res.data.length === 0) {

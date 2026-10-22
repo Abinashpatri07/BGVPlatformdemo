@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -71,7 +72,7 @@ export default function ClientAdminLoginForm() {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/client-admin/auth/login`,
+        `${API_BASE_URL}/api/client-admin/auth/login`,
         { email, password }
       );
       
@@ -110,7 +111,7 @@ export default function ClientAdminLoginForm() {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/client-admin/auth/verify-otp`,
+        `${API_BASE_URL}/api/client-admin/auth/verify-otp`,
         { email, otp }
       );
       

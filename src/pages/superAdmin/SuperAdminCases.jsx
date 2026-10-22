@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../API/config.js";
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../../API/axiosInstance";
 import {
@@ -184,7 +185,7 @@ function SuperAdminCases() {
   const fetchCases = async () => {
     try {
       setLoading(true);
-      const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const API_BASE = API_BASE_URL;
       const response = await axiosInstance.get(`${API_BASE}/api/superadmin/cases/get-all`);
       setTableData(response.data);
     } catch (error) {

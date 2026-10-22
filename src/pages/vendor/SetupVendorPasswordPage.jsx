@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../API/config.js";
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
@@ -22,7 +23,7 @@ const SetupVendorPasswordPage = () => {
 
   useEffect(() => {
     if (token) {
-      axios.get(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/vendor/auth/setup-info?token=${token}`)
+      axios.get(`${API_BASE_URL}/api/vendor/auth/setup-info?token=${token}`)
         .then(res => {
           if (res.data.success) setEmail(res.data.email);
         })
@@ -61,7 +62,7 @@ const SetupVendorPasswordPage = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/vendor/auth/send-setup-otp`, {
+      const response = await axios.post(`${API_BASE_URL}/api/vendor/auth/send-setup-otp`, {
         token,
       });
 
@@ -87,7 +88,7 @@ const SetupVendorPasswordPage = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/vendor/auth/set-password`, {
+      const response = await axios.post(`${API_BASE_URL}/api/vendor/auth/set-password`, {
         token,
         otp,
         password,

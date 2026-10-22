@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../API/config.js";
 import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import axiosInstance from "../API/axiosInstance";
@@ -11,7 +12,7 @@ function SuperAdminLayout() {
   useEffect(() => {
     const fetchPendingCases = async () => {
       try {
-        const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+        const API_BASE = API_BASE_URL;
         const response = await axiosInstance.get(`${API_BASE}/api/superadmin/cases/get-all`);
         const pendingCount = response.data.filter(c => c.status === "Pending").length;
         

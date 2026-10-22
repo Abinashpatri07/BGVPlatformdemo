@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../../API/axiosInstance";
@@ -12,7 +13,7 @@ export default function ActionButtons({ consentRead = false }) {
       // Calling the backend API. Using dummy cand_id 1 for now as requested in other files.
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const candId = user.cand_id || 1;
-      const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const API_BASE = API_BASE_URL;
       await axiosInstance.post(`${API_BASE}/api/candidate/submit/consent`, {
         cand_id: candId,
         client_id: 1,

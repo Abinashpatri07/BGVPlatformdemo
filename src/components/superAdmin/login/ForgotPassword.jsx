@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -13,7 +14,7 @@ export default function ForgotPassword() {
   try {
 
     const response = await axios.post(
-      `${import.meta.env.VITE_API_URL}/api/auth/forgot-password`,
+      `${API_BASE_URL}/api/auth/forgot-password`,
       {
         email,
       }

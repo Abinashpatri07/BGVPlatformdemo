@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import { useState } from "react";
 import { PlayCircle, CheckCircle } from "lucide-react";
 import axiosInstance from "../../../API/axiosInstance";
@@ -14,7 +15,7 @@ function RemoveHoldModal({ candidate, onClose, onSuccess }) {
     try {
       const candId = candidate?.id || candidate?.cand_id;
       const res = await axiosInstance.patch(
-        `${import.meta.env.VITE_API_URL}/api/client-admin/candidate/remove-hold/${candId}`
+        `${API_BASE_URL}/api/client-admin/candidate/remove-hold/${candId}`
       );
 
       if (res.data.success) {

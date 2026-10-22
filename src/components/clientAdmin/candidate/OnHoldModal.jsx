@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import { useState } from "react";
 import { Square } from "lucide-react";
 import axiosInstance from "../../../API/axiosInstance";
@@ -19,7 +20,7 @@ function OnHoldModal({ candidate, onClose, onSuccess }) {
       setIsLoading(true);
       const candId = candidate?.id || candidate?.cand_id;
       const res = await axiosInstance.patch(
-        `${import.meta.env.VITE_API_URL}/api/client-admin/candidate/on-hold/${candId}`,
+        `${API_BASE_URL}/api/client-admin/candidate/on-hold/${candId}`,
         { reason }
       );
       if (res.data.success) {

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../API/config.js";
 import React, { useState, useEffect } from "react";
 import {
   IdCard,
@@ -39,7 +40,7 @@ export default function SuperAdminIdentificationDetails() {
       }
       try {
         setLoading(true);
-        const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+        const API_BASE = API_BASE_URL;
         const res = await axiosInstance.get(`${API_BASE}/api/superadmin/cases/details/${caseIdParam}`);
         if (res.data.success) {
           setCaseData(res.data.case);
@@ -270,7 +271,7 @@ export default function SuperAdminIdentificationDetails() {
                       const cleanPath = activeDoc.cand_iden_docu.replace(/\\/g, "/");
                       const docUrl = cleanPath.startsWith("http")
                         ? cleanPath
-                        : `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/${cleanPath.startsWith("/") ? cleanPath.slice(1) : cleanPath}`;
+                        : `${API_BASE_URL}/${cleanPath.startsWith("/") ? cleanPath.slice(1) : cleanPath}`;
                       const isPdf = cleanPath.toLowerCase().endsWith(".pdf");
 
                       return (

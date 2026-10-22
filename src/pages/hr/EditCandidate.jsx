@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../API/config.js";
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axiosInstance from "../../API/axiosInstance";
@@ -30,7 +31,7 @@ const resolveDocUrl = (path) => {
   if (!clean.startsWith("uploads/")) {
     clean = `uploads/${clean}`;
   }
-  return `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/${clean}`;
+  return `${API_BASE_URL}/${clean}`;
 };
 
 const DocumentPreviewCard = ({ url, title = "Document Preview" }) => {

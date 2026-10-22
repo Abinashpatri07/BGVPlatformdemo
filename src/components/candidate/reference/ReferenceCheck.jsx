@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import React, { useState } from "react";
 import axiosInstance from "../../../API/axiosInstance";
 import { AlertCircle } from "lucide-react";
@@ -25,7 +26,7 @@ function ReferenceCheck({ onNext }) {
       try {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const candId = user.cand_id || 1;
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const API_BASE = API_BASE_URL;
         const response = await axiosInstance.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         if (response.data && response.data.references && response.data.references.length > 0) {
           const loadedRefs = [createEmptyRef(), createEmptyRef()];
@@ -106,7 +107,7 @@ function ReferenceCheck({ onNext }) {
         ]
       };
 
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const API_BASE = API_BASE_URL;
       await axiosInstance.post(`${API_BASE}/api/candidate/submit/reference`, payload);
       if (onNext) onNext(references);
     } catch (err) {

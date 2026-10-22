@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import { useState } from "react";
 import axiosInstance from "../../../API/axiosInstance";
 
@@ -13,7 +14,7 @@ function TerminateModal({ hrId, candidateId = "this HR", onCancel, onSuccess }) 
     setError("");
     try {
       const res = await axiosInstance.patch(
-        `${import.meta.env.VITE_API_URL}/api/client-admin/hr/terminate/${hrId}`,
+        `${API_BASE_URL}/api/client-admin/hr/terminate/${hrId}`,
         { reason: reason.trim() }
       );
       if (res.data.success) {

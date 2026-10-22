@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../API/config.js";
 import { useState, useEffect } from "react";
 import axiosInstance from "../../API/axiosInstance";
 import jsPDF from "jspdf";
@@ -23,7 +24,7 @@ const Hr = () => {
     setLoading(true);
     try {
       const hrRes = await axiosInstance.get(
-        `${import.meta.env.VITE_API_URL}/api/client-admin/hr/get-all?page=${currentPage}&limit=10`
+        `${API_BASE_URL}/api/client-admin/hr/get-all?page=${currentPage}&limit=10`
       );
       if (hrRes.data.success) {
         setHrs(hrRes.data.data);

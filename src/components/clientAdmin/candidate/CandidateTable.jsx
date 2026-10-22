@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import {
   MoreVertical,
   Mail,
@@ -24,7 +25,7 @@ import AssignHRModal  from "../candidate/AssignHRModal";
 import BulkAssignHRModal from "../candidate/BulkAssignHRModal";
 import Pagination     from "../../clientAdmin/home/Pagination";
 
-const API = `${import.meta.env.VITE_API_URL}/api/client-admin/candidate`;
+const API = `${API_BASE_URL}/api/client-admin/candidate`;
 
 // ── CANDIDATE TABLE ────────────────────────────────────────────────────────────
 // onTotalPagesChange → parent ko totalPages batao
@@ -114,7 +115,7 @@ function CandidateTable({
   const handleSendEmail = async (candidate) => {
     setEmailSending(true);
     try {
-      const response = await axiosInstance.post(`${import.meta.env.VITE_API_URL}/api/client-admin/candidate/send-welcome-email/${candidate.id}`);
+      const response = await axiosInstance.post(`${API_BASE_URL}/api/client-admin/candidate/send-welcome-email/${candidate.id}`);
       if (response.data.success) {
         setShowEmailModal(true);
       } else {

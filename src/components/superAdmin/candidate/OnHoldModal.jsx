@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import { useState } from "react";
 import { Square } from "lucide-react";
 
@@ -16,7 +17,7 @@ function OnHoldModal({ candidate, onClose, onSuccess }) {
 
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/candidate/on-hold/${candidate?.id}`,
+        `${API_BASE_URL}/api/candidate/on-hold/${candidate?.id}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },

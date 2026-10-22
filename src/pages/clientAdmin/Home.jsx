@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../API/config.js";
 import ProfileHeader from "../../components/clientAdmin/home/ProfileHeader";
 import HROverview from "../../components/clientAdmin/home/HROverview";
 import CandidateOverview from "../../components/clientAdmin/home/CandidateOverview";
@@ -15,7 +16,7 @@ function Home() {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const res = await axiosInstance.get(`${import.meta.env.VITE_API_URL}/api/client-admin/dashboard/metrics`);
+        const res = await axiosInstance.get(`${API_BASE_URL}/api/client-admin/dashboard/metrics`);
         if (res.data.success) {
           setHrStats(res.data.data.hrStats);
           setCandidateStats(res.data.data.candidateStats);

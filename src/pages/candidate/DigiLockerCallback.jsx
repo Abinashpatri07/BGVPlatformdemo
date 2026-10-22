@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../API/config.js";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
@@ -34,7 +35,7 @@ export default function DigiLockerCallback() {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const candId = sessionStorage.getItem("digilocker_cand_id") || user.cand_id || user.id || 1;
 
-        const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+        const API_BASE = API_BASE_URL;
 
         const res = await axios.post(`${API_BASE}/api/candidate/ekyc/digilocker/token`, {
           code,

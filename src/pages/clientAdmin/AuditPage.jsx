@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../API/config.js";
 import React, { useState, useEffect } from "react";
 import { FileDown, CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import axiosInstance from "../../API/axiosInstance";
@@ -26,7 +27,7 @@ export default function AuditPage() {
   const fetchAuditLogs = async () => {
     try {
       setLoading(true);
-      const res = await axiosInstance.get(`${import.meta.env.VITE_API_URL}/api/audit`, {
+      const res = await axiosInstance.get(`${API_BASE_URL}/api/audit`, {
         params: {
           page,
           limit: rowsPerPage,
@@ -51,7 +52,7 @@ export default function AuditPage() {
   const handleExport = async () => {
     setExportState({ status: "loading", message: "Preparing CSV export..." });
     try {
-      const res = await axiosInstance.get(`${import.meta.env.VITE_API_URL}/api/audit`, {
+      const res = await axiosInstance.get(`${API_BASE_URL}/api/audit`, {
         params: { page: 1, limit: 100000, search, module, dateFilter }
       });
       if (res.data.success && res.data.data.length > 0) {

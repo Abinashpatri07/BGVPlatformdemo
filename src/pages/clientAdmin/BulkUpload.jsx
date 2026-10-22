@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../API/config.js";
 import { CheckCircle, XCircle, Download, FileText } from "lucide-react";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -84,7 +85,7 @@ const BulkUpload = () => {
       formData.append("clientAdminId", 2);
 
       const res = await axiosInstance.post(
-        `${import.meta.env.VITE_API_URL}/api/client-admin/candidate/bulk-create`,
+        `${API_BASE_URL}/api/client-admin/candidate/bulk-create`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

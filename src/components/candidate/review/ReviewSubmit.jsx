@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../../../API/axiosInstance";
 import ReviewContent from "./ReviewContent";
@@ -13,7 +14,7 @@ function ReviewSubmit({ onSubmit }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const API_BASE = API_BASE_URL;
         // Fetch candId dynamically
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const candId = user.cand_id || 1;
@@ -35,7 +36,7 @@ function ReviewSubmit({ onSubmit }) {
     try {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const candId = user.cand_id || 1;
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const API_BASE = API_BASE_URL;
       await axiosInstance.post(`${API_BASE}/api/candidate/submit/final`, { cand_id: candId });
       
       // show popup

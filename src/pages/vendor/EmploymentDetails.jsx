@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../API/config.js";
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../../API/axiosInstance";
 import {
@@ -13,7 +14,7 @@ import {
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API = API_BASE_URL;
 
 const getDocUrl = (path) => {
   if (!path) return null;

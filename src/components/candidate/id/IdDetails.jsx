@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../../../API/axiosInstance";
 import UploadCard from "./UploadCard";
@@ -157,7 +158,7 @@ export default function IdDetails({ onNext }) {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const candId = user.cand_id || 1;
         const registeredName = user.name || "";
-        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const API_BASE = API_BASE_URL;
         const response = await axiosInstance.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         if (response.data && response.data.idDocs && response.data.idDocs.length > 0) {
           const loadedData = {};

@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../../../API/config.js";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -74,7 +75,7 @@ export default function HRLoginForm() {
     setIsLoading(true);
     try {
       // ── ACTUAL BACKEND CALL ──
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/hr/auth/login`, {
+      const res = await axios.post(`${API_BASE_URL}/api/hr/auth/login`, {
         email,
         password,
       });
@@ -113,7 +114,7 @@ export default function HRLoginForm() {
 
     setIsLoading(true);
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/hr/auth/verify-otp`, { email, otp });
+      const response = await axios.post(`${API_BASE_URL}/api/hr/auth/verify-otp`, { email, otp });
       
       if (response.data.success) {
         localStorage.clear();
