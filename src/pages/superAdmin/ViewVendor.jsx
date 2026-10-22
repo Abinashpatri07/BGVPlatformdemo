@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import {
   ArrowLeft,
   ChevronRight,
@@ -135,7 +135,7 @@ export default function ViewVendor() {
     const fetchVendor = async () => {
       try {
         setIsLoading(true);
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/vendor/${id}`);
+        const res = await axiosInstance.get("/api/vendor/${id}");
         if (res.data.success) {
           setVendor(res.data.data);
         } else {

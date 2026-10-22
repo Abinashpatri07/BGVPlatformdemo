@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import { ArrowRight, Pill, CheckCircle, AlertCircle } from "lucide-react";
 
 function DrugTestStep({ onNext }) {
@@ -34,7 +34,7 @@ function DrugTestStep({ onNext }) {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const candId = user.cand_id || 1;
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
+        const response = await axiosInstance.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         if (response.data && response.data.drugTest) {
           const drug = response.data.drugTest;
           if (drug.cand_drug_test === "Yes") {
@@ -73,7 +73,7 @@ function DrugTestStep({ onNext }) {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const candId = user.cand_id || 1;
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      await axios.post(`${API_BASE}/api/candidate/submit/drug`, { 
+      await axiosInstance.post(`${API_BASE}/api/candidate/submit/drug`, { 
         cand_id: candId,
         has_taken: false,
         drugStatus: "No" 
@@ -134,7 +134,7 @@ function DrugTestStep({ onNext }) {
       }
 
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      await axios.post(`${API_BASE}/api/candidate/submit/drug`, formData);
+      await axiosInstance.post(`${API_BASE}/api/candidate/submit/drug`, formData);
 
       sessionStorage.setItem("candidate_drug_step", "input");
       sessionStorage.setItem("candidate_drug_date", testDate);

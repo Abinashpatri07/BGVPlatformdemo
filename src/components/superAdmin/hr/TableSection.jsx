@@ -1,7 +1,7 @@
 import { MoreVertical } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import HRActionDropdown from "../hr/HRActionDropdown";
 
 const BASE_URL = `${import.meta.env.VITE_API_URL}`;
@@ -18,7 +18,7 @@ function TableSection({ page = 1, limit = 10, onDataLoaded }) {
   const fetchHRs = async () => {
     setLoading(true);
     try {
-      const { data: res } = await axios.get(`${BASE_URL}/api/hr/get-all`, {
+      const { data: res } = await axiosInstance.get(`${BASE_URL}/api/hr/get-all`, {
         params: { page, limit },
       });
       if (res.success) {

@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import {
   CheckCircle,
   Loader2,
@@ -82,8 +82,8 @@ const CandidateDetails = () => {
     const fetchCandidate = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/candidates/get_candidate/${id}`
+        const res = await axiosInstance.get(
+          "/api/candidates/get_candidate/${id}"
         );
         if (res.data.success) {
           setCandidate(res.data.candidate);

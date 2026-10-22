@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Building2, UserCircle, CheckCircle2 } from "lucide-react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import PhoneInputPkg from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
@@ -206,7 +206,7 @@ export default function CreateClientForm({ onSubmit, onCancel }) {
         cleanPhone = cleanPhone.slice(-10);
       }
 
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/client/create-client`,
         {
           ...form,

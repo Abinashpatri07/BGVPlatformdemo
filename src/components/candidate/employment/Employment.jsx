@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Briefcase, ArrowRight, Loader2 } from "lucide-react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import EmploymentForm from "./EmploymentForm";
 import EmploymentCard from "./EmploymentCard";
 
@@ -38,7 +38,7 @@ function Employment({ onNext }) {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const candId = user.cand_id || 1;
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
+        const response = await axiosInstance.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         
         // Determine if candidate is fresher based on candidate_experience
         if (response.data && response.data.basicInfo) {
@@ -175,7 +175,7 @@ function Employment({ onNext }) {
       formPayload.append("employmentData", JSON.stringify(employmentData));
 
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      await axios.post(`${API_BASE}/api/candidate/submit/employment`, formPayload, {
+      await axiosInstance.post(`${API_BASE}/api/candidate/submit/employment`, formPayload, {
         headers: { "Content-Type": "multipart/form-data" }
       });
 

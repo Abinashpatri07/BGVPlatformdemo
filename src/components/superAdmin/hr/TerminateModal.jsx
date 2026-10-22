@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 
 function TerminateModal({ candidateId = "EMP-008", hrId, onCancel, onSuccess }) {
   const [step, setStep] = useState("confirm"); // "confirm" | "success"
@@ -9,7 +9,7 @@ function TerminateModal({ candidateId = "EMP-008", hrId, onCancel, onSuccess }) 
   const handleTerminate = async () => {
     try {
       setLoading(true);
-      const res = await axios.patch(`${import.meta.env.VITE_API_URL}/api/hr/terminate/${hrId}`, { reason });
+      const res = await axiosInstance.patch("/api/hr/terminate/${hrId}", { reason });
       if (res.data.success) {
         setStep("success");
       }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import { ChevronDown, ChevronUp, CheckCircle, Mail, Briefcase, PlusCircle, UserPlus, Info, Loader2 } from "lucide-react";
 import axiosInstance from "../../../API/axiosInstance";
 import PhoneInputPkg from 'react-phone-input-2';

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import {
   Users,
   User,
@@ -81,7 +81,7 @@ function ReferenceDetails() {
       if (evidenceFile) {
         formData.append("evidenceFile", evidenceFile);
       }
-      await axios.post(
+      await axiosInstance.post(
         `${API}/api/vendor/cases/${caseId}/verify`,
         formData,
         { 

@@ -1,7 +1,7 @@
 import { CheckCircle, XCircle, Download, FileText, AlertTriangle, Users, SkipForward } from "lucide-react";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 
 const BulkUpload = () => {
   const fileRef = useRef();
@@ -141,8 +141,8 @@ const BulkUpload = () => {
       const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
       formData.append("createdById", storedUser.id || storedUser.users_id || 1);
 
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/candidates/multiple_candidate_add`,
+      const res = await axiosInstance.post(
+        "/api/candidates/multiple_candidate_add",
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );

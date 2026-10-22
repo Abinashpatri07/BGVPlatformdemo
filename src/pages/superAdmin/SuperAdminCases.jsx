@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import {
   RefreshCw,
   ListFilter,
@@ -185,7 +185,7 @@ function SuperAdminCases() {
     try {
       setLoading(true);
       const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
-      const response = await axios.get(`${API_BASE}/api/superadmin/cases/get-all`);
+      const response = await axiosInstance.get(`${API_BASE}/api/superadmin/cases/get-all`);
       setTableData(response.data);
     } catch (error) {
       console.error("Error fetching cases:", error);

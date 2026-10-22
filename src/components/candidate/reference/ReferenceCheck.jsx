@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import { AlertCircle } from "lucide-react";
 import ReferenceForm from "./ReferenceForm";
 
@@ -26,7 +26,7 @@ function ReferenceCheck({ onNext }) {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const candId = user.cand_id || 1;
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
+        const response = await axiosInstance.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         if (response.data && response.data.references && response.data.references.length > 0) {
           const loadedRefs = [createEmptyRef(), createEmptyRef()];
           response.data.references.forEach(ref => {
@@ -107,7 +107,7 @@ function ReferenceCheck({ onNext }) {
       };
 
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      await axios.post(`${API_BASE}/api/candidate/submit/reference`, payload);
+      await axiosInstance.post(`${API_BASE}/api/candidate/submit/reference`, payload);
       if (onNext) onNext(references);
     } catch (err) {
       console.error(err);

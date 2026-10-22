@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import {
   Users,
   CheckCircle,
@@ -102,8 +102,8 @@ const CardSection = () => {
     const fetchCounts = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/candidates/get_all_candidates`
+        const res = await axiosInstance.get(
+          "/api/candidates/get_all_candidates"
         );
 
         if (res.data.success) {

@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import {
   User,
   MapPin,
@@ -79,8 +79,8 @@ const EditCandidate = () => {
       tag: "May Batch",
     };
 
-    const response = await axios.put(
-      `${import.meta.env.VITE_API_URL}/api/candidate/update/${id}`,
+    const response = await axiosInstance.put(
+      "/api/candidate/update/${id}",
       finalData
     );
 

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import {
   CheckCircle2,
   AlertCircle,
@@ -54,7 +54,7 @@ function VendorBilling() {
       try {
         setLoading(true);
         const token = localStorage.getItem("vendorToken");
-        const res = await axios.get(`${API}/api/vendor/billing/overview`, {
+        const res = await axiosInstance.get(`${API}/api/vendor/billing/overview`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.data.success) {

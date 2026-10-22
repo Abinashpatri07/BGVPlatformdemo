@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import { ArrowRight, Hash, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 
 function UANStep({ onNext }) {
@@ -25,7 +25,7 @@ function UANStep({ onNext }) {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const candId = user.cand_id || 1;
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
+        const response = await axiosInstance.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         
         if (response.data) {
           const empUan = response.data.employment?.find(e => e.cand_emp_uan_number)?.cand_emp_uan_number;
@@ -60,7 +60,7 @@ function UANStep({ onNext }) {
       const candId = user.cand_id || 1;
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       
-      await axios.post(`${API_BASE}/api/candidate/submit/uan`, { 
+      await axiosInstance.post(`${API_BASE}/api/candidate/submit/uan`, { 
         cand_id: candId,
         has_uan: false, 
         uan_number: null 
@@ -95,7 +95,7 @@ function UANStep({ onNext }) {
       const candId = user.cand_id || 1;
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-      await axios.post(`${API_BASE}/api/candidate/submit/uan`, { 
+      await axiosInstance.post(`${API_BASE}/api/candidate/submit/uan`, { 
         cand_id: candId,
         has_uan: true, 
         uan_number: uanNumber 

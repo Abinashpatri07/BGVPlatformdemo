@@ -12,7 +12,7 @@ import {
   Maximize2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 
 // Exact custom SVG Icons matching the design
 const AssignedIcon = () => (
@@ -131,7 +131,7 @@ function VendorDashboard() {
     try {
       setLoading(true);
       const token = localStorage.getItem("vendorToken");
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/vendor/cases/assigned`, {
+      const res = await axiosInstance.get("/api/vendor/cases/assigned", {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.data.success) {

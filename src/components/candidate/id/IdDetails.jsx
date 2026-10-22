@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import UploadCard from "./UploadCard";
 import DocumentFields from "./DocumentFields";
 import { uploadOCR, verifyPanSource, verifyDlSource, verifyVoterSource, verifyPassportSource, pollTaskStatus, submitCandidateIdDocuments } from "../../../API/ocrApi";
@@ -158,7 +158,7 @@ export default function IdDetails({ onNext }) {
         const candId = user.cand_id || 1;
         const registeredName = user.name || "";
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
+        const response = await axiosInstance.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         if (response.data && response.data.idDocs && response.data.idDocs.length > 0) {
           const loadedData = {};
           const loadedMismatch = {};

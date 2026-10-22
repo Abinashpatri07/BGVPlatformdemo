@@ -13,7 +13,7 @@ import {
   useCallback,
 } from "react";
 
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
 import ActionDropdown from "../candidate/ActionDropdown";
@@ -24,7 +24,7 @@ import AssignHRModal  from "../candidate/AssignHRModal";
 import BulkAssignHRModal from "../candidate/BulkAssignHRModal";
 import Pagination     from "../../clientAdmin/home/Pagination";
 
-const API = `${import.meta.env.VITE_API_URL}/api/candidate`;
+const API = "/api/candidate";
 
 // ── CANDIDATE TABLE ────────────────────────────────────────────────────────────
 // onTotalPagesChange → parent ko totalPages batao
@@ -81,7 +81,7 @@ function CandidateTable({
       if (searchQuery.trim()) params.append("search", searchQuery.trim());
       if (activeFilter && activeFilter !== "All") params.append("status", activeFilter);
 
-      const { data: res } = await axios.get(`${API}/get-all?${params.toString()}`);
+      const { data: res } = await axiosInstance.get(`${API}/get-all?${params.toString()}`);
 
       if (res.success) {
         let data = res.data || [];
@@ -114,7 +114,7 @@ function CandidateTable({
   const handleSendEmail = async (candidate) => {
     setEmailSending(true);
     try {
-      const response = await axios.post(`${API}/send-welcome-email/${candidate.id}`);
+      const response = await axiosInstance.post(`${API}/send-welcome-email/${candidate.id}`);
       if (response.data.success) {
         setShowEmailModal(true);
       } else {

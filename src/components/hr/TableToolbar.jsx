@@ -35,7 +35,7 @@ function ExportPopup({ type, message, onClose }) {
   );
 }
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -71,8 +71,8 @@ function TableToolbar({
 
   /* ── Fetch latest candidates for export ── */
   const fetchForExport = async () => {
-    const res = await axios.get(
-      `${import.meta.env.VITE_API_URL}/api/candidates/get_all_candidates`
+    const res = await axiosInstance.get(
+      "/api/candidates/get_all_candidates"
     );
     return res.data.success ? res.data.candidates : [];
   };

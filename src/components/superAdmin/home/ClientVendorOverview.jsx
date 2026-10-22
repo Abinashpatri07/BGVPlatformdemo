@@ -158,13 +158,13 @@ export default function ClientVendorOverview({ data }) {
     <div className="flex gap-4 p-4 pl-0">
       <Panel 
         title="Client" 
-        total={data?.clients?.total || 20} 
+        total={data?.clients?.total ?? 0} 
         totalLabel="Total Client" 
         cards={currentClientCards} 
       />
       <Panel 
         title="Vendor" 
-        total={data?.vendors?.total || 20} 
+        total={data?.vendors?.total ?? 0} 
         totalLabel="Total Vendor" 
         cards={currentVendorCards} 
       />

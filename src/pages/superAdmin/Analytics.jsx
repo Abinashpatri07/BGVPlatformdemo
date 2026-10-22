@@ -1,7 +1,7 @@
 // src/pages/superAdmin/Analytics.jsx
 
 import { useState, useMemo, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import { Loader2 } from "lucide-react";
 import AnalyticsTabs from "../../components/superAdmin/analytics/AnalyticsTabs";
 import AnalyticsToolbar from "../../components/superAdmin/analytics/AnalyticsToolbar";
@@ -25,8 +25,8 @@ export default function Analytics() {
       try {
         setLoading(true);
         const [misRes, casesRes] = await Promise.all([
-          axios.get(`${API_BASE}/api/superadmin/analytics/mis`),
-          axios.get(`${API_BASE}/api/superadmin/analytics/cases`),
+          axiosInstance.get(`${API_BASE}/api/superadmin/analytics/mis`),
+          axiosInstance.get(`${API_BASE}/api/superadmin/analytics/cases`),
         ]);
 
         if (isMounted) {

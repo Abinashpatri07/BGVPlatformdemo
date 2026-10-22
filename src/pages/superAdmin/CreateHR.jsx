@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import {
   ArrowLeft,
   ChevronRight,
@@ -105,8 +105,8 @@ export default function CreateHR() {
     if (Object.keys(e).length > 0) return;
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/hr/create`,
+      const response = await axiosInstance.post(
+        "/api/hr/create",
         form
       );
 

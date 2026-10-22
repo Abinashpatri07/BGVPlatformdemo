@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import {
   ArrowLeft,
   ChevronRight,
@@ -54,7 +54,7 @@ export default function ViewHr() {
   useEffect(() => {
     const fetchHR = async () => {
       try {
-        const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/hr/get/${id}`);
+        const { data } = await axiosInstance.get("/api/hr/get/${id}");
         if (data.success) {
           const hr = data.data;
           

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { UserPlus, Loader2, CheckCircle } from "lucide-react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 
 function BulkAssignVendorModal({ caseIds, onClose, onSuccess }) {
   const [vendors, setVendors] = useState([]);
@@ -13,7 +13,7 @@ function BulkAssignVendorModal({ caseIds, onClose, onSuccess }) {
   useEffect(() => {
     const fetchVendors = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/vendor?limit=1000`);
+        const res = await axiosInstance.get("/api/vendor?limit=1000");
         if (res.data.success) {
           setVendors(res.data.vendors || []);
         }
@@ -34,8 +34,8 @@ function BulkAssignVendorModal({ caseIds, onClose, onSuccess }) {
     setApiError("");
 
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/superadmin/cases/assign-vendor`,
+      const res = await axiosInstance.post(
+        "/api/superadmin/cases/assign-vendor",
         { caseIds, vendorId: selectedVendorId }
       );
       

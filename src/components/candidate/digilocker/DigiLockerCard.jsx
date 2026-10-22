@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ShieldCheck, Zap, Loader2 } from "lucide-react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 
 export default function DigiLockerCard({ onClick, loading = false }) {
   const [internalLoading, setInternalLoading] = useState(false);
@@ -23,7 +23,7 @@ export default function DigiLockerCard({ onClick, loading = false }) {
       const candId = user.cand_id || user.id || 1;
       const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-      const res = await axios.post(`${API_BASE}/api/candidate/ekyc/digilocker/initiate`, {
+      const res = await axiosInstance.post(`${API_BASE}/api/candidate/ekyc/digilocker/initiate`, {
         cand_id: candId
       });
 

@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import {
   User, MapPin, IdCard, GraduationCap, Briefcase,
   ShieldCheck, Users, CheckCircle, Eye, Trash2, Pencil, Loader2,
@@ -11,7 +11,7 @@ import 'react-phone-input-2/lib/style.css';
 
 const PhoneInput = PhoneInputPkg.default || PhoneInputPkg;
 
-const BASE = `${import.meta.env.VITE_API_URL}/api/candidates`;
+const BASE = "/api/candidates";
 
 const resolveDocUrl = (path) => {
   if (!path || typeof path !== "string") return null;
@@ -228,7 +228,7 @@ function PersonalTab({ candId }) {
   const [msg, setMsg]         = useState("");
 
   useEffect(() => {
-    axios.get(`${BASE}/${candId}/personal`)
+    axiosInstance.get(`${BASE}/${candId}/personal`)
       .then(r => setData(r.data.data || {}))
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -239,7 +239,7 @@ function PersonalTab({ candId }) {
   const onSave = async () => {
     setSaving(true); setMsg("");
     try {
-      await axios.put(`${BASE}/${candId}/personal`, data);
+      await axiosInstance.put(`${BASE}/${candId}/personal`, data);
       setMsg("✅ Saved successfully!");
     } catch { setMsg("❌ Save failed."); }
     finally { setSaving(false); }
@@ -293,7 +293,7 @@ function AddressTab({ candId }) {
   const [msg, setMsg]         = useState("");
 
   useEffect(() => {
-    axios.get(`${BASE}/${candId}/address`)
+    axiosInstance.get(`${BASE}/${candId}/address`)
       .then(r => setData(r.data.data || {}))
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -304,7 +304,7 @@ function AddressTab({ candId }) {
   const onSave = async () => {
     setSaving(true); setMsg("");
     try {
-      await axios.put(`${BASE}/${candId}/address`, data);
+      await axiosInstance.put(`${BASE}/${candId}/address`, data);
       setMsg("✅ Address saved!");
     } catch { setMsg("❌ Save failed."); }
     finally { setSaving(false); }
@@ -353,7 +353,7 @@ function IdentityTab({ candId }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get(`${BASE}/${candId}/identity`)
+    axiosInstance.get(`${BASE}/${candId}/identity`)
       .then(r => setDocs(r.data.data || []))
       .catch(() => setDocs([]))
       .finally(() => setLoading(false));
@@ -413,7 +413,7 @@ function EducationTab({ candId }) {
   const [docType, setDocType]   = useState("certificate");
 
   useEffect(() => {
-    axios.get(`${BASE}/${candId}/education`)
+    axiosInstance.get(`${BASE}/${candId}/education`)
       .then(r => setList(r.data.data || []))
       .catch(() => setList([]))
       .finally(() => setLoading(false));
@@ -528,7 +528,7 @@ function EmploymentTab({ candId }) {
   const [docType, setDocType]   = useState("joining");
 
   useEffect(() => {
-    axios.get(`${BASE}/${candId}/employment`)
+    axiosInstance.get(`${BASE}/${candId}/employment`)
       .then(r => setList(r.data.data || []))
       .catch(() => setList([]))
       .finally(() => setLoading(false));
@@ -664,7 +664,7 @@ function BackgroundTab({ candId }) {
   const [viewItem, setViewItem] = useState(null); // { type, data }
 
   useEffect(() => {
-    axios.get(`${BASE}/${candId}/background`)
+    axiosInstance.get(`${BASE}/${candId}/background`)
       .then(r => setBgData(r.data.data || { criminal: [], drug: [] }))
       .catch(() => setBgData({ criminal: [], drug: [] }))
       .finally(() => setLoading(false));
@@ -760,7 +760,7 @@ function ReferenceTab({ candId }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get(`${BASE}/${candId}/reference`)
+    axiosInstance.get(`${BASE}/${candId}/reference`)
       .then(r => setRefs(r.data.data || []))
       .catch(() => setRefs([]))
       .finally(() => setLoading(false));
@@ -801,7 +801,7 @@ const EditCandidate = () => {
 
   /* Load candidate name for header */
   useEffect(() => {
-    axios.get(`${BASE}/${id}/personal`)
+    axiosInstance.get(`${BASE}/${id}/personal`)
       .then(r => {
         if (r.data.data)
           setCandidateName(`${r.data.data.first_name} ${r.data.data.last_name}`);

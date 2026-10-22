@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import { Eye, Pencil, Mail, Ban, Loader2 } from "lucide-react";
 
 import TerminateModal from "./TerminateModal";
@@ -17,7 +17,7 @@ function HRActionDropdown({ onView, onEdit, candidateId = "EMP-0002", hrId, onTe
 
     try {
       setSendingEmail(true);
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/hr/send-email/${hrId}`);
+      const res = await axiosInstance.post("/api/hr/send-email/${hrId}");
       if (res.data.success) {
         setEmailMessage(res.data.message || "Invitation & Password Setup email has been sent successfully.");
         setShowEmailSuccess(true);

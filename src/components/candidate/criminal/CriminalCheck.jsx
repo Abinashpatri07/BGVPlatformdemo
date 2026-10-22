@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import { ArrowRight, ShieldAlert, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 
 function CriminalCheck({ onNext }) {
@@ -34,7 +34,7 @@ function CriminalCheck({ onNext }) {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const candId = user.cand_id || 1;
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
+        const response = await axiosInstance.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         if (response.data && response.data.criminal) {
           const crim = response.data.criminal;
           if (crim.cand_crim_record === "Yes") {
@@ -72,7 +72,7 @@ function CriminalCheck({ onNext }) {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const candId = user.cand_id || 1;
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      await axios.post(`${API_BASE}/api/candidate/submit/criminal`, { 
+      await axiosInstance.post(`${API_BASE}/api/candidate/submit/criminal`, { 
         cand_id: candId,
         has_record: false,
         criminalStatus: "No" 
@@ -132,7 +132,7 @@ function CriminalCheck({ onNext }) {
       }
 
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      await axios.post(`${API_BASE}/api/candidate/submit/criminal`, formData);
+      await axiosInstance.post(`${API_BASE}/api/candidate/submit/criminal`, formData);
 
       sessionStorage.setItem("candidate_criminal_step", "input");
       sessionStorage.setItem("candidate_criminal_details", details);

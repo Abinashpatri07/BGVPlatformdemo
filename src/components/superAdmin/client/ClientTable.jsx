@@ -9,7 +9,7 @@ import {
   MailCheck,
   Loader2,
 } from "lucide-react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 
 
 const statusStyle = {
@@ -95,8 +95,8 @@ export default function ClientTable({
     try {
       setIsSuspending(true);
       setSuspendError("");
-      await axios.patch(
-        `${import.meta.env.VITE_API_URL}/api/client/suspend-client/${selectedClientId}`,
+      await axiosInstance.patch(
+        "/api/client/suspend-client/${selectedClientId}",
         { reason: suspendReason.trim() }
       );
       setShowSuspendModal(false);

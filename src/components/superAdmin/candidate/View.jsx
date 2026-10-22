@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import {
   User,
   MapPin,
@@ -109,7 +109,7 @@ function View() {
   useEffect(() => {
     const fetchCandidate = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/candidate/get-candidate/${id}`);
+        const response = await axiosInstance.get("/api/candidate/get-candidate/${id}");
         if (response.data.success) {
           setCandidateData(response.data.data);
         }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import {
   UsersRound,
   UserCheck,
@@ -39,7 +39,7 @@ export default function ClientListPage() {
   const fetchClients = async () => {
     try {
       setIsLoading(true);
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/client/get-all-clients?page=${currentPage}&limit=${perPage}`);
+      const res = await axiosInstance.get("/api/client/get-all-clients?page=${currentPage}&limit=${perPage}");
       if (res.data.success) {
         // Map backend data to match ClientTable expected format
         const formattedData = res.data.data.map(client => ({
@@ -81,7 +81,7 @@ export default function ClientListPage() {
   const handleSendEmail = async (clientId) => {
     try {
       setPopupMessage(null); // Clear previous popup
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/client/send-welcome-email/${clientId}`);
+      const res = await axiosInstance.post("/api/client/send-welcome-email/${clientId}");
       if (res.data.success) {
         setPopupMessage({ type: "success", text: "Welcome email sent successfully." });
       }

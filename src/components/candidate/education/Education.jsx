@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import { Plus, AlertCircle, Loader2 } from "lucide-react";
 import EducationCard from "./EducationCard";
 
@@ -57,7 +57,7 @@ function Education({ onNext }) {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const candId = user.cand_id || 1;
         const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
-        const response = await axios.get(
+        const response = await axiosInstance.get(
           `${API_BASE}/api/candidate/submit/review/${candId}`
         );
         if (
@@ -307,7 +307,7 @@ function Education({ onNext }) {
 
       const API_BASE =
         import.meta.env.VITE_API_URL || "http://localhost:5000";
-      await axios.post(
+      await axiosInstance.post(
         `${API_BASE}/api/candidate/submit/education`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }

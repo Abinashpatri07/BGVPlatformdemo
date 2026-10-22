@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CheckCircle } from "lucide-react";
@@ -44,8 +44,8 @@ function CreateCandidateForm() {
         normalizedPhone = normalizedPhone.slice(2);
       }
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/candidates/single_candidate_add`,
+      const response = await axiosInstance.post(
+        "/api/candidates/single_candidate_add",
         {
           ...data,
           firstName: data.firstName?.trim(),

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FileDown, CheckCircle2, XCircle, Loader2 } from "lucide-react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import * as XLSX from "xlsx";
 
 import AuditFilters from "../../components/clientAdmin/candidate/AuditFilters";
@@ -26,7 +26,7 @@ export default function AuditPage() {
   const fetchAuditLogs = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/audit`, {
+      const res = await axiosInstance.get("/api/audit", {
         params: {
           page,
           limit: rowsPerPage,
@@ -51,7 +51,7 @@ export default function AuditPage() {
   const handleExport = async () => {
     setExportState({ status: "loading", message: "Preparing CSV export..." });
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/audit`, {
+      const res = await axiosInstance.get("/api/audit", {
         params: { page: 1, limit: 100000, search, module, dateFilter }
       });
       if (res.data.success && res.data.data.length > 0) {

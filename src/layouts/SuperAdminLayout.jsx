@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../API/axiosInstance";
 import Sidebar from "../components/common/sidebar/Sidebar";
 import { superAdminMenu } from "../components/common/sidebar/superAdminMenu";
 import Header from "../components/common/Header";
@@ -12,7 +12,7 @@ function SuperAdminLayout() {
     const fetchPendingCases = async () => {
       try {
         const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
-        const response = await axios.get(`${API_BASE}/api/superadmin/cases/get-all`);
+        const response = await axiosInstance.get(`${API_BASE}/api/superadmin/cases/get-all`);
         const pendingCount = response.data.filter(c => c.status === "Pending").length;
         
         setMenu(prevMenu => prevMenu.map(item => 

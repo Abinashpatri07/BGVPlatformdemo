@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import Header from "../../components/common/Header";
 import SidebarStepper from "../../components/candidate/candsidebar/SidebarStepper";
 import VerificationList from "../../components/candidate/concent/VerificationList";
@@ -50,7 +50,7 @@ export default function VerificationPage() {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const candId = user.cand_id || 1;
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
+        const response = await axiosInstance.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         if (response.data) {
           setSubmittedData(response.data);
           if (response.data.basicInfo && response.data.basicInfo.verification_status === 2) {
@@ -72,7 +72,7 @@ export default function VerificationPage() {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const candId = user.cand_id || 1;
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
+      const response = await axiosInstance.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
       if (response.data) {
         setSubmittedData(response.data);
       }

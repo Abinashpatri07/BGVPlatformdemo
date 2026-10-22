@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import ClientVendorOverview from "../../components/superAdmin/home/ClientVendorOverview";
 import RevenueGrowth from "../../components/superAdmin/home/RevenueGrowth";
 import ClientPageHeader from "../../components/superAdmin/client/ClientPageHeader";
@@ -11,7 +11,7 @@ function Home() {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/dashboard/metrics`);
+        const res = await axiosInstance.get("/api/dashboard/metrics");
         if (res.data.success) {
           setMetrics(res.data.data);
         }

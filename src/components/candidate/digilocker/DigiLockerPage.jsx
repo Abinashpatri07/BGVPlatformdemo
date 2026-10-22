@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import DigiLockerCard from "../digilocker/DigiLockerCard";
 import ManualEntryCard from "../digilocker/ManualEntryCard";
 import { useNavigate } from "react-router-dom";
@@ -25,7 +25,7 @@ export default function DigiLockerPage() {
       const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
       setDebugInfo(`⏳ API call: ${API_BASE}/api/candidate/ekyc/digilocker/initiate (cand_id=${candId})`);
 
-      const response = await axios.post(`${API_BASE}/api/candidate/ekyc/digilocker/initiate`, {
+      const response = await axiosInstance.post(`${API_BASE}/api/candidate/ekyc/digilocker/initiate`, {
         cand_id: candId
       });
 

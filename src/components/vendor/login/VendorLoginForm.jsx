@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import { Eye, EyeOff } from "lucide-react";
 /* ── LOGIN POPUP ─────────────────────────────────────────── */
 function LoginPopup({ type, title, message, onClose }) {
@@ -70,8 +70,8 @@ export default function VendorLoginForm() {
 
     setIsLoading(true);
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/vendor/auth/login`,
+      const response = await axiosInstance.post(
+        "/api/vendor/auth/login",
         { email, password }
       );
       
@@ -109,8 +109,8 @@ export default function VendorLoginForm() {
 
     setIsLoading(true);
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/vendor/auth/verify-otp`,
+      const response = await axiosInstance.post(
+        "/api/vendor/auth/verify-otp",
         { email, otp }
       );
       

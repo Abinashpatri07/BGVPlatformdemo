@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import {
   ArrowLeft,
   ChevronRight,
@@ -269,8 +269,8 @@ export default function CreateVendor() {
         services: selectedServices,
       };
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/vendor/create`,
+      const response = await axiosInstance.post(
+        "/api/vendor/create",
         finalData
       );
 

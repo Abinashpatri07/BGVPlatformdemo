@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -45,8 +45,8 @@ const Candidates = () => {
   const handleExport = async (type) => {
     setExportState({ status: "loading", message: `Preparing ${type} export...` });
     try {
-      const { data: res } = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/candidate/get-all?limit=100000`
+      const { data: res } = await axiosInstance.get(
+        "/api/candidate/get-all?limit=100000"
       );
 
       if (!res.success || !res.data || res.data.length === 0) {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import ReviewContent from "./ReviewContent";
 import SuccessModal from "./SuccessModal";
 
@@ -17,7 +17,7 @@ function ReviewSubmit({ onSubmit }) {
         // Fetch candId dynamically
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const candId = user.cand_id || 1;
-        const response = await axios.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
+        const response = await axiosInstance.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         setData(response.data);
       } catch (err) {
         console.error(err);
@@ -36,7 +36,7 @@ function ReviewSubmit({ onSubmit }) {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const candId = user.cand_id || 1;
       const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      await axios.post(`${API_BASE}/api/candidate/submit/final`, { cand_id: candId });
+      await axiosInstance.post(`${API_BASE}/api/candidate/submit/final`, { cand_id: candId });
       
       // show popup
       setShowModal(true);

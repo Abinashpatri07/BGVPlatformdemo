@@ -9,7 +9,7 @@ import {
   Loader2,
   Save,
 } from "lucide-react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import PageHeader from "../../components/superAdmin/client/PageHeader";
 import PhoneInputPkg from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
@@ -89,7 +89,7 @@ export default function EditClientPage() {
     try {
       setIsLoading(true);
       setFetchError(null);
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/client/get-client/${id}`);
+      const res = await axiosInstance.get("/api/client/get-client/${id}");
       if (res.data.success) {
         const c = res.data.data;
         setForm({
@@ -148,8 +148,8 @@ export default function EditClientPage() {
         isActive:     form.isActive,
       };
 
-      const res = await axios.patch(
-        `${import.meta.env.VITE_API_URL}/api/client/update-client/${id}`,
+      const res = await axiosInstance.patch(
+        "/api/client/update-client/${id}",
         payload
       );
 

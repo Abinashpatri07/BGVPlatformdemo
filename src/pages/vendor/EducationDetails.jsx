@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import {
   User,
   GraduationCap,
@@ -53,7 +53,7 @@ function EducationDetails() {
       window.location.href = "/vendor/login";
       return;
     }
-    axios.get(`${API}/api/vendor/cases/education/${caseId}`, {
+    axiosInstance.get(`${API}/api/vendor/cases/education/${caseId}`, {
       headers: { Authorization: `Bearer ${token}` }
     }).then(res => {
       // console.log("Education API response:", res.data);
@@ -80,7 +80,7 @@ function EducationDetails() {
     setSubmitting(true);
     try {
       const token = localStorage.getItem("vendorToken");
-      await axios.post(`${API}/api/vendor/cases/${caseId}/verify`, {
+      await axiosInstance.post(`${API}/api/vendor/cases/${caseId}/verify`, {
         decision, remarks
       }, { headers: { Authorization: `Bearer ${token}` } });
       alert("Verification submitted successfully!");

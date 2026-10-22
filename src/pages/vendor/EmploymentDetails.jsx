@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 import {
   User,
   Briefcase,
@@ -46,7 +46,7 @@ function EmploymentDetails() {
   useEffect(() => {
     if (!caseId) { setLoading(false); return; }
     const token = localStorage.getItem("vendorToken");
-    axios.get(`${API}/api/vendor/cases/employment/${caseId}`, {
+    axiosInstance.get(`${API}/api/vendor/cases/employment/${caseId}`, {
       headers: { Authorization: `Bearer ${token}` }
     }).then(res => {
       if (res.data.success) {
@@ -65,7 +65,7 @@ function EmploymentDetails() {
     setSubmitting(true);
     try {
       const token = localStorage.getItem("vendorToken");
-      await axios.post(`${API}/api/vendor/cases/${caseId}/verify`, {
+      await axiosInstance.post(`${API}/api/vendor/cases/${caseId}/verify`, {
         decision, remarks
       }, { headers: { Authorization: `Bearer ${token}` } });
       alert("Verification submitted successfully!");

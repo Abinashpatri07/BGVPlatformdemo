@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import PhoneInputPkg from 'react-phone-input-2';
@@ -33,8 +33,8 @@ function CreateCandidateForm() {
         normalizedPhone = normalizedPhone.slice(2);
       }
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/candidate/create`,
+      const response = await axiosInstance.post(
+        "/api/candidate/create",
         {
           ...data,
           firstName: data.firstName?.trim(),

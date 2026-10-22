@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../../API/axiosInstance";
 
 export default function ActionButtons({ consentRead = false }) {
   const [checked, setChecked] = useState(false);
@@ -13,7 +13,7 @@ export default function ActionButtons({ consentRead = false }) {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const candId = user.cand_id || 1;
       const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
-      await axios.post(`${API_BASE}/api/candidate/submit/consent`, {
+      await axiosInstance.post(`${API_BASE}/api/candidate/submit/consent`, {
         cand_id: candId,
         client_id: 1,
         latitude,

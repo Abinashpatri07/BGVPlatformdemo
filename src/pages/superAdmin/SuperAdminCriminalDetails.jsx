@@ -12,7 +12,7 @@ import {
   Clock
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -46,7 +46,7 @@ function SuperAdminCriminalDetails() {
     const fetchDetails = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`${API_BASE}/api/superadmin/cases/details/${caseIdParam}`);
+        const res = await axiosInstance.get(`${API_BASE}/api/superadmin/cases/details/${caseIdParam}`);
         if (res.data.success) {
           setCaseData(res.data.case);
           setCandidate(res.data.candidate);

@@ -31,14 +31,28 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     if (error.response && error.response.status === 401) {
-      // If unauthorized, clear tokens and redirect to login
+      // Get role before clearing storage
+      const role = localStorage.getItem("role");
+
+      // Clear all auth tokens
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("user");
       localStorage.removeItem("role");
-      
-      // We can trigger a custom event or redirect here
-      window.location.href = "/super-admin/login";
+
+      // Redirect to the correct login page based on role
+      const redirectMap = {
+        "Vendor": "/vendor/login",
+        "HR": "/hr/login",
+        "HR 2": "/hr/login",
+        "HR Executive": "/hr/login",
+        "HR Manager": "/hr/login",
+        "HR User": "/hr/login",
+        "Client Admin": "/client-admin/login",
+        "Candidate": "/candidate/login",
+        "Super Admin": "/super-admin/login",
+      };
+      window.location.href = redirectMap[role] || "/super-admin/login";
     }
     return Promise.reject(error);
   }

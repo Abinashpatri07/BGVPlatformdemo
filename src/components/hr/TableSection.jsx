@@ -15,7 +15,7 @@ import {
 import { useNavigate } from "react-router-dom";
 
 // ── LIVE API INTEGRATION ──
-import axios from "axios";
+import axiosInstance from "../../API/axiosInstance";
 
 import ActionDropdown from "../../components/hr/ActionDropdown";
 import RejectModal from "../clientAdmin/candidate/RejectModal";
@@ -181,8 +181,8 @@ function TableSection({ searchTerm = "", sortBy = "all", page = 1, onTotalPagesC
     try {
       setLoading(true);
       setFetchError("");
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/candidates/get_all_candidates?page=${page}&limit=10`
+      const response = await axiosInstance.get(
+        "/api/candidates/get_all_candidates?page=${page}&limit=10"
       );
       if (response.data.success) {
         setCandidates(response.data.candidates);
