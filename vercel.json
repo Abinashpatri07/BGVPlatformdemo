@@ -5,6 +5,11 @@
       "destination": "/"
     }
   ],
+  "build": {
+    "env": {
+      "VITE_API_URL": "https://bgvplatform-backend.onrender.com"
+    }
+  },
   "env": {
     "VITE_API_URL": "https://bgvplatform-backend.onrender.com"
   }
