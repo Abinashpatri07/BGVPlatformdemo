@@ -111,12 +111,16 @@ function ChangePasswordModal({ onClose }) {
   const [form, setForm] = useState({ current: "", newPass: "", confirm: "" });
   const [show, setShow] = useState({ current: false, newPass: false, confirm: false });
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const toggle = (field) => setShow((p) => ({ ...p, [field]: !p[field] }));
 
   const handleChange = (field, value) => {
     setForm((p) => ({ ...p, [field]: value }));
     setErrors((p) => ({ ...p, [field]: "" }));
+    setApiError("");
   };
 
   const validate = () => {
@@ -130,69 +134,134 @@ function ChangePasswordModal({ onClose }) {
     return e;
   };
 
-  const handleSave = () => {
+  // Role ke hisaab se API endpoint determine karo
+  const getEndpoint = () => {
+    const path = window.location.pathname;
+    if (path.includes("/super-admin")) return "/api/auth/change-password";
+    if (path.includes("/vendor"))      return "/api/vendor/auth/change-password";
+    if (path.includes("/client-admin")) return "/api/client-admin/auth/change-password";
+    return "/api/hr/auth/change-password"; // HR / HR Manager / HR Executive / HR User
+  };
+
+  const handleSave = async () => {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
 
-    // TODO: Connect this to the actual backend change-password endpoint based on role
-    alert("Change password backend integration is coming soon!");
-    onClose();
+    setLoading(true);
+    setApiError("");
+    try {
+      const token = localStorage.getItem("accessToken") || localStorage.getItem("vendorToken");
+      const baseUrl = (typeof window !== "undefined" && window.__BGV_CONFIG__?.API_URL)
+        || import.meta.env.VITE_API_URL
+        || "http://localhost:5000";
+      const res = await fetch(`${baseUrl}${getEndpoint()}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ currentPassword: form.current, newPassword: form.newPass }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setApiError(data.message || "Something went wrong. Please try again.");
+        return;
+      }
+
+      setSuccess(true);
+      setTimeout(() => {
+        onClose();
+      }, 1800);
+    } catch {
+      setApiError("Network error. Please check your connection.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Modal title="Password" subtitle="Set and reset your password" onClose={onClose}>
-      <div className="space-y-4">
-        <PasswordField
-          field="current"
-          label="Current Password"
-          placeholder="Enter Your Current Password"
-          form={form}
-          errors={errors}
-          show={show}
-          onToggle={toggle}
-          onChange={handleChange}
-        />
-        <PasswordField
-          field="newPass"
-          label="New Password"
-          placeholder="Enter new password"
-          form={form}
-          errors={errors}
-          show={show}
-          onToggle={toggle}
-          onChange={handleChange}
-        />
-        <PasswordField
-          field="confirm"
-          label="Confirm New Password"
-          placeholder="Confirm new password"
-          form={form}
-          errors={errors}
-          show={show}
-          onToggle={toggle}
-          onChange={handleChange}
-        />
-      </div>
+      {success ? (
+        <div className="flex flex-col items-center py-6 gap-3">
+          <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          <p className="text-green-700 font-semibold text-base">Password changed successfully!</p>
+        </div>
+      ) : (
+        <>
+          <div className="space-y-4">
+            <PasswordField
+              field="current"
+              label="Current Password"
+              placeholder="Enter Your Current Password"
+              form={form}
+              errors={errors}
+              show={show}
+              onToggle={toggle}
+              onChange={handleChange}
+            />
+            <PasswordField
+              field="newPass"
+              label="New Password"
+              placeholder="Enter new password"
+              form={form}
+              errors={errors}
+              show={show}
+              onToggle={toggle}
+              onChange={handleChange}
+            />
+            <PasswordField
+              field="confirm"
+              label="Confirm New Password"
+              placeholder="Confirm new password"
+              form={form}
+              errors={errors}
+              show={show}
+              onToggle={toggle}
+              onChange={handleChange}
+            />
+          </div>
 
-      <div className="mt-4 bg-red-50 border border-red-100 rounded-lg px-4 py-3">
-        <p className="text-xs text-red-500 font-semibold mb-1">Note:</p>
-        <p className="text-xs text-red-400">
-          Your password must be at least 8 characters long and include a
-          combination of letters, numbers, and special characters.
-        </p>
-      </div>
+          {apiError && (
+            <div className="mt-3 bg-red-50 border border-red-200 rounded-lg px-4 py-2 flex items-center gap-2">
+              <AlertCircle size={14} className="text-red-500 shrink-0" />
+              <p className="text-xs text-red-600">{apiError}</p>
+            </div>
+          )}
 
-      <div className="mt-6 flex justify-end">
-        <button
-          onClick={handleSave}
-          className="bg-[#02027A] text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-[#01016a] transition"
-        >
-          Save
-        </button>
-      </div>
+          <div className="mt-4 bg-red-50 border border-red-100 rounded-lg px-4 py-3">
+            <p className="text-xs text-red-500 font-semibold mb-1">Note:</p>
+            <p className="text-xs text-red-400">
+              Your password must be at least 8 characters long and include a
+              combination of letters, numbers, and special characters.
+            </p>
+          </div>
+
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={handleSave}
+              disabled={loading}
+              className="bg-[#02027A] text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-[#01016a] transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {loading && (
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                </svg>
+              )}
+              {loading ? "Saving..." : "Save"}
+            </button>
+          </div>
+        </>
+      )}
     </Modal>
   );
 }
+
 
 // ── Main Header ───────────────────────────────────────────
 export default function Header() {
