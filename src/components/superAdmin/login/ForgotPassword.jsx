@@ -8,37 +8,41 @@ export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSend = async () => {
+    if (!email.trim()) {
+      setError("Please enter your email.");
+      return;
+    }
 
-  try {
+    setIsLoading(true);
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/auth/forgot-password`,
+        { email }
+      );
 
-    const response = await axios.post(
-      `${API_BASE_URL}/api/auth/forgot-password`,
-      {
-        email,
-      }
-    );
+      setSuccessMsg(response.data.message);
+      setError("");
+    } catch (error) {
+      setError(
+        error.response?.data?.message ||
+        "Something went wrong"
+      );
+      setSuccessMsg("");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    setSuccessMsg(response.data.message);
-    setError("");
-
-  } catch (error) {
-
-    setError(
-      error.response?.data?.message ||
-      "Something went wrong"
-    );
-
-    setSuccessMsg("");
-
-  }
-
-};
-
-  const handleResend = () => {
-    if (!email.trim()) return;
-    setSuccessMsg("Password reset link has been sent to your email.");
+  const handleResend = async () => {
+    if (!email.trim()) {
+      setError("Please enter your email first.");
+      return;
+    }
+    // Call the same forgot-password API to resend the link
+    await handleSend();
   };
 
   return (
@@ -92,9 +96,10 @@ export default function ForgotPassword() {
         {/* Send Reset Link button */}
         <button
           onClick={handleSend}
-          className="w-full bg-indigo-500 hover:bg-indigo-600 active:scale-[0.98] text-white text-sm font-medium py-3 rounded-lg transition-all mt-3"
+          disabled={isLoading}
+          className="w-full bg-indigo-500 hover:bg-indigo-600 active:scale-[0.98] text-white text-sm font-medium py-3 rounded-lg transition-all mt-3 disabled:opacity-50"
         >
-          Send Reset Link
+          {isLoading ? "Sending..." : "Send Reset Link"}
         </button>
 
         {/* Resend link */}
@@ -109,12 +114,12 @@ export default function ForgotPassword() {
         </p>
 
         {/* Back to login */}
-        {/* <p
-          onClick={() => navigate("/login")}
+        <p
+          onClick={() => navigate("/super-admin/login")}
           className="text-center text-xs text-gray-400 hover:text-indigo-500 cursor-pointer mt-6 transition-colors"
         >
           ← Back to Login
-        </p> */}
+        </p>
       </div>
     </div>
   );

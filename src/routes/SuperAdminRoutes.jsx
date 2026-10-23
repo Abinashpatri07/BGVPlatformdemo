@@ -8,6 +8,7 @@ import SuperAdminLayout from "../layouts/SuperAdminLayout";
 import Login from "../pages/superAdmin/Login";
 import Signup from "../pages/superAdmin/Signup";
 import ForgotPassword from "../components/superAdmin/login/ForgotPassword";
+import ResetPassword from "../components/superAdmin/login/ResetPassword";
 
 /* DASHBOARD AND CASES */
 import Home from "../pages/superAdmin/Home";
@@ -63,6 +64,7 @@ function SuperAdminRoutes() {
       <Route path="login" element={<Login />} />
       <Route path="signup" element={<Signup />} />
       <Route path="forgot-password" element={<ForgotPassword />} />
+      <Route path="reset-password" element={<ResetPassword />} />
 
       {/* PROTECTED LAYOUT */}
       <Route

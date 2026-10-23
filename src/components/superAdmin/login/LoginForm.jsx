@@ -56,6 +56,10 @@ export default function SuperAdminLoginForm() {
   const [popup, setPopup]       = useState(null); // { type, title, message }
   const [isLoading, setIsLoading] = useState(false);
 
+  // Resend OTP countdown (60 seconds)
+  const [resendCooldown, setResendCooldown] = useState(60);
+  const [resendLoading, setResendLoading]   = useState(false);
+
   useEffect(() => {
     if (location.state?.message) {
       setPopup({ type: "success", title: "Logged Out", message: location.state.message });
@@ -63,6 +67,22 @@ export default function SuperAdminLoginForm() {
       window.history.replaceState({}, document.title);
     }
   }, [location]);
+
+  // Start countdown when OTP step is shown
+  useEffect(() => {
+    if (step !== 2) return;
+    setResendCooldown(60);
+    const interval = setInterval(() => {
+      setResendCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [step]);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -114,6 +134,31 @@ export default function SuperAdminLoginForm() {
     }
   };
 
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0 || resendLoading) return;
+
+    setResendLoading(true);
+    try {
+      const response = await axiosInstance.post("/api/auth/resend-otp", { email });
+      if (response.data.success) {
+        setPopup({ type: "success", title: "OTP Resent!", message: response.data.message });
+        // Restart countdown
+        setResendCooldown(60);
+        const interval = setInterval(() => {
+          setResendCooldown((prev) => {
+            if (prev <= 1) { clearInterval(interval); return 0; }
+            return prev - 1;
+          });
+        }, 1000);
+      }
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || "Failed to resend OTP. Please try again.";
+      setPopup({ type: "error", title: "Resend Failed", message: errorMsg });
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   return (
     <div className="relative z-10 w-full max-w-sm px-8">
 
@@ -122,6 +167,7 @@ export default function SuperAdminLoginForm() {
         <LoginPopup
           type={popup.type}
           message={popup.message}
+          title={popup.title}
           onClose={() => setPopup(null)}
         />
       )}
@@ -202,20 +248,33 @@ export default function SuperAdminLoginForm() {
         </>
       ) : (
         <>
+          {/* OTP Info banner */}
+          <div className="bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-3 mb-5 text-center">
+            <p className="text-sm text-indigo-700 font-medium">📧 OTP sent to your registered email</p>
+            <p className="text-xs text-indigo-500 mt-1">
+              Email may take <strong>1–2 minutes</strong> to arrive. Please check your inbox &amp; spam folder.
+            </p>
+          </div>
+
           {/* OTP Input */}
-          <div className="mb-6">
+          <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1 text-center">
-              Enter the OTP sent to your email
+              Enter 6-digit OTP
             </label>
             <input
               type="text"
-              placeholder="6-digit OTP"
+              placeholder="• • • • • •"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
               className="w-full border rounded-md px-4 py-2.5 text-center tracking-widest text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               maxLength={6}
             />
           </div>
+
+          {/* OTP validity hint */}
+          <p className="text-xs text-gray-400 text-center mb-4">
+            ⏱ OTP is valid for <strong>10 minutes</strong>
+          </p>
           
           <button
             onClick={handleVerifyOtp}
@@ -224,6 +283,24 @@ export default function SuperAdminLoginForm() {
           >
             {isLoading ? "Verifying..." : "Verify OTP"}
           </button>
+
+          {/* Resend OTP */}
+          <div className="text-center mb-3">
+            {resendCooldown > 0 ? (
+              <p className="text-xs text-gray-400">
+                Didn't receive OTP? Resend in{" "}
+                <span className="text-indigo-600 font-semibold">{resendCooldown}s</span>
+              </p>
+            ) : (
+              <button
+                onClick={handleResendOtp}
+                disabled={resendLoading}
+                className="text-sm text-indigo-600 hover:text-indigo-800 font-medium underline underline-offset-2 disabled:opacity-50"
+              >
+                {resendLoading ? "Sending..." : "Resend OTP"}
+              </button>
+            )}
+          </div>
           
           <button
             onClick={() => setStep(1)}
