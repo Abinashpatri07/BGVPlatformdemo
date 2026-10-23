@@ -277,7 +277,7 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
+  const loadUser = () => {
     let storedUser = null;
     const path = location.pathname;
 
@@ -297,14 +297,33 @@ export default function Header() {
     }
 
     if (storedUser) {
+      const derivedName =
+        storedUser.name ||
+        `${storedUser.first_name || ""} ${storedUser.last_name || ""}`.trim() ||
+        `${storedUser.candidate_first_name || ""} ${storedUser.candidate_last_name || ""}`.trim() ||
+        storedUser.fullName ||
+        storedUser.poc_name ||
+        storedUser.username ||
+        (path.includes("/verification") ? "Candidate" : "");
+
+      const derivedRole =
+        storedUser.role ||
+        (path.includes("/vendor") ? "Vendor" : path.includes("/verification") ? "Candidate" : "User");
+
       setUser({
-        name: storedUser.name || storedUser.fullName || storedUser.poc_name || storedUser.username || "",
-        email: storedUser.email || storedUser.poc_email || "",
-        role: storedUser.role || (path.includes("/vendor") ? "Vendor" : ""),
+        name: derivedName,
+        email: storedUser.email || storedUser.poc_email || storedUser.candidate_email || "",
+        role: derivedRole,
         avatar: storedUser.avatar || null,
-        phone: storedUser.phone || storedUser.mobile || storedUser.poc_mobile || ""
+        phone: storedUser.phone || storedUser.mobile || storedUser.candidate_mobile || storedUser.poc_mobile || ""
       });
     }
+  };
+
+  useEffect(() => {
+    loadUser();
+    window.addEventListener("storage", loadUser);
+    return () => window.removeEventListener("storage", loadUser);
   }, [location.pathname]);
 
   // Close dropdown on outside click

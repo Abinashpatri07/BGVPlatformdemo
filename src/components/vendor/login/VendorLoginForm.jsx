@@ -251,15 +251,7 @@ export default function VendorLoginForm() {
         </>
       )}
 
-      <p className="text-center text-sm text-gray-500 mt-10">
-        Don't have an account?{" "}
-        <span 
-          className="text-indigo-500 cursor-pointer hover:underline"
-          onClick={() => navigate("/vendor/signup")}
-        >
-          Sign up
-        </span>
-      </p>
+      
 
     </div>
   );

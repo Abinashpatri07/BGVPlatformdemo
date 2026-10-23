@@ -248,13 +248,6 @@ export default function SuperAdminLoginForm() {
         </>
       ) : (
         <>
-          {/* OTP Info banner */}
-          <div className="bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-3 mb-5 text-center">
-            <p className="text-sm text-indigo-700 font-medium">📧 OTP sent to your registered email</p>
-            <p className="text-xs text-indigo-500 mt-1">
-              Email may take <strong>1–2 minutes</strong> to arrive. Please check your inbox &amp; spam folder.
-            </p>
-          </div>
 
           {/* OTP Input */}
           <div className="mb-4">
@@ -311,16 +304,6 @@ export default function SuperAdminLoginForm() {
         </>
       )}
 
-      {/* Footer */}
-      <p className="text-center text-sm text-gray-500 mt-10">
-        Don't have an account?{" "}
-        <span 
-          className="text-indigo-500 cursor-pointer hover:underline"
-          onClick={() => navigate("/super-admin/signup")}
-        >
-          Sign up
-        </span>
-      </p>
 
     </div>
   );

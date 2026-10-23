@@ -54,8 +54,22 @@ export default function VerificationPage() {
         const response = await axiosInstance.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
         if (response.data) {
           setSubmittedData(response.data);
-          if (response.data.basicInfo && response.data.basicInfo.verification_status === 2) {
-            setIsSubmitted(true);
+          if (response.data.basicInfo) {
+            const b = response.data.basicInfo;
+            const candFullName = `${b.candidate_first_name || ""} ${b.candidate_last_name || ""}`.trim();
+            const updatedUser = {
+              ...user,
+              name: candFullName || user.name || "Candidate",
+              email: b.candidate_email || user.email || "",
+              phone: b.candidate_mobile || user.phone || "",
+              role: "Candidate",
+              cand_id: b.cand_id || user.cand_id,
+            };
+            localStorage.setItem("user", JSON.stringify(updatedUser));
+            window.dispatchEvent(new Event("storage"));
+            if (b.verification_status === 2) {
+              setIsSubmitted(true);
+            }
           }
         }
       } catch (err) {
