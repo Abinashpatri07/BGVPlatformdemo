@@ -2,7 +2,7 @@ import { API_BASE_URL } from "../../../API/config.js";
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { Eye, EyeOff } from "lucide-react";
+import { Lock, Eye, EyeOff, CheckCircle, Loader2, Mail, ArrowLeft } from "lucide-react";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -19,7 +19,8 @@ export default function ResetPassword() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleReset = async () => {
+  const handleReset = async (e) => {
+    if (e) e.preventDefault();
     setError("");
     setSuccessMsg("");
 
@@ -39,7 +40,7 @@ export default function ResetPassword() {
     }
 
     if (!token || !email) {
-      setError("Invalid reset link. Please request a new one.");
+      setError("Invalid or expired reset link. Please request a new one.");
       return;
     }
 
@@ -50,15 +51,15 @@ export default function ResetPassword() {
         { token, email, newPassword }
       );
 
-      setSuccessMsg(response.data.message);
+      setSuccessMsg(response.data.message || "Password has been reset successfully.");
       setError("");
 
-      // Redirect to login after 3 seconds
-      setTimeout(() => navigate("/super-admin/login"), 3000);
+      // Redirect to login after 2.5 seconds
+      setTimeout(() => navigate("/super-admin/login"), 2500);
     } catch (err) {
       setError(
         err.response?.data?.message ||
-        "Something went wrong. Please try again."
+        "Something went wrong. Please request a new reset link."
       );
       setSuccessMsg("");
     } finally {
@@ -67,109 +68,168 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#EEF0F8] flex items-center justify-center overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden font-sans">
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-blue-400/50 blur-[100px]" />
+        <div className="absolute top-[60%] -right-[10%] w-[40%] h-[40%] rounded-full bg-indigo-400/50 blur-[100px]" />
+      </div>
 
-      {/* Top-right circle — outline only, partially cut off */}
-      <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full border-28 border-[#C8CCEB]" />
-
-      {/* Bottom-left organic blob */}
-      <div className="absolute -bottom-10 -left-10 w-80 h-80 bg-[#C8CCEB] rounded-[60%_40%_40%_60%/40%_40%_60%_60%]" />
-
-      {/* Content */}
-      <div className="relative z-10 w-full max-w-md px-8 text-center">
-
-        {/* Heading */}
-        <h1 className="text-4xl font-black uppercase tracking-widest text-gray-900 mb-3">
-          Reset Password
-        </h1>
-        <p className="text-sm text-gray-500 mb-10">
-          Enter your new password below.
-        </p>
-
-        {/* New Password */}
-        <div className="text-left mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            New Password
-          </label>
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Enter new password"
-              value={newPassword}
-              onChange={(e) => {
-                setNewPassword(e.target.value);
-                setError("");
-              }}
-              onCopy={(e) => e.preventDefault()}
-              onPaste={(e) => e.preventDefault()}
-              onCut={(e) => e.preventDefault()}
-              className="w-full border border-gray-300 rounded-md px-4 py-2.5 pr-10 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
+      <div className="sm:mx-auto sm:w-full sm:max-w-md z-10">
+        <div className="flex justify-center">
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+            <Lock className="h-7 w-7 text-white" />
           </div>
         </div>
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-800 tracking-tight">
+          Super Admin Portal
+        </h2>
+        <p className="mt-2 text-center text-sm text-slate-600">
+          Please set your new secure password to access your account
+        </p>
+      </div>
 
-        {/* Confirm Password */}
-        <div className="text-left mb-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Confirm Password
-          </label>
-          <div className="relative">
-            <input
-              type={showConfirm ? "text" : "password"}
-              placeholder="Confirm new password"
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-                setError("");
-              }}
-              onCopy={(e) => e.preventDefault()}
-              onPaste={(e) => e.preventDefault()}
-              onCut={(e) => e.preventDefault()}
-              className="w-full border border-gray-300 rounded-md px-4 py-2.5 pr-10 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirm(!showConfirm)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </div>
-
-          {/* Error */}
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10 px-4 sm:px-0">
+        <div className="bg-white/80 backdrop-blur-xl py-8 px-4 shadow-2xl sm:rounded-2xl sm:px-10 border border-white/60">
+          
           {error && (
-            <p className="text-red-500 text-xs mt-1">{error}</p>
+            <div className="mb-4 bg-red-50/80 border-l-4 border-red-500 p-4 rounded-r-xl">
+              <p className="text-sm text-red-700 font-medium">{error}</p>
+            </div>
           )}
 
-          {/* Success */}
-          {successMsg && (
-            <p className="text-green-500 text-xs mt-1">{successMsg}</p>
+          {successMsg ? (
+            <div className="text-center py-6">
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4 animate-bounce">
+                <CheckCircle className="h-10 w-10 text-green-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800">Password Reset Successfully!</h3>
+              <p className="mt-2 text-sm text-slate-600">
+                Your password has been updated. Redirecting you to login...
+              </p>
+              <div className="mt-6">
+                <button
+                  onClick={() => navigate("/super-admin/login")}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 shadow-md transition-colors"
+                >
+                  Go to Super Admin Login
+                </button>
+              </div>
+            </div>
+          ) : (
+            <form className="space-y-5" onSubmit={handleReset}>
+              
+              {/* Email (Read Only if available) */}
+              {email && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+                    Super Admin Email
+                  </label>
+                  <div className="relative rounded-xl shadow-sm">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <input
+                      type="text"
+                      readOnly
+                      value={email}
+                      className="bg-slate-100/70 border border-slate-200 text-slate-500 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 font-medium cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* New Password */}
+              <div>
+                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+                  New Password
+                </label>
+                <div className="relative rounded-xl shadow-sm">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    placeholder="Min. 8 chars, 1 uppercase, 1 special"
+                    value={newPassword}
+                    onChange={(e) => {
+                      setNewPassword(e.target.value);
+                      setError("");
+                    }}
+                    onCopy={(e) => e.preventDefault()}
+                    onPaste={(e) => e.preventDefault()}
+                    onCut={(e) => e.preventDefault()}
+                    className="bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 block w-full p-3 pr-10 transition-all font-medium"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm Password */}
+              <div>
+                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+                  Confirm Password
+                </label>
+                <div className="relative rounded-xl shadow-sm">
+                  <input
+                    type={showConfirm ? "text" : "password"}
+                    required
+                    placeholder="Repeat password"
+                    value={confirmPassword}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      setError("");
+                    }}
+                    onCopy={(e) => e.preventDefault()}
+                    onPaste={(e) => e.preventDefault()}
+                    onCut={(e) => e.preventDefault()}
+                    className="bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 block w-full p-3 pr-10 transition-all font-medium"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm(!showConfirm)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                  >
+                    {showConfirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Resetting Password...
+                    </span>
+                  ) : (
+                    "Reset Password"
+                  )}
+                </button>
+              </div>
+
+              {/* Back to Login */}
+              <div className="mt-6 text-center">
+                <button
+                  type="button"
+                  onClick={() => navigate("/super-admin/login")}
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to Super Admin Login
+                </button>
+              </div>
+            </form>
           )}
         </div>
-
-        {/* Reset Button */}
-        <button
-          onClick={handleReset}
-          disabled={isLoading}
-          className="w-full bg-indigo-500 hover:bg-indigo-600 active:scale-[0.98] text-white text-sm font-medium py-3 rounded-lg transition-all mt-3 disabled:opacity-50"
-        >
-          {isLoading ? "Resetting..." : "Reset Password"}
-        </button>
-
-        {/* Back to login */}
-        <p
-          onClick={() => navigate("/super-admin/login")}
-          className="text-center text-xs text-gray-400 hover:text-indigo-500 cursor-pointer mt-6 transition-colors"
-        >
-          ← Back to Login
-        </p>
       </div>
     </div>
   );

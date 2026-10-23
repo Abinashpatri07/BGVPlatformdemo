@@ -1,11 +1,20 @@
 import { Navigate } from "react-router-dom";
 
+// Map required role → correct login page
+const LOGIN_PATHS = {
+  "super-admin": "/super-admin/login",
+  "admin":       "/admin/login",
+  "hr":          "/hr/login",
+  "vendor":      "/vendor/login",
+};
+
 function ProtectedRoute({ children, role }) {
   const userRole = localStorage.getItem("role");
 
-  // NOT LOGGED IN → send to home/root
+  // NOT LOGGED IN → send to the correct portal's login page
   if (!userRole) {
-    return <Navigate to="/" replace />;
+    const loginPath = LOGIN_PATHS[role] || "/";
+    return <Navigate to={loginPath} replace />;
   }
 
   // WRONG ROLE → redirect based on STORED role, not required role

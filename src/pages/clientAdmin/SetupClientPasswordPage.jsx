@@ -108,140 +108,159 @@ const SetupClientPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-indigo-100 to-purple-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden font-sans">
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
-        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-indigo-400/50 blur-[100px]" />
-        <div className="absolute top-[60%] -right-[10%] w-[40%] h-[40%] rounded-full bg-purple-400/50 blur-[100px]" />
-        <div className="absolute top-[30%] left-[50%] w-[30%] h-[30%] rounded-full bg-blue-300/30 blur-[80px]" />
+        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-blue-400/50 blur-[100px]" />
+        <div className="absolute top-[60%] -right-[10%] w-[40%] h-[40%] rounded-full bg-indigo-400/50 blur-[100px]" />
       </div>
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md z-10 relative">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md z-10">
         <div className="flex justify-center">
-          <div className="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-purple-500 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.3)]">
-            <Lock className="w-8 h-8 text-white" />
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+            <Lock className="h-7 w-7 text-white" />
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-800 tracking-tight">
           Welcome to Client Portal
         </h2>
-        <p className="mt-2 text-center text-sm text-slate-500 max-w-sm mx-auto">
-          Please set a secure password to activate your Client Admin account.
+        <p className="mt-2 text-center text-sm text-slate-600">
+          Set up your secure password to access your Client Admin account
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10 relative">
-        <div className="bg-white/80 backdrop-blur-xl py-8 px-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)] sm:rounded-3xl sm:px-10 border border-white">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10 px-4 sm:px-0">
+        <div className="bg-white/80 backdrop-blur-xl py-8 px-4 shadow-2xl sm:rounded-2xl sm:px-10 border border-white/60">
           
+          {error && (
+            <div className="mb-4 bg-red-50/80 border-l-4 border-red-500 p-4 rounded-r-xl">
+              <p className="text-sm text-red-700 font-medium">{error}</p>
+            </div>
+          )}
+
           {success ? (
-            <div className="text-center py-8">
-              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4 shadow-sm">
-                <CheckCircle className="h-8 w-8 text-green-600" />
+            <div className="text-center py-6">
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4 animate-bounce">
+                <CheckCircle className="h-10 w-10 text-green-600" />
               </div>
-              <h3 className="text-lg font-medium text-slate-800 mb-2">Password Set Successfully!</h3>
-              <p className="text-sm text-slate-500 mb-6">
-                Your account is now active. Redirecting you to login...
+              <h3 className="text-xl font-bold text-slate-800">Password Set Successfully!</h3>
+              <p className="mt-2 text-sm text-slate-600">
+                Redirecting to login in a few seconds...
               </p>
-              <button
-                onClick={() => navigate("/client-admin/login")}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 transition-all"
-              >
-                Go to Client Login Now
-              </button>
+              <div className="mt-6">
+                <button
+                  onClick={() => navigate("/admin/login")}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 shadow-md transition-colors"
+                >
+                  Go to Login Now
+                </button>
+              </div>
             </div>
           ) : (
-            <form className="space-y-6" onSubmit={otpSent ? handleVerifyAndSetPassword : handleSendOtp}>
-              {error && (
-                <div className="bg-red-50/80 backdrop-blur-sm border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm text-center">
-                  {error}
-                </div>
-              )}
-
-              {/* Email (Read Only) */}
+            <form className="space-y-5" onSubmit={otpSent ? handleVerifyAndSetPassword : handleSendOtp}>
+              
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Your Account Email
+                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+                  Registered Email
                 </label>
-                <div className="relative">
+                <div className="relative rounded-xl shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Mail className="h-5 w-5 text-slate-400" />
                   </div>
                   <input
                     type="email"
-                    value={email}
                     disabled
-                    className="appearance-none block w-full pl-10 px-4 py-3 border border-slate-200 rounded-xl shadow-sm text-slate-500 bg-slate-50 sm:text-sm cursor-not-allowed"
-                    placeholder={error ? "Email not found" : "Loading..."}
+                    value={email || "Loading..."}
+                    className="bg-slate-100/70 border border-slate-200 text-slate-500 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 font-medium cursor-not-allowed"
                   />
                 </div>
               </div>
 
-              {!otpSent ? (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      New Password
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="appearance-none block w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm placeholder-slate-400 text-slate-800 bg-white/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors"
-                        placeholder="Abcd@1234"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-indigo-500 transition-colors"
-                      >
-                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                      </button>
-                    </div>
-                  </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+                  New Password
+                </label>
+                <div className="relative rounded-xl shadow-sm">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    disabled={otpSent}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Min. 8 chars, 1 uppercase, 1 special"
+                    required
+                    className="bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 block w-full p-3 pr-10 transition-all font-medium disabled:bg-slate-100 disabled:text-slate-500"
+                  />
+                  <button
+                    type="button"
+                    disabled={otpSent}
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Confirm Password
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showConfirmPassword ? "text" : "password"}
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        required
-                        className="appearance-none block w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm placeholder-slate-400 text-slate-800 bg-white/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors"
-                        placeholder="Repeat new password"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-indigo-500 transition-colors"
-                      >
-                        {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                      </button>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="animate-[fadeIn_0.3s_ease-in-out]">
-                  <div className="bg-indigo-50/80 backdrop-blur-sm border border-indigo-100 rounded-xl p-4 mb-6">
-                    <p className="text-sm text-indigo-700 text-center">
-                      We've sent a 6-digit OTP to <b className="text-indigo-900">{email}</b>. Please enter it below to verify your identity.
+              <div>
+                <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+                  Confirm Password
+                </label>
+                <div className="relative rounded-xl shadow-sm">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    disabled={otpSent}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Repeat password"
+                    required
+                    className="bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 block w-full p-3 pr-10 transition-all font-medium disabled:bg-slate-100 disabled:text-slate-500"
+                  />
+                  <button
+                    type="button"
+                    disabled={otpSent}
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {otpSent && (
+                <div className="pt-2 animate-[fadeIn_0.3s_ease-out]">
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4">
+                    <p className="text-xs text-blue-700">
+                      An OTP has been sent to <b>{email}</b>. Please enter it below to set your password.
                     </p>
                   </div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Enter OTP
+                  <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">
+                    Enter 6-Digit OTP
                   </label>
                   <input
                     type="text"
+                    maxLength={6}
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
+                    placeholder="Enter 6-digit OTP"
                     required
-                    maxLength={6}
-                    className="appearance-none block w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-center text-2xl tracking-[0.5em] font-bold text-slate-800 bg-white/50 focus:bg-white transition-all"
-                    placeholder="------"
+                    className="bg-white border-2 border-blue-500 text-slate-900 text-center tracking-widest text-lg font-bold rounded-xl focus:ring-2 focus:ring-blue-500/20 block w-full p-3 shadow-sm"
                   />
+                  <div className="flex justify-between items-center mt-2">
+                    <button
+                      type="button"
+                      onClick={() => setOtpSent(false)}
+                      className="text-xs text-slate-500 hover:text-blue-600 underline font-medium"
+                    >
+                      Change Password
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSendOtp}
+                      disabled={loading}
+                      className="text-xs text-blue-600 hover:text-blue-800 font-bold"
+                    >
+                      Resend OTP
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -249,7 +268,7 @@ const SetupClientPasswordPage = () => {
                 <button
                   type="submit"
                   disabled={loading || !email}
-                  className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transform transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                  className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <>
@@ -266,7 +285,7 @@ const SetupClientPasswordPage = () => {
 
           {!success && (
             <div className="mt-6 text-center">
-              <Link to="/admin/login" className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors">
+              <Link to="/admin/login" className="text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors">
                 Back to Login
               </Link>
             </div>
