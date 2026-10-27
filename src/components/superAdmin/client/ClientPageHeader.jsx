@@ -96,12 +96,15 @@ export default function ClientPageHeader({
     setShowExportModal(false);
   };
 
+  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const adminName = storedUser.name || storedUser.first_name || "Admin";
+
   return (
     <div className="flex items-start justify-between mb-6">
       {/* ───────────────── LEFT ───────────────── */}
       <div>
         <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">
-          Welcome Back, Dhiren! 👋
+          Welcome Back, {adminName}! 👋
         </h1>
 
         <p className="text-sm text-gray-400 mt-1">

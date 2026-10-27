@@ -173,6 +173,8 @@ function SuperAdminCases() {
   const [pageSize, setPageSize] = useState(10);
 
   const navigate = useNavigate();
+  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const adminName = storedUser.name || storedUser.first_name || "Super Admin";
 
   const assignedCount = tableData.filter(c => c.status === "Assigned").length;
   const pendingCount = tableData.filter(c => c.status === "Pending").length;
@@ -299,7 +301,7 @@ function SuperAdminCases() {
         {/* HEADER SECTION */}
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            Hi Super Admin Good Morning!
+            Hi {adminName} Good Morning!
           </h1>
           <p className="text-gray-500 mt-1 font-medium text-sm">
             "Power Your Ecosystem With Verified Partners And Real-Time Insights."

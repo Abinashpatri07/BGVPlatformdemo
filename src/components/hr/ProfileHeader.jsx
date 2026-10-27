@@ -154,6 +154,9 @@ const ProfileHeader = ({ showExport, showAddCandidate }) => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
+  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const hrName = storedUser.name || storedUser.first_name || "HR";
+
   return (
     <>
       {popup && (
@@ -167,7 +170,7 @@ const ProfileHeader = ({ showExport, showAddCandidate }) => {
       {/* LEFT SECTION */}
       <div>
         <h1 className="text-[24px] font-bold text-black leading-tight">
-          Welcome Back Puja 👋🏻
+          Welcome Back {hrName} 👋🏻
         </h1>
         <p className="text-[14px] text-gray-600 mt-0.5">
           Let's Customize Your Workspace
