@@ -35,15 +35,15 @@ import AdminRoutes from "./AdminRoutes";
 import HRRoutes from "./HRRoutes";
 import SuperAdminRoutes from "./SuperAdminRoutes";
 import VendorRoutes from "./VendorRoutes";
-import PortalSelectionPage from "../pages/PortalSelectionPage";
+import PortalLoginPage from "../pages/PortalLoginPage";
 
 function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* Landing / Portal Selection Page */}
-        <Route path="/" element={<PortalSelectionPage />} />
+        {/* Landing / Unified Portal Login Page */}
+        <Route path="/" element={<PortalLoginPage />} />
 
         {/* Candidate Portal */}
         <Route path="/candidate/*" element={<CandidateRoutes />} />

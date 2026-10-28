@@ -25,35 +25,27 @@ axiosInstance.interceptors.request.use(
   }
 );
 
-// Response Interceptor: Handle 401 Unauthorized
+// Response Interceptor: Handle 401 Unauthorized for expired sessions
 axiosInstance.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Get role before clearing storage
-      const role = localStorage.getItem("role");
+      const url = error.config?.url || "";
+      const isAuthRequest = url.includes("/auth/login") || url.includes("/unified-login") || url.includes("/verify-otp");
+      const isLoginPage = window.location.pathname === "/" || window.location.pathname.endsWith("/login");
 
-      // Clear all auth tokens
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("user");
-      localStorage.removeItem("role");
+      // Don't auto-redirect/reload during login attempt, let the login form show the error message!
+      if (!isAuthRequest && !isLoginPage) {
+        // Clear all auth tokens
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        localStorage.removeItem("role");
 
-      // Redirect to the correct login page based on role
-      const redirectMap = {
-        "Vendor": "/vendor/login",
-        "HR": "/hr/login",
-        "HR 2": "/hr/login",
-        "HR Executive": "/hr/login",
-        "HR Manager": "/hr/login",
-        "HR User": "/hr/login",
-        "Client Admin": "/client-admin/login",
-        "Candidate": "/candidate/login",
-        "Super Admin": "/super-admin/login",
-      };
-      window.location.href = redirectMap[role] || "/super-admin/login";
+        window.location.href = "/";
+      }
     }
     return Promise.reject(error);
   }
