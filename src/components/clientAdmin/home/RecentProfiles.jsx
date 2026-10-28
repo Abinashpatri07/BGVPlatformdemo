@@ -1,3 +1,6 @@
+import React from "react";
+import { User } from "lucide-react";
+
 function timeAgo(dateString) {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -36,12 +39,10 @@ function RecentProfiles({ data = [] }) {
             {/* LEFT */}
             <div className="flex items-start gap-3 min-w-0">
 
-              {/* IMAGE */}
-              <img
-                src={`https://i.pravatar.cc/150?img=${item.img || 10}`}
-                alt=""
-                className="w-8 h-8 rounded-full object-cover shrink-0 border border-white/10"
-              />
+              {/* USER ICON */}
+              <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center shrink-0 text-indigo-200">
+                <User size={16} />
+              </div>
 
               {/* INFO */}
               <div className="min-w-0">

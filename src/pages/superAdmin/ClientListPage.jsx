@@ -39,7 +39,7 @@ export default function ClientListPage() {
   const fetchClients = async () => {
     try {
       setIsLoading(true);
-      const res = await axiosInstance.get("/api/client/get-all-clients?page=${currentPage}&limit=${perPage}");
+      const res = await axiosInstance.get(`/api/client/get-all-clients?page=${currentPage}&limit=${perPage}`);
       if (res.data.success) {
         // Map backend data to match ClientTable expected format
         const formattedData = res.data.data.map(client => ({
@@ -82,7 +82,7 @@ export default function ClientListPage() {
   const handleSendEmail = async (clientId) => {
     try {
       setPopupMessage(null); // Clear previous popup
-      const res = await axiosInstance.post("/api/client/send-welcome-email/${clientId}");
+      const res = await axiosInstance.post(`/api/client/send-welcome-email/${clientId}`);
       if (res.data.success) {
         setPopupMessage({ type: "success", text: "Welcome email sent successfully." });
       }
@@ -204,4 +204,4 @@ export default function ClientListPage() {
 
     </div>
   );
-}
+}
