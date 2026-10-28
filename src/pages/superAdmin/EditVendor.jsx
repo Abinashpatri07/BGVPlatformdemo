@@ -391,6 +391,7 @@ export default function EditVendor() {
                   <PhoneInput
                     country={'in'}
                     value={form.phone}
+                    countryCodeEditable={false}
                     onChange={(phone) => handleChange("phone", phone)}
                     enableSearch={true}
                     disableSearchIcon={true}

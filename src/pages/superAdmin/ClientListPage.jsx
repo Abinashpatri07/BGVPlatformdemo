@@ -56,6 +56,7 @@ export default function ClientListPage() {
             Number(client.is_suspend) === 1 ? "Suspended" :
             Number(client.is_active) === 1 ? "Active" :
             "In Active",
+          is_password_set: Boolean(client.is_password_set),
         }));
         setClients(formattedData);
         setTotalClients(res.data.pagination.total);
@@ -139,7 +140,7 @@ export default function ClientListPage() {
   };
 
   return (
-    <div className="min-h-screen px-10 py-9 font-sans relative">
+    <div className="p-4 flex flex-col relative">
 
       {/* Toast Popup */}
       {popupMessage && (
@@ -173,7 +174,9 @@ export default function ClientListPage() {
       <ClientPageHeader onExport={handleExport} />
 
       {/* Stat Cards */}
-      <ClientStatCards stats={statsData} />
+      <div className="mt-5">
+        <ClientStatCards stats={statsData} />
+      </div>
 
       {/* Table */}
       <ClientTable

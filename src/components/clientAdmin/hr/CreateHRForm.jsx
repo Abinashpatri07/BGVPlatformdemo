@@ -169,7 +169,7 @@ function CreateHRForm() {
         <label className="block text-sm font-medium text-gray-700 mb-1.5">
           Phone Number <span className="text-red-500">*</span>
         </label>
-        <div className={`border-2 rounded-xl transition ${
+        <div className={`overflow-hidden border-2 rounded-xl transition ${
           errors.phone
             ? "border-red-300"
             : "border-indigo-200"
@@ -177,24 +177,31 @@ function CreateHRForm() {
           <PhoneInput
             country={'in'}
             value={formData.phone}
+            countryCodeEditable={false}
             onChange={(phone) => setFormData((prev) => ({ ...prev, phone }))}
             enableSearch={true}
             disableSearchIcon={true}
+            containerStyle={{
+              width: '100%',
+              border: 'none',
+              background: errors.phone ? '#FEF2F2' : '#F5F6FF'
+            }}
             inputStyle={{
               width: '100%',
               height: '46px',
               border: 'none',
               background: 'transparent',
               fontSize: '14px',
-              paddingLeft: '48px'
+              paddingLeft: '48px',
+              borderRadius: '0.75rem',
             }}
             buttonStyle={{
               border: 'none',
-              background: '#E0E7FF', // indigo-100
-              padding: '0 4px'
-            }}
-            containerStyle={{
-              background: errors.phone ? '#FEF2F2' : '#F5F6FF'
+              borderRight: '1px solid #C7D2FE',
+              background: '#E0E7FF',
+              padding: '0 4px',
+              borderTopLeftRadius: '0.75rem',
+              borderBottomLeftRadius: '0.75rem',
             }}
           />
         </div>

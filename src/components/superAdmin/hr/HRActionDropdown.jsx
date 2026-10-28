@@ -4,7 +4,7 @@ import { Eye, Pencil, Mail, Ban, Loader2 } from "lucide-react";
 
 import TerminateModal from "./TerminateModal";
 
-function HRActionDropdown({ onView, onEdit, candidateId = "EMP-0002", hrId, onTerminateSuccess }) {
+function HRActionDropdown({ onView, onEdit, candidateId = "EMP-0002", hrId, onTerminateSuccess, isPasswordSet }) {
   const [showTerminate, setShowTerminate] = useState(false);
   const [showEmailSuccess, setShowEmailSuccess] = useState(false);
   const [emailMessage, setEmailMessage] = useState("");
@@ -106,19 +106,21 @@ function HRActionDropdown({ onView, onEdit, candidateId = "EMP-0002", hrId, onTe
         </button>
 
         {/* EMAIL */}
-        <button
-          type="button"
-          disabled={sendingEmail}
-          onClick={handleEmail}
-          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 transition disabled:opacity-50"
-        >
-          {sendingEmail ? (
-            <Loader2 size={17} className="text-blue-500 animate-spin" />
-          ) : (
-            <Mail size={17} className="text-blue-500" />
-          )}
-          {sendingEmail ? "Sending..." : "Send Email"}
-        </button>
+        {!isPasswordSet && (
+          <button
+            type="button"
+            disabled={sendingEmail}
+            onClick={handleEmail}
+            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 transition disabled:opacity-50"
+          >
+            {sendingEmail ? (
+              <Loader2 size={17} className="text-blue-500 animate-spin" />
+            ) : (
+              <Mail size={17} className="text-blue-500" />
+            )}
+            {sendingEmail ? "Sending..." : "Send Email"}
+          </button>
+        )}
 
         {/* TERMINATE */}
         <button

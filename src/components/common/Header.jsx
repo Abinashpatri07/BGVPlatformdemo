@@ -282,13 +282,24 @@ export default function Header() {
     const path = location.pathname;
 
     try {
-      if (path.includes("/vendor") || localStorage.getItem("vendorToken")) {
-        const vendorData = localStorage.getItem("vendorUser");
-        if (vendorData) storedUser = JSON.parse(vendorData);
-      } else if (path.includes("/super-admin")) {
+      if (path.includes("/super-admin")) {
+        // Super Admin — always use "user" key, never vendor
         const superAdminData = localStorage.getItem("user");
         if (superAdminData) storedUser = JSON.parse(superAdminData);
+      } else if (path.includes("/vendor")) {
+        // Vendor portal — use vendorUser key
+        const vendorData = localStorage.getItem("vendorUser");
+        if (vendorData) storedUser = JSON.parse(vendorData);
+      } else if (path.includes("/admin")) {
+        // Client Admin
+        const userData = localStorage.getItem("user");
+        if (userData) storedUser = JSON.parse(userData);
+      } else if (path.includes("/hr")) {
+        // HR portal
+        const userData = localStorage.getItem("user");
+        if (userData) storedUser = JSON.parse(userData);
       } else {
+        // Default fallback
         const normalUser = localStorage.getItem("user");
         if (normalUser) storedUser = JSON.parse(normalUser);
       }
@@ -373,12 +384,38 @@ export default function Header() {
     navigate(redirectTo, { state: { message: "Logout Successful!" } });
   };
 
+  const handleLogoClick = () => {
+    const path = window.location.pathname;
+    const role = localStorage.getItem("role") || "";
+    const lowerRole = role.toLowerCase();
+
+    if (path.includes("/super-admin") || lowerRole === "super-admin" || lowerRole === "super admin") {
+      navigate("/super-admin/home");
+    } else if (path.includes("/admin") || lowerRole === "admin" || lowerRole === "client admin" || lowerRole === "client_admin") {
+      navigate("/admin/home");
+    } else if (path.includes("/hr") || lowerRole.startsWith("hr")) {
+      navigate("/hr/home");
+    } else if (path.includes("/vendor") || lowerRole === "vendor") {
+      navigate("/vendor/home");
+    } else if (path.includes("/candidate") || path.includes("/verification") || lowerRole === "candidate") {
+      navigate("/verification");
+    } else {
+      navigate("/");
+    }
+  };
+
   return (
     <>
       <header className="h-16 bg-white flex items-center justify-between px-6 shadow-sm z-40 relative">
         {/* LEFT — Logo */}
         <div className="flex items-center">
-          <img src={logo} alt="Logo" className="h-24 w-auto object-contain" />
+          <img
+            src={logo}
+            alt="Logo"
+            className="h-24 w-auto object-contain cursor-pointer transition-transform hover:scale-[1.02]"
+            onClick={handleLogoClick}
+            title="Go to Home"
+          />
         </div>
 
         {/* Search */}

@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BulkAssignVendorModal from "../../components/superAdmin/cases/BulkAssignVendorModal";
+import ClientPageHeader from "../../components/superAdmin/client/ClientPageHeader";
+import ClientPagination from "../../components/superAdmin/client/ClientPagination";
 
 // Exact custom SVG Icons matching the design
 const AssignedIcon = () => (
@@ -297,16 +299,12 @@ function SuperAdminCases() {
         </div>
       )}
 
-      <div className="w-full max-w-[1600px] mx-auto flex flex-col gap-5 pb-6">
-        {/* HEADER SECTION */}
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Hi {adminName} Good Morning!
-          </h1>
-          <p className="text-gray-500 mt-1 font-medium text-sm">
-            "Power Your Ecosystem With Verified Partners And Real-Time Insights."
-          </p>
-        </div>
+      <div className="p-4 flex flex-col gap-5 pb-6">
+                {/* HEADER SECTION */}
+        <ClientPageHeader
+          showCreateButton={false}
+          showExportButton={false}
+        />
 
         {/* STATS CARDS SECTION - CLICK TO FILTER */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -522,7 +520,7 @@ function SuperAdminCases() {
         </div>
 
         {/* TABLE SECTION */}
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-visible shadow-sm flex flex-col min-h-[500px]">
+        <div className="bg-white rounded-2xl border border-gray-200 overflow-visible shadow-sm flex flex-col">
           <div className="overflow-x-auto flex-1">
             <table className="w-full border-collapse">
               <thead className="bg-[#FAFAFA] border-b border-gray-200">
@@ -665,51 +663,23 @@ function SuperAdminCases() {
             </table>
           </div>
 
-          {/* PAGINATION SECTION */}
-          <div className="px-6 py-4 border-t border-gray-200 flex flex-wrap items-center justify-between gap-4 text-sm text-gray-600 bg-white rounded-b-2xl">
-            <div className="flex items-center gap-2">
-              <span className="text-xs">Showing</span>
-              <select 
-                value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className="border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#4338CA]"
-              >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-              </select>
-              <span className="text-xs text-gray-500">out of {filteredData.length} records</span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <button 
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="flex items-center gap-1 px-3 py-1.5 hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent rounded-lg transition font-medium text-xs text-gray-700"
-              >
-                <ChevronLeft size={15} />
-                Previous
-              </button>
-              
-              <span className="text-xs font-medium text-gray-700 px-3 py-1 bg-gray-50 border border-gray-200 rounded-lg">
-                Page {currentPage} of {totalPages}
-              </span>
-
-              <button 
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="flex items-center gap-1 px-3 py-1.5 hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent rounded-lg transition font-medium text-xs text-gray-700"
-              >
-                Next
-                <ChevronRight size={15} />
-              </button>
-            </div>
-          </div>
         </div>
+
+        {/* PAGINATION */}
+        {filteredData.length > 0 && (
+          <div className="mt-2">
+            <ClientPagination
+              total={filteredData.length}
+              perPage={pageSize}
+              currentPage={currentPage}
+              onPageChange={setCurrentPage}
+              onPerPageChange={(val) => {
+                setPageSize(val);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+        )}
       </div>
     </>
   );

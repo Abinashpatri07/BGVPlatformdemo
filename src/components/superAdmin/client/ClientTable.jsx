@@ -18,7 +18,7 @@ const statusStyle = {
   Suspended: "bg-red-100 text-red-500",
 };
 
-function ActionMenu({ onView, onEdit, onEmail, onSuspend }) {
+function ActionMenu({ onView, onEdit, onEmail, onSuspend, isPasswordSet }) {
   return (
     <div className="absolute right-8 top-2 bg-white border border-gray-200 rounded-xl shadow-lg z-50 py-1 w-36 overflow-hidden">
       <button
@@ -33,12 +33,14 @@ function ActionMenu({ onView, onEdit, onEmail, onSuspend }) {
       >
         <Pencil size={13} className="text-gray-400" /> Edit
       </button>
-      <button
-        onClick={onEmail}
-        className="flex items-center gap-2 w-full px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 transition cursor-pointer"
-      >
-        <Mail size={13} className="text-gray-400" /> Send Email
-      </button>
+      {!isPasswordSet && (
+        <button
+          onClick={onEmail}
+          className="flex items-center gap-2 w-full px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 transition cursor-pointer"
+        >
+          <Mail size={13} className="text-gray-400" /> Send Email
+        </button>
+      )}
       <button
         onClick={onSuspend}
         className="flex items-center gap-2 w-full px-4 py-2 text-xs text-red-500 hover:bg-red-50 transition cursor-pointer"
@@ -118,14 +120,6 @@ export default function ClientTable({
         {/* HEADER */}
         <thead>
           <tr className="bg-gray-50 border-b border-gray-200">
-            <th className="px-5 py-3.5 w-10">
-              <input
-                type="checkbox"
-                checked={selectedRows.length === data.length && data.length > 0}
-                onChange={handleSelectAll}
-                className="w-4 h-4 accent-indigo-600 cursor-pointer"
-              />
-            </th>
             {["Client ID", "Client Name", "GST", "POC Name", "POC Phone", "Status", "Action"].map(
               (col) => (
                 <th
@@ -143,13 +137,13 @@ export default function ClientTable({
         <tbody>
           {isLoading ? (
             <tr>
-              <td colSpan="8" className="px-5 py-10 text-center text-gray-500 font-medium">
+              <td colSpan="7" className="px-5 py-10 text-center text-gray-500 font-medium">
                 Loading clients...
               </td>
             </tr>
           ) : data.length === 0 ? (
             <tr>
-              <td colSpan="8" className="px-5 py-10 text-center text-gray-500 font-medium">
+              <td colSpan="7" className="px-5 py-10 text-center text-gray-500 font-medium">
                 No clients found.
               </td>
             </tr>
@@ -159,16 +153,6 @@ export default function ClientTable({
               key={row.id}
               className={`hover:bg-gray-50 transition-colors duration-100 ${index < data.length - 1 ? "border-b border-gray-100" : ""}`}
             >
-              {/* CHECKBOX */}
-              <td className="px-5 py-3">
-                <input
-                  type="checkbox"
-                  checked={selectedRows.includes(row.id)}
-                  onChange={() => handleRowSelect(row.id)}
-                  className="w-4 h-4 accent-indigo-600 cursor-pointer"
-                />
-              </td>
-
               {/* CLIENT ID */}
               <td className="px-5 py-3 text-sm text-gray-700 font-medium">
                 {row.displayId || row.id}
@@ -218,6 +202,7 @@ export default function ClientTable({
 
                   {openMenu === index && (
                     <ActionMenu
+                      isPasswordSet={row.is_password_set}
                       onView={() => {
                         onView && onView(row);
                         setOpenMenu(null);

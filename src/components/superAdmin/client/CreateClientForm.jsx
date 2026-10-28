@@ -123,10 +123,14 @@ export default function CreateClientForm({ onSubmit, onCancel }) {
 
   const handlePinCodeChange = (e) => {
     const val = e.target.value.replace(/\D/g, "").slice(0, 6);
-    setForm((prev) => {
-      const updated = { ...prev, pinCode: val };
-      return updated;
-    });
+    
+    // When pincode is edited/cleared, update pinCode and reset dependent fields if cleared
+    setForm((prev) => ({
+      ...prev,
+      pinCode: val,
+      country: "India",
+      ...(val.length < 6 ? {} : {}),
+    }));
 
     if (errors.pinCode) setErrors((prev) => ({ ...prev, pinCode: "" }));
 
@@ -134,22 +138,28 @@ export default function CreateClientForm({ onSubmit, onCancel }) {
       // 1. Check local prefix map first for instant auto-selection
       const localState = getStateFromPinPrefix(val);
       if (localState) {
-        setForm((prev) => ({ ...prev, pinCode: val, state: localState }));
+        setForm((prev) => ({ ...prev, pinCode: val, state: localState, country: "India" }));
       }
 
-      // 2. Query Postal PIN API for exact State and City
+      // 2. Query Postal PIN API for exact State, District (City) and Country
       fetch(`https://api.postalpincode.in/pincode/${val}`)
         .then((res) => res.json())
         .then((data) => {
           if (data && data[0] && data[0].Status === "Success" && data[0].PostOffice?.length > 0) {
             const po = data[0].PostOffice[0];
-            const apiState = po.State;
-            const apiCity = po.District || po.Block || po.Division;
+            const apiState = po.State || "";
+            const apiCity = po.District || po.Block || po.Division || "";
+            const apiCountry = po.Country || "India";
+            
+            // Override with newly fetched details for this specific new PIN code
             setForm((prev) => ({
               ...prev,
               state: apiState || prev.state,
-              city: prev.city || apiCity || "",
+              city: apiCity || prev.city,
+              country: apiCountry,
             }));
+            
+            setErrors((prev) => ({ ...prev, state: "", city: "" }));
           }
         })
         .catch((err) => {
@@ -409,19 +419,24 @@ export default function CreateClientForm({ onSubmit, onCancel }) {
                 hint="Must be a unique active number."
               >
                 <div
-                  className={`border rounded-xl transition ${
+                  className={`overflow-hidden rounded-xl border transition ${
                     errors.phone ? "border-red-300" : "border-[#B3C9FF]"
                   }`}
                 >
                   <PhoneInput
                     country={"in"}
                     value={form.phone}
+                    countryCodeEditable={false}
                     onChange={(phone) => {
                       setForm((prev) => ({ ...prev, phone }));
                       if (errors.phone) setErrors((prev) => ({ ...prev, phone: "" }));
                     }}
                     enableSearch={true}
                     disableSearchIcon={true}
+                    containerStyle={{
+                      width: "100%",
+                      border: "none",
+                    }}
                     inputStyle={{
                       width: "100%",
                       height: "44px",
@@ -429,16 +444,15 @@ export default function CreateClientForm({ onSubmit, onCancel }) {
                       background: "#F8FAFF",
                       fontSize: "14px",
                       paddingLeft: "48px",
-                      borderTopRightRadius: "0.75rem",
-                      borderBottomRightRadius: "0.75rem",
+                      borderRadius: "0.75rem",
                     }}
                     buttonStyle={{
                       border: "none",
+                      borderRight: "1px solid #B3C9FF",
                       background: "#F8FAFF",
                       padding: "0 4px",
                       borderTopLeftRadius: "0.75rem",
                       borderBottomLeftRadius: "0.75rem",
-                      borderRight: "1px solid #B3C9FF",
                     }}
                   />
                 </div>

@@ -22,7 +22,7 @@ import OnHoldModal    from "../candidate/OnHoldModal";
 import RemoveHoldModal from "../candidate/RemoveHoldModal";
 import AssignHRModal  from "../candidate/AssignHRModal";
 import BulkAssignHRModal from "../candidate/BulkAssignHRModal";
-import Pagination     from "../../clientAdmin/home/Pagination";
+import ClientPagination from "../client/ClientPagination";
 
 const API = "/api/candidate";
 
@@ -43,6 +43,7 @@ function CandidateTable({
   // ── DATA STATE ──
   const [candidates, setCandidates]   = useState([]);
   const [loading, setLoading]         = useState(false);
+  const [limit, setLimit]             = useState(10);
   const [fetchError, setFetchError]   = useState("");
   const [emailSending, setEmailSending] = useState(false);
 
@@ -77,7 +78,7 @@ function CandidateTable({
     setLoading(true);
     setFetchError("");
     try {
-      const params = new URLSearchParams({ page, limit: 10 });
+      const params = new URLSearchParams({ page, limit: limit || 10 });
       if (searchQuery.trim()) params.append("search", searchQuery.trim());
       if (activeFilter && activeFilter !== "All") params.append("status", activeFilter);
 
@@ -104,7 +105,7 @@ function CandidateTable({
     } finally {
       setLoading(false);
     }
-  }, [page, searchQuery, activeFilter, sortBy]);
+  }, [page, limit, searchQuery, activeFilter, sortBy]);
 
   useEffect(() => {
     fetchCandidates();
@@ -404,14 +405,17 @@ function CandidateTable({
           </tbody>
         </table>
 
-        {/* PAGINATION (Moved inside the table container) */}
-        <div className="p-4 border-t border-gray-100">
-          <Pagination
-            currentPage={page}
-            totalPages={totalPages}
-            onPageChange={onPageChange}
-          />
-        </div>
+      </div>
+
+      {/* PAGINATION */}
+      <div className="mt-2">
+        <ClientPagination
+          total={totalPages * (limit || 10)}
+          perPage={limit || 10}
+          currentPage={page}
+          onPageChange={onPageChange}
+          onPerPageChange={setLimit ? setLimit : undefined}
+        />
       </div>
     </>
   );

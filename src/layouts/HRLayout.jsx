@@ -1,3 +1,4 @@
+import Footer from "../components/common/Footer";
 import Sidebar from "../components/common/sidebar/Sidebar";
 import HRHeader from "../components/common/Header";
 
@@ -30,13 +31,11 @@ function HRLayout() {
 
         {/* CONTENT */}
         <div className="flex-1 p-6 overflow-y-auto">
-
           <Outlet />
-
         </div>
 
       </div>
-
+      <Footer />
     </div>
   );
 }

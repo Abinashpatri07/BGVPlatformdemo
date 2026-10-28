@@ -3,7 +3,7 @@ import { Eye, Pencil, Mail, Ban, Loader2 } from "lucide-react";
 import axiosInstance from "../../../API/axiosInstance";
 import TerminateModal from "./TerminateModal";
 
-function HRActionDropdown({ onView, onEdit, onTerminate, hrId, hrName = "this HR" }) {
+function HRActionDropdown({ onView, onEdit, onTerminate, hrId, hrName = "this HR", isPasswordSet }) {
   const [showTerminate, setShowTerminate] = useState(false);
   const [showEmailSuccess, setShowEmailSuccess] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
@@ -111,18 +111,20 @@ function HRActionDropdown({ onView, onEdit, onTerminate, hrId, hrName = "this HR
           Edit
         </button>
 
-        <button
-          disabled={sendingEmail}
-          onClick={handleEmail}
-          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 transition disabled:opacity-50"
-        >
-          {sendingEmail ? (
-            <Loader2 size={17} className="text-blue-500 animate-spin" />
-          ) : (
-            <Mail size={17} className="text-blue-500" />
-          )}
-          {sendingEmail ? "Sending..." : "Send Email"}
-        </button>
+        {!isPasswordSet && (
+          <button
+            disabled={sendingEmail}
+            onClick={handleEmail}
+            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 transition disabled:opacity-50"
+          >
+            {sendingEmail ? (
+              <Loader2 size={17} className="text-blue-500 animate-spin" />
+            ) : (
+              <Mail size={17} className="text-blue-500" />
+            )}
+            {sendingEmail ? "Sending..." : "Send Email"}
+          </button>
+        )}
 
         <button
           onClick={(e) => {

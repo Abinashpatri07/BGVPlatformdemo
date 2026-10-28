@@ -1,3 +1,4 @@
+import Footer from "../components/common/Footer";
 import { API_BASE_URL } from "../API/config.js";
 import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
@@ -45,6 +46,7 @@ function SuperAdminLayout() {
         </div>
 
       </div>
+      <Footer />
     </div>
   );
 }

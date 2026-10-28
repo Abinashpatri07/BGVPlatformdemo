@@ -135,7 +135,7 @@ export default function Analytics() {
   };
 
   return (
-    <div className="p-5 bg-gray-50 min-h-screen">
+    <div className="p-4 flex flex-col gap-5">
       {/* TITLE */}
       <h1 className="text-2xl font-bold text-gray-900 mb-1">
         Candidate Analytics

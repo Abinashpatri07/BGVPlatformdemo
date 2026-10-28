@@ -11,7 +11,7 @@ export default function Vendor() {
     suspended: "0",
   });
   return (
-    <div className="p-5 bg-gray-50 min-h-screen">
+    <div className="p-4 flex flex-col">
 
       {/* HEADER */}
       <ClientPageHeader

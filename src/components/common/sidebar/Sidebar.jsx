@@ -310,15 +310,15 @@ function Sidebar({
       } h-full bg-white border-r border-gray-200 flex flex-col justify-between transition-all duration-300 shadow-sm`}
     >
 
-      {/* TOP */}
-      <div className="p-4">
+      {/* TOP TOGGLE */}
+      <div className="p-4 pb-2 shrink-0">
 
         {/* TOGGLE */}
         <button
           onClick={() =>
             setIsOpen(!isOpen)
           }
-          className="mb-8 p-2 rounded-lg hover:bg-gray-100 transition"
+          className="p-2 rounded-lg hover:bg-gray-100 transition"
         >
 
           {expanded ? (
@@ -333,8 +333,10 @@ function Sidebar({
 
         </button>
 
-        {/* MENU */}
-        <div className="space-y-3">
+      </div>
+
+      {/* SCROLLABLE MENU */}
+      <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2 [scrollbar-width:thin] [scrollbar-color:#CBD5E1_transparent]">
 
           {menu?.map((item, index) => {
 
@@ -426,8 +428,6 @@ function Sidebar({
             </div>
 
           )}
-
-        </div>
 
       </div>
 

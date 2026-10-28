@@ -358,7 +358,17 @@ export default function PortalLoginPage() {
 
       <section className="relative z-10 w-full max-w-md rounded-2xl bg-white p-8 shadow-xl ring-1 ring-slate-200/80 sm:p-10 backdrop-blur-sm">
         {/* Logo / Header Branding */}
-        <div className="mb-8 flex items-center gap-3.5">
+        <div
+          className="mb-8 flex items-center gap-3.5 cursor-pointer select-none"
+          onClick={() => {
+            if (existingDestination) {
+              navigate(existingDestination);
+            } else {
+              changeMode("login");
+            }
+          }}
+          title="HedgeVerify"
+        >
           {logo ? (
             <img src={logo} alt="HedgeVerify" className="h-11 w-auto object-contain" />
           ) : (

@@ -1,3 +1,4 @@
+import Footer from "../components/common/Footer";
 import { Outlet } from "react-router-dom";
 
 import Sidebar from "../components/common/sidebar/Sidebar";
@@ -25,6 +26,7 @@ function AdminLayout() {
         </div>
 
       </div>
+      <Footer />
     </div>
   );
 }

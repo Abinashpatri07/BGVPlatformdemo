@@ -1,3 +1,4 @@
+import Footer from "../components/common/Footer";
 import Sidebar from "../components/common/sidebar/Sidebar";
 import Header from "../components/common/Header";
 import { Outlet } from "react-router-dom";
@@ -13,6 +14,7 @@ function VendorLayout() {
           <Outlet />
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

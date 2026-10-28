@@ -142,6 +142,39 @@ export default function CreateVendor() {
     if (errors[field]) setErrors((p) => ({ ...p, [field]: "" }));
   };
 
+  const handlePinCodeChange = (rawVal) => {
+    const val = rawVal.replace(/\D/g, "").slice(0, 6);
+    setForm((prev) => ({
+      ...prev,
+      pinCode: val,
+    }));
+
+    if (errors.pinCode) setErrors((prev) => ({ ...prev, pinCode: "" }));
+
+    if (val.length === 6) {
+      fetch(`https://api.postalpincode.in/pincode/${val}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data[0] && data[0].Status === "Success" && data[0].PostOffice?.length > 0) {
+            const po = data[0].PostOffice[0];
+            const apiState = po.State || "";
+            const apiCity = po.District || po.Block || po.Division || "";
+
+            setForm((prev) => ({
+              ...prev,
+              state: apiState || prev.state,
+              city: apiCity || prev.city,
+            }));
+
+            setErrors((prev) => ({ ...prev, state: "", city: "" }));
+          }
+        })
+        .catch((err) => {
+          console.warn("Vendor Pincode lookup error:", err);
+        });
+    }
+  };
+
   const handleAddCoverage = () => {
     if (coverageAreas.length < 5) {
       setCoverageAreas([...coverageAreas, { stateId: "", cityIds: [] }]);
@@ -395,10 +428,9 @@ export default function CreateVendor() {
               <Field label={<>Pincode <span className="text-red-500">*</span></>} error={errors.pinCode}>
                 <input
                   value={form.pinCode}
-                  onChange={(e) => handleChange("pinCode", e.target.value)}
+                  onChange={(e) => handlePinCodeChange(e.target.value)}
                   placeholder="400001"
                   maxLength={6}
-                  onInput={(e) => { e.target.value = e.target.value.replace(/\D/g, ""); }}
                   className={inputClass(errors.pinCode)}
                 />
               </Field>
@@ -541,15 +573,20 @@ export default function CreateVendor() {
                 label={<>Phone Number <span className="text-red-500">*</span></>}
                 error={errors.phone}
               >
-                <div className={`border rounded-xl transition ${
+                <div className={`overflow-hidden rounded-xl border transition ${
                   errors.phone ? "border-red-300" : "border-[#B3C9FF]"
                 }`}>
                   <PhoneInput
                     country={'in'}
                     value={form.phone}
+                    countryCodeEditable={false}
                     onChange={(phone) => handleChange("phone", phone)}
                     enableSearch={true}
                     disableSearchIcon={true}
+                    containerStyle={{
+                      width: '100%',
+                      border: 'none',
+                    }}
                     inputStyle={{
                       width: '100%',
                       height: '44px',
@@ -557,16 +594,15 @@ export default function CreateVendor() {
                       background: '#F8FAFF',
                       fontSize: '14px',
                       paddingLeft: '48px',
-                      borderTopRightRadius: '0.75rem',
-                      borderBottomRightRadius: '0.75rem'
+                      borderRadius: '0.75rem',
                     }}
                     buttonStyle={{
                       border: 'none',
+                      borderRight: '1px solid #B3C9FF',
                       background: '#F8FAFF',
                       padding: '0 4px',
                       borderTopLeftRadius: '0.75rem',
                       borderBottomLeftRadius: '0.75rem',
-                      borderRight: '1px solid #B3C9FF'
                     }}
                   />
                 </div>

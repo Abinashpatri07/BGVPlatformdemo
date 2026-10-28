@@ -366,6 +366,7 @@ export default function EditClientPage() {
                     <PhoneInput
                       country={'in'}
                       value={form.contactPhone}
+                      countryCodeEditable={false}
                       onChange={(phone) => handleChange("contactPhone")({ target: { value: phone } })}
                       enableSearch={true}
                       disableSearchIcon={true}

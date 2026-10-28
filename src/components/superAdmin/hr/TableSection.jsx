@@ -97,13 +97,6 @@ function TableSection({ page = 1, limit = 10, onDataLoaded }) {
         {/* HEADER */}
         <thead className="bg-[#F7F7F7] text-gray-700">
           <tr className="border-b border-gray-200">
-            <th className="px-4 py-4 w-10">
-              <input
-                type="checkbox"
-                onChange={handleSelectAll}
-                checked={data.length > 0 && selectedRows.length === data.length}
-              />
-            </th>
             <th className="px-4 py-4 text-left font-semibold">Employee ID</th>
             <th className="px-4 py-4 text-left font-semibold">Name</th>
             <th className="px-4 py-4 text-left font-semibold">E-Mail</th>
@@ -123,14 +116,6 @@ function TableSection({ page = 1, limit = 10, onDataLoaded }) {
                 key={item.id}
                 className="border-b border-gray-200 hover:bg-gray-50 transition"
               >
-                {/* CHECKBOX */}
-                <td className="px-4 py-5">
-                  <input
-                    type="checkbox"
-                    checked={selectedRows.includes(item.id)}
-                    onChange={() => handleSelectRow(item.id)}
-                  />
-                </td>
 
                 {/* EMPLOYEE ID */}
                 <td className="px-4 py-5 text-gray-700 font-medium">{item.empId}</td>
@@ -186,6 +171,7 @@ function TableSection({ page = 1, limit = 10, onDataLoaded }) {
                           }}
                           candidateId={item.empId}
                           hrId={item.id}
+                          isPasswordSet={Boolean(item.is_password_set)}
                           onTerminateSuccess={() => {
                             setOpenMenu(null);
                             fetchHRs();

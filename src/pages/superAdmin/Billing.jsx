@@ -189,7 +189,7 @@ const Billing = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-full">
+    <div className="p-4 flex flex-col gap-6">
       
       {/* Tabs */}
       <div className="flex gap-4 border-b border-gray-200 pb-2">

@@ -72,17 +72,6 @@ function TableSection({ isToolBarRequired, data, onAction }) {
         <thead className="bg-[#F7F7F7] text-gray-700">
           <tr className="border-b border-gray-200">
 
-            <th className="px-4 py-4 w-10">
-              <input
-                type="checkbox"
-                onChange={handleSelectAll}
-                checked={
-                  data.length > 0 &&
-                  selectedRows.length === data.length
-                }
-              />
-            </th>
-
             <th className="px-4 py-4 text-left font-semibold">
               Employee ID
             </th>
@@ -123,13 +112,6 @@ function TableSection({ isToolBarRequired, data, onAction }) {
                   index % 2 === 0 ? "bg-white" : "bg-[#F4F4F4]/30"
                 }`}
               >
-                <td className="px-4 py-4 w-10">
-                  <input
-                    type="checkbox"
-                    checked={selectedRows.includes(row.id)}
-                    onChange={() => handleSelectRow(row.id)}
-                  />
-                </td>
 
                 <td className="px-4 py-4 font-medium text-gray-900">
                   {row.empId}
@@ -186,6 +168,7 @@ function TableSection({ isToolBarRequired, data, onAction }) {
                     <div className="absolute right-10 top-0 z-10">
                       <HRActionDropdown
                         hrId={row.id}
+                        isPasswordSet={Boolean(row.is_password_set)}
                         hrName={`${row.firstName} ${row.lastName}`}
                         onView={() => { navigate(`/admin/view-hr/${row.id}`); setOpenMenu(null); }}
                         onEdit={() => { navigate(`/admin/edit-hr/${row.id}`); setOpenMenu(null); }}

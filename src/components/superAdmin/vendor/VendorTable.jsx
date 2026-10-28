@@ -201,7 +201,9 @@ const ActionMenu = ({ vendor, onView, onEdit, onSendEmail, onTerminate }) => {
 
       {open && (
         <div className="absolute right-0 mt-1 w-40 bg-white border border-gray-100 rounded-xl shadow-xl py-1 z-50">
-          {actions.map(({ label, icon, onClick, className }) => (
+          {actions
+            .filter(({ label }) => !(label === "Send Email" && vendor?.is_password_set))
+            .map(({ label, icon, onClick, className }) => (
             <button
               key={label}
               onClick={() => {
@@ -250,7 +252,8 @@ export default function VendorTable({ onStatsFetched }) {
             poc: `${v.poc_first_name} ${v.poc_last_name}`,
             email: v.poc_email,
             gst: v.gst_number || "N/A",
-            status: status
+            status: status,
+            is_password_set: Boolean(v.is_password_set),
           };
         });
         setVendors(mapped);
@@ -309,16 +312,6 @@ export default function VendorTable({ onStatsFetched }) {
         <table className="w-full">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/50">
-              <th className="px-4 py-4 w-10 first:rounded-tl-2xl">
-                <input
-                  type="checkbox"
-                  onChange={toggleAll}
-                  checked={
-                    vendors.length > 0 && selected.length === vendors.length
-                  }
-                  className="rounded"
-                />
-              </th>
               {[
                 "Vendor ID",
                 "Vendor Name",
@@ -326,10 +319,12 @@ export default function VendorTable({ onStatsFetched }) {
                 "GST Number",
                 "Status",
                 "Action",
-              ].map((h) => (
+              ].map((h, i) => (
                 <th
                   key={h}
-                  className="px-4 py-4 text-left text-sm font-medium text-gray-600 last:rounded-tr-2xl"
+                  className={`px-4 py-4 text-left text-sm font-medium text-gray-600 ${
+                    i === 0 ? "first:rounded-tl-2xl" : ""
+                  } last:rounded-tr-2xl`}
                 >
                   {h}
                 </th>
@@ -355,14 +350,6 @@ export default function VendorTable({ onStatsFetched }) {
                   key={v.id}
                   className="border-b border-gray-50 hover:bg-gray-50 transition"
                 >
-                  <td className="px-4 py-4">
-                    <input
-                      type="checkbox"
-                      checked={selected.includes(v.id)}
-                      onChange={() => toggleOne(v.id)}
-                      className="rounded"
-                    />
-                  </td>
                   <td className="px-4 py-4 text-sm text-gray-700">{v.id}</td>
                   <td className="px-4 py-4 text-sm font-semibold text-gray-900">
                     {v.vendorName}
