@@ -89,7 +89,7 @@ export default function EditClientPage() {
     try {
       setIsLoading(true);
       setFetchError(null);
-      const res = await axiosInstance.get("/api/client/get-client/${id}");
+      const res = await axiosInstance.get(`/api/client/get-client/${id}`);
       if (res.data.success) {
         const c = res.data.data;
         setForm({
@@ -149,7 +149,7 @@ export default function EditClientPage() {
       };
 
       const res = await axiosInstance.patch(
-        "/api/client/update-client/${id}",
+        `/api/client/update-client/${id}`,
         payload
       );
 

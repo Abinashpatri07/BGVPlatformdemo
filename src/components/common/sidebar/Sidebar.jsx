@@ -259,34 +259,12 @@ function Sidebar({
 
   /* LOGOUT */
   const handleLogout = () => {
-
-    const path = window.location.pathname;
-
-    // Determine redirect from path (most reliable)
-    let redirectTo = "/";
-
-    if (path.includes("/super-admin")) {
-      redirectTo = "/super-admin/login";
-    } else if (path.includes("/vendor")) {
-      redirectTo = "/vendor/login";
-    } else if (path.includes("/hr")) {
-      redirectTo = "/hr/login";
-    } else if (path.includes("/admin")) {
-      redirectTo = "/admin/login";
-    } else {
-      // Fallback to localStorage role
-      const role = localStorage.getItem("role");
-      if (role === "super-admin") redirectTo = "/super-admin/login";
-      else if (role === "hr") redirectTo = "/hr/login";
-      else if (role === "admin" || role === "client_admin") redirectTo = "/admin/login";
-      else if (role === "vendor") redirectTo = "/vendor/login";
-    }
-
     // Clear everything
     localStorage.clear();
     sessionStorage.clear();
 
-    navigate(redirectTo, { state: { message: "Logout Successful!" } });
+    // Redirect directly to central portal login page
+    navigate("/", { state: { message: "Logout Successful!" } });
   };
 
   /* SIDEBAR EXPAND */

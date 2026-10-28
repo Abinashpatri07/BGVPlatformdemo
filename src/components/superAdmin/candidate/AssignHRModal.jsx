@@ -35,7 +35,7 @@ function AssignHRModal({ candidate, onClose, onSuccess }) {
 
     try {
       const res = await axiosInstance.patch(
-        "/api/candidate/assign-hr/${candidate?.id}",
+        `/api/candidate/assign-hr/${candidate?.id}`,
         { hrId: selectedHrId }
       );
 

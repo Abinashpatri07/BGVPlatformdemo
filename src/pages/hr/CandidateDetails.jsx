@@ -83,7 +83,7 @@ const CandidateDetails = () => {
       try {
         setLoading(true);
         const res = await axiosInstance.get(
-          "/api/candidates/get_candidate/${id}"
+          `/api/candidates/get_candidate/${id}`
         );
         if (res.data.success) {
           setCandidate(res.data.candidate);

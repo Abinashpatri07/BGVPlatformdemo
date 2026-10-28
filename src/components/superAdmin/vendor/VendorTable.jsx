@@ -239,7 +239,7 @@ export default function VendorTable({ onStatsFetched }) {
   useEffect(() => {
     const fetchVendors = async () => {
       try {
-        const response = await axiosInstance.get("/api/vendor?page=${currentPage}&limit=${perPage}");
+        const response = await axiosInstance.get(`/api/vendor?page=${currentPage}&limit=${perPage}`);
         const mapped = response.data.vendors.map(v => {
           let status = "Active";
           if (v.is_suspend === 1) status = "Suspended";
@@ -282,7 +282,7 @@ export default function VendorTable({ onStatsFetched }) {
 
   const handleTerminateConfirm = async (reason) => {
     try {
-      const res = await axiosInstance.patch("/api/vendor/suspend/${terminateTarget.dbId}", { reason });
+      const res = await axiosInstance.patch(`/api/vendor/suspend/${terminateTarget.dbId}`, { reason });
       if (res.data.success) {
         // Trigger a re-fetch so that the table and the dashboard stats cards update automatically
         setRefreshToggle(prev => !prev);
@@ -297,7 +297,7 @@ export default function VendorTable({ onStatsFetched }) {
 
   const handleSendEmail = async (v) => {
     try {
-      const res = await axiosInstance.post("/api/vendor/send-welcome-email/${v.dbId}");
+      const res = await axiosInstance.post(`/api/vendor/send-welcome-email/${v.dbId}`);
       if (res.data.success) {
         setEmailSuccess(true);
       }

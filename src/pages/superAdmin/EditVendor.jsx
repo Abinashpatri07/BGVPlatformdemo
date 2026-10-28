@@ -155,7 +155,7 @@ export default function EditVendor() {
     const fetchVendor = async () => {
       try {
         setIsLoading(true);
-        const res = await axiosInstance.get("/api/vendor/${id}");
+        const res = await axiosInstance.get(`/api/vendor/${id}`);
         if (res.data.success) {
           const v = res.data.data;
           setForm({
@@ -257,7 +257,7 @@ export default function EditVendor() {
         services: selectedServices
       };
       
-      const res = await axiosInstance.patch("/api/vendor/update/${id}", payload);
+      const res = await axiosInstance.patch(`/api/vendor/update/${id}`, payload);
       if (res.data.success) {
         setSubmitted(true);
       }

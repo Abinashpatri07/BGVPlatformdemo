@@ -110,7 +110,7 @@ function View() {
   useEffect(() => {
     const fetchCandidate = async () => {
       try {
-        const response = await axiosInstance.get("/api/candidate/get-candidate/${id}");
+        const response = await axiosInstance.get(`/api/candidate/get-candidate/${id}`);
         if (response.data.success) {
           setCandidateData(response.data.data);
         }

@@ -98,7 +98,7 @@ export default function ClientTable({
       setIsSuspending(true);
       setSuspendError("");
       await axiosInstance.patch(
-        "/api/client/suspend-client/${selectedClientId}",
+        `/api/client/suspend-client/${selectedClientId}`,
         { reason: suspendReason.trim() }
       );
       setShowSuspendModal(false);

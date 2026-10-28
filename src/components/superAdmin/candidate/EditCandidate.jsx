@@ -80,7 +80,7 @@ const EditCandidate = () => {
     };
 
     const response = await axiosInstance.put(
-      "/api/candidate/update/${id}",
+      `/api/candidate/update/${id}`,
       finalData
     );
 

@@ -54,7 +54,7 @@ export default function ViewHr() {
   useEffect(() => {
     const fetchHR = async () => {
       try {
-        const { data } = await axiosInstance.get("/api/hr/get/${id}");
+        const { data } = await axiosInstance.get(`/api/hr/get/${id}`);
         if (data.success) {
           const hr = data.data;
           

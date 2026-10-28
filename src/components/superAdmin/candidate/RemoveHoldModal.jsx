@@ -13,7 +13,7 @@ function RemoveHoldModal({ candidate, onClose, onSuccess }) {
 
     try {
       const res = await axiosInstance.patch(
-        "/api/candidate/remove-hold/${candidate?.id}"
+        `/api/candidate/remove-hold/${candidate?.id}`
       );
 
       if (res.data.success) {
