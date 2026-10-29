@@ -249,10 +249,7 @@ export default function VendorLoginForm() {
             Back to Login
           </button>
         </>
-      )}
-
-      
-
+      )}   
     </div>
   );
 }

@@ -25,27 +25,46 @@ const SetupVendorPasswordPage = () => {
   const [fetchingInfo, setFetchingInfo] = useState(true);
 
   useEffect(() => {
+    if (emailFromUrl && !email) {
+      setEmail(emailFromUrl);
+    }
+  }, [emailFromUrl]);
+
+  useEffect(() => {
     if (token) {
       setFetchingInfo(true);
-      axios.get(`${API_BASE_URL}/api/vendor/auth/setup-info?token=${token}`)
-        .then(res => {
-          if (res.data && res.data.success && res.data.email) {
+      const fetchInfo = async () => {
+        try {
+          const res = await axios.get(`${API_BASE_URL}/api/vendor/auth/setup-info?token=${token}`);
+          if (res.data?.success && res.data.email) {
             setEmail(res.data.email);
-          } else {
-            setError(res.data?.message || "Invalid or expired setup link.");
+            setError("");
+            return;
           }
-        })
-        .catch(err => {
-          setError(err.response?.data?.message || "Invalid or expired setup link.");
-        })
-        .finally(() => {
+        } catch {
+          // Fallback to unified setup-info
+          try {
+            const res2 = await axios.get(`${API_BASE_URL}/api/auth/setup-info?token=${token}`);
+            if (res2.data?.success && res2.data.email) {
+              setEmail(res2.data.email);
+              setError("");
+              return;
+            }
+          } catch (err2) {
+            if (!emailFromUrl) {
+              setError(err2.response?.data?.message || "Invalid or expired setup link.");
+            }
+          }
+        } finally {
           setFetchingInfo(false);
-        });
+        }
+      };
+      fetchInfo();
     } else {
       setFetchingInfo(false);
       setError("No setup token provided in the link.");
     }
-  }, [token]);
+  }, [token, emailFromUrl]);
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
@@ -74,11 +93,19 @@ const SetupVendorPasswordPage = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/vendor/auth/send-setup-otp`, {
-        token,
-      });
+      let sent = false;
+      try {
+        const response = await axios.post(`${API_BASE_URL}/api/vendor/auth/send-setup-otp`, {
+          token,
+        });
+        if (response.data.success) sent = true;
+      } catch (err) {
+        // Fallback to unified send-setup-otp
+        const fallbackRes = await axios.post(`${API_BASE_URL}/api/auth/send-setup-otp`, { token });
+        if (fallbackRes.data.success) sent = true;
+      }
 
-      if (response.data.success) {
+      if (sent) {
         setOtpSent(true);
         setError(""); 
       }
@@ -100,13 +127,21 @@ const SetupVendorPasswordPage = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/vendor/auth/set-password`, {
-        token,
-        otp,
-        password,
-      });
+      let ok = false;
+      try {
+        const response = await axios.post(`${API_BASE_URL}/api/vendor/auth/set-password`, {
+          token,
+          otp,
+          password,
+        });
+        if (response.data.success) ok = true;
+      } catch (err) {
+        // Fallback to unified set-password
+        const fallbackRes = await axios.post(`${API_BASE_URL}/api/auth/set-password`, { token, otp, password });
+        if (fallbackRes.data.success) ok = true;
+      }
 
-      if (response.data.success) {
+      if (ok) {
         setSuccess(true);
         setTimeout(() => {
           navigate("/"); // Redirect to portal login

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import logo from "../../assets/logo.png";
 import { useNavigate, useLocation } from "react-router-dom";
+import { API_BASE_URL } from "../../API/config.js";
 import {
   User,
   KeyRound,
@@ -139,7 +140,8 @@ function ChangePasswordModal({ onClose }) {
     const path = window.location.pathname;
     if (path.includes("/super-admin")) return "/api/auth/change-password";
     if (path.includes("/vendor"))      return "/api/vendor/auth/change-password";
-    if (path.includes("/client-admin")) return "/api/client-admin/auth/change-password";
+    if (path.includes("/admin"))       return "/api/client-admin/auth/change-password";
+    if (path.includes("/candidate") || path.includes("/verification")) return "/api/candidate/auth/change-password";
     return "/api/hr/auth/change-password"; // HR / HR Manager / HR Executive / HR User
   };
 
@@ -150,10 +152,11 @@ function ChangePasswordModal({ onClose }) {
     setLoading(true);
     setApiError("");
     try {
-      const token = localStorage.getItem("accessToken") || localStorage.getItem("vendorToken");
-      const baseUrl = (typeof window !== "undefined" && window.__BGV_CONFIG__?.API_URL)
-        || import.meta.env.VITE_API_URL
-        || "http://localhost:5000";
+      const token =
+        localStorage.getItem("accessToken") ||
+        localStorage.getItem("vendorToken") ||
+        localStorage.getItem("candidateToken");
+      const baseUrl = API_BASE_URL || "http://localhost:5000";
       const res = await fetch(`${baseUrl}${getEndpoint()}`, {
         method: "POST",
         headers: {

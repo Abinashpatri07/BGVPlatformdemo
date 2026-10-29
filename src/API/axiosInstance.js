@@ -14,7 +14,10 @@ const axiosInstance = axios.create({
 // Request Interceptor: Attach token if available
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("accessToken");
+    const token =
+      localStorage.getItem("accessToken") ||
+      localStorage.getItem("vendorToken") ||
+      localStorage.getItem("candidateToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -40,6 +43,8 @@ axiosInstance.interceptors.response.use(
       if (!isAuthRequest && !isLoginPage) {
         // Clear all auth tokens
         localStorage.removeItem("accessToken");
+        localStorage.removeItem("vendorToken");
+        localStorage.removeItem("candidateToken");
         localStorage.removeItem("refreshToken");
         localStorage.removeItem("user");
         localStorage.removeItem("role");
