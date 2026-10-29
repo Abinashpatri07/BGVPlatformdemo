@@ -95,9 +95,21 @@ export default function PortalLoginPage() {
 
   if (existingDestination) return <Navigate to={existingDestination} replace />;
 
+  const normalizeSystemRole = (val) => {
+    if (!val) return "candidate";
+    const r = String(val).toLowerCase().trim();
+    if (r === "super admin" || r === "super-admin") return "super-admin";
+    if (r === "client admin" || r === "client_admin" || r === "admin") return "admin";
+    if (r.startsWith("hr")) return "hr";
+    if (r === "vendor") return "vendor";
+    if (r === "candidate") return "candidate";
+    return r;
+  };
+
   const completeLogin = (role, dashboard, data) => {
     clearAuthState();
-    const normalizedRole = role || data.user?.role || "candidate";
+    const rawRole = role || data.user?.role || "candidate";
+    const normalizedRole = normalizeSystemRole(rawRole);
 
     if (normalizedRole === "candidate" || normalizedRole === "Candidate") {
       localStorage.setItem("candidateToken", data.token);
@@ -352,11 +364,14 @@ export default function PortalLoginPage() {
   };
 
   return (
-    <main className="min-h-screen relative flex items-center justify-center px-4 py-10 bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40">
+    <main className="min-h-screen relative flex flex-col items-center justify-between px-4 py-8 bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40">
       {/* Decorative background glows */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-96 bg-blue-100/40 blur-3xl pointer-events-none -z-0" />
 
-      <section className="relative z-10 w-full max-w-md rounded-2xl bg-white p-8 shadow-xl ring-1 ring-slate-200/80 sm:p-10 backdrop-blur-sm">
+      {/* Spacer to balance top & bottom */}
+      <div className="h-2 hidden sm:block"></div>
+
+      <section className="relative z-10 w-full max-w-md rounded-2xl bg-white p-8 shadow-xl ring-1 ring-slate-200/80 sm:p-10 backdrop-blur-sm my-auto">
         {/* Logo / Header Branding */}
         <div
           className="mb-8 flex items-center gap-3.5 cursor-pointer select-none"
@@ -550,6 +565,11 @@ export default function PortalLoginPage() {
           </form>
         )}
       </section>
+
+      {/* Footer / Copyright */}
+      <footer className="relative z-10 mt-8 text-center text-xs text-slate-500">
+        <p>© {new Date().getFullYear()} <span className="font-semibold text-slate-700">HedgeVerify</span>. All rights reserved.</p>
+      </footer>
     </main>
   );
 }

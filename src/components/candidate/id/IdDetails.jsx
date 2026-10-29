@@ -73,6 +73,15 @@ const compareNames = (docName, registeredName) => {
 };
 
 export default function IdDetails({ onNext }) {
+  const user = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "{}");
+    } catch {
+      return {};
+    }
+  })();
+  const candId = user.cand_id || user.id || user.users_id || 1;
+
   const [data, setData] = useState(() => {
     try {
       const saved = sessionStorage.getItem("candidate_id_data");
@@ -155,8 +164,6 @@ export default function IdDetails({ onNext }) {
   React.useEffect(() => {
     const fetchExistingData = async () => {
       try {
-        const user = JSON.parse(localStorage.getItem("user") || "{}");
-        const candId = user.cand_id || 1;
         const registeredName = user.name || "";
         const API_BASE = API_BASE_URL;
         const response = await axiosInstance.get(`${API_BASE}/api/candidate/submit/review/${candId}`);
@@ -564,10 +571,10 @@ export default function IdDetails({ onNext }) {
         const hasMismatch = nameMismatch[docType] === true;
 
         let docNumber = "";
-        if (docType === "PAN card")         docNumber = item.fields.pan_number;
-        else if (docType === "Driving license") docNumber = item.fields.driving_licence_number;
-        else if (docType === "Voter ID")    docNumber = item.fields.voter_id_number;
-        else if (docType === "Passport")   docNumber = item.fields.passport_number;
+        if (docType === "PAN card")         docNumber = item.fields?.pan_number;
+        else if (docType === "Driving license") docNumber = item.fields?.driving_licence_number;
+        else if (docType === "Voter ID")    docNumber = item.fields?.voter_id_number;
+        else if (docType === "Passport")   docNumber = item.fields?.passport_number;
 
         if (rawFiles[docType]) {
           formData.append(`doc_file_${index}`, rawFiles[docType]);
@@ -576,7 +583,7 @@ export default function IdDetails({ onNext }) {
         return {
           doc_type: docType,
           doc_number: docNumber || "",
-          ocr_data: item.fields,
+          ocr_data: item.fields || {},
           verification_status: hasMismatch ? "failed" : "success",
           file_name: item.fileName,
           cand_iden_docu: item.existingUrl || null

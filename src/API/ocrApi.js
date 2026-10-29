@@ -66,11 +66,16 @@ export const pollTaskStatus = async (request_id) => {
 
 export const submitCandidateIdDocuments = async (payload) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/api/candidate/submit/id-documents`, payload);
+    const token = localStorage.getItem("candidateToken") || localStorage.getItem("accessToken");
+    const config = {};
+    if (token) {
+      config.headers = { Authorization: `Bearer ${token}` };
+    }
+    const response = await axios.post(`${API_BASE_URL}/api/candidate/submit/id-documents`, payload, config);
     return response.data;
   } catch (error) {
     console.error("Submit ID docs error:", error);
-    throw error.response?.data || { error: "Failed to submit documents" };
+    throw error.response?.data || { error: error.message || "Failed to submit documents" };
   }
 };
 

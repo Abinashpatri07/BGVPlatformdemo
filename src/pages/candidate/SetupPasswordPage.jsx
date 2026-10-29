@@ -292,6 +292,11 @@ const SetupPasswordPage = () => {
           )}
         </div>
       </div>
+
+      {/* Footer / Copyright */}
+      <footer className="relative z-10 mt-8 text-center text-xs text-slate-500">
+        <p>© {new Date().getFullYear()} <span className="font-semibold text-slate-700">HedgeVerify</span>. All rights reserved.</p>
+      </footer>
     </div>
   );
 };

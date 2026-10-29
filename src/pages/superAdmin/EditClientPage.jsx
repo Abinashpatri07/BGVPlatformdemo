@@ -126,6 +126,32 @@ export default function EditClientPage() {
   const handleChange = (field) => (e) =>
     setForm({ ...form, [field]: e.target.value });
 
+  const handlePincodeChange = (e) => {
+    const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+    setForm((prev) => ({ ...prev, pincode: val }));
+    if (errors.pincode) setErrors((prev) => ({ ...prev, pincode: "" }));
+
+    if (val.length === 6) {
+      fetch(`https://api.postalpincode.in/pincode/${val}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data[0] && data[0].Status === "Success" && data[0].PostOffice?.length > 0) {
+            const po = data[0].PostOffice[0];
+            const apiCity = po.District || po.Block || po.Division || "";
+            const apiState = po.State || "";
+            setForm((prev) => ({
+              ...prev,
+              city: apiCity || prev.city,
+              state: apiState || prev.state,
+            }));
+          }
+        })
+        .catch((err) => {
+          console.warn("Pincode lookup error:", err);
+        });
+    }
+  };
+
   /* ── SAVE ── */
   const handleSave = async () => {
     try {
@@ -312,21 +338,25 @@ export default function EditClientPage() {
                 <Field label="City">
                   <input
                     value={form.city}
-                    onChange={handleChange("city")}
-                    className={inputCls}
+                    disabled
+                    readOnly
+                    className={`${inputCls} bg-gray-100 text-gray-500 cursor-not-allowed`}
                   />
                 </Field>
                 <Field label="State">
                   <input
                     value={form.state}
-                    onChange={handleChange("state")}
-                    className={inputCls}
+                    disabled
+                    readOnly
+                    className={`${inputCls} bg-gray-100 text-gray-500 cursor-not-allowed`}
                   />
                 </Field>
                 <Field label="Pin Code">
                   <input
                     value={form.pincode}
-                    onChange={handleChange("pincode")}
+                    onChange={handlePincodeChange}
+                    maxLength={6}
+                    placeholder="Enter 6-digit Pincode"
                     className={inputCls}
                   />
                   {errors.pincode && <p className="text-xs text-red-500 mt-1">{errors.pincode}</p>}
