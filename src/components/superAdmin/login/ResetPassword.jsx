@@ -55,7 +55,7 @@ export default function ResetPassword() {
       setError("");
 
       // Redirect to login after 2.5 seconds
-      setTimeout(() => navigate("/super-admin/login"), 2500);
+      setTimeout(() => navigate("/"), 2500);
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -108,10 +108,10 @@ export default function ResetPassword() {
               </p>
               <div className="mt-6">
                 <button
-                  onClick={() => navigate("/super-admin/login")}
+                  onClick={() => navigate("/")}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 shadow-md transition-colors"
                 >
-                  Go to Super Admin Login
+                  Go to Login Now
                 </button>
               </div>
             </div>
@@ -220,11 +220,11 @@ export default function ResetPassword() {
               <div className="mt-6 text-center">
                 <button
                   type="button"
-                  onClick={() => navigate("/super-admin/login")}
+                  onClick={() => navigate("/")}
                   className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  Back to Super Admin Login
+                  Back to Login
                 </button>
               </div>
             </form>

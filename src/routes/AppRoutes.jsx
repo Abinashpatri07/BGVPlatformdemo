@@ -18,6 +18,8 @@ function AppRoutes() {
 
         {/* Landing / Unified Portal Login Page */}
         <Route path="/" element={<PortalLoginPage />} />
+        <Route path="/portal-login" element={<PortalLoginPage />} />
+        <Route path="/portallogin" element={<PortalLoginPage />} />
 
         {/* Top-Level Password Reset & Setup Routes (Direct match for all portal emails) */}
         <Route path="/candidate/reset-password" element={<SetupPasswordPage />} />

@@ -7,9 +7,10 @@ import { Lock, Eye, EyeOff, CheckCircle, Loader2, Mail } from "lucide-react";
 const SetupPasswordPage = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
+  const emailFromUrl = searchParams.get("email") || "";
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(emailFromUrl);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [otp, setOtp] = useState("");
@@ -21,16 +22,27 @@ const SetupPasswordPage = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
+  const [fetchingInfo, setFetchingInfo] = useState(true);
+
   useEffect(() => {
     if (token) {
+      setFetchingInfo(true);
       axios.get(`${API_BASE_URL}/api/client-admin/candidate/setup-info?token=${token}`)
         .then(res => {
-          if (res.data.success) setEmail(res.data.email);
+          if (res.data && res.data.success && res.data.email) {
+            setEmail(res.data.email);
+          } else {
+            setError(res.data?.message || "Invalid or expired setup link.");
+          }
         })
         .catch(err => {
           setError(err.response?.data?.message || "Invalid or expired setup link.");
+        })
+        .finally(() => {
+          setFetchingInfo(false);
         });
     } else {
+      setFetchingInfo(false);
       setError("No setup token provided in the link.");
     }
   }, [token]);
@@ -97,7 +109,7 @@ const SetupPasswordPage = () => {
       if (response.data.success) {
         setSuccess(true);
         setTimeout(() => {
-          navigate("/"); // Redirect to login
+          navigate("/"); // Redirect to portal login
         }, 3000);
       }
     } catch (err) {
@@ -169,7 +181,7 @@ const SetupPasswordPage = () => {
                   <input
                     type="email"
                     disabled
-                    value={email || "Loading..."}
+                    value={email || (fetchingInfo ? "Loading..." : "Email unavailable")}
                     className="bg-slate-100/70 border border-slate-200 text-slate-500 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 font-medium cursor-not-allowed"
                   />
                 </div>

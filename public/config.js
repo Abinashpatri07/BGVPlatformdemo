@@ -9,5 +9,5 @@
  * when this file fails to load.
  */
 window.__BGV_CONFIG__ = {
-  API_URL: "https://bgv.dqnex.online",
+  API_URL: "https://api.dqnex.online",
 };

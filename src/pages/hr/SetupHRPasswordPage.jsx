@@ -7,9 +7,10 @@ import { Lock, Eye, EyeOff, CheckCircle, Loader2, Mail } from "lucide-react";
 const SetupHRPasswordPage = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
+  const emailFromUrl = searchParams.get("email") || "";
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(emailFromUrl);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [otp, setOtp] = useState("");
@@ -21,16 +22,27 @@ const SetupHRPasswordPage = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
+  const [fetchingInfo, setFetchingInfo] = useState(true);
+
   useEffect(() => {
     if (token) {
+      setFetchingInfo(true);
       axios.get(`${API_BASE_URL}/api/hr/auth/setup-info?token=${token}`)
         .then(res => {
-          if (res.data.success) setEmail(res.data.email);
+          if (res.data && res.data.success && res.data.email) {
+            setEmail(res.data.email);
+          } else {
+            setError(res.data?.message || "Invalid or expired setup link.");
+          }
         })
         .catch(err => {
           setError(err.response?.data?.message || "Invalid or expired setup link.");
+        })
+        .finally(() => {
+          setFetchingInfo(false);
         });
     } else {
+      setFetchingInfo(false);
       setError("No setup token provided in the link.");
     }
   }, [token]);
@@ -97,7 +109,7 @@ const SetupHRPasswordPage = () => {
       if (response.data.success) {
         setSuccess(true);
         setTimeout(() => {
-          navigate("/hr/login"); // Redirect to HR login
+          navigate("/"); // Redirect to portal login
         }, 3000);
       }
     } catch (err) {
@@ -144,11 +156,11 @@ const SetupHRPasswordPage = () => {
               </div>
               <h3 className="text-xl font-bold text-slate-800">Password Set Successfully!</h3>
               <p className="mt-2 text-sm text-slate-600">
-                Redirecting to HR login in a few seconds...
+                Redirecting to login in a few seconds...
               </p>
               <div className="mt-6">
                 <Link
-                  to="/hr/login"
+                  to="/"
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-xl text-white bg-blue-600 hover:bg-blue-700 shadow-md transition-colors"
                 >
                   Go to Login Now
@@ -169,7 +181,7 @@ const SetupHRPasswordPage = () => {
                   <input
                     type="email"
                     disabled
-                    value={email || "Loading..."}
+                    value={email || (fetchingInfo ? "Loading..." : "Email unavailable")}
                     className="bg-slate-100/70 border border-slate-200 text-slate-500 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3 font-medium cursor-not-allowed"
                   />
                 </div>
@@ -285,7 +297,7 @@ const SetupHRPasswordPage = () => {
 
           {!success && (
             <div className="mt-6 text-center">
-              <Link to="/hr/login" className="text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors">
+              <Link to="/" className="text-sm font-medium text-slate-500 hover:text-blue-600 transition-colors">
                 Back to Login
               </Link>
             </div>

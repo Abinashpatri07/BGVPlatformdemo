@@ -29,7 +29,7 @@ const resolveApiBaseUrl = () => {
     candidate = import.meta.env.VITE_API_URL || "";
   }
   if (!candidate) {
-    candidate = "https://bgv.dqnex.online";
+    candidate = "https://api.dqnex.online";
   }
   return String(candidate).replace(/\/+$/, "");
 };
