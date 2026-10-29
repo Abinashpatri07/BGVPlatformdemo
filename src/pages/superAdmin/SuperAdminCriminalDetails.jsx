@@ -19,8 +19,11 @@ const API_BASE = API_BASE_URL;
 
 const getDocUrl = (path) => {
   if (!path) return null;
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  const clean = path.replace(/\\/g, "/");
+  let clean = path.replace(/\\/g, "/");
+  if (clean.includes("bgvplatform-backend.onrender.com")) {
+    clean = clean.replace("https://bgvplatform-backend.onrender.com", API_BASE).replace("http://bgvplatform-backend.onrender.com", API_BASE);
+  }
+  if (clean.startsWith("http://") || clean.startsWith("https://")) return clean;
   return `${API_BASE}/${clean.startsWith("/") ? clean.slice(1) : clean}`;
 };
 

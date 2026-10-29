@@ -7,10 +7,10 @@
   ],
   "build": {
     "env": {
-      "VITE_API_URL": "https://bgvplatform-backend.onrender.com"
+      "VITE_API_URL": "https://bgv.dqnex.online"
     }
   },
   "env": {
-    "VITE_API_URL": "https://bgvplatform-backend.onrender.com"
+    "VITE_API_URL": "https://bgv.dqnex.online"
   }
 }

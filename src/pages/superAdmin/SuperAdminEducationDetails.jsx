@@ -8,7 +8,9 @@ import {
   FileBadge,
   ChevronLeft,
   Loader2,
-  ShieldCheck
+  ShieldCheck,
+  X,
+  ExternalLink
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axiosInstance from "../../API/axiosInstance";
@@ -95,8 +97,12 @@ const fmtYear = (d) => {
 
 const getDocUrl = (path) => {
   if (!path) return null;
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  const clean = path.replace(/\\/g, "/");
+  let clean = path.replace(/\\/g, "/");
+  if (clean.includes("bgvplatform-backend.onrender.com")) {
+    clean = clean.replace("https://bgvplatform-backend.onrender.com", API_BASE)
+                 .replace("http://bgvplatform-backend.onrender.com", API_BASE);
+  }
+  if (clean.startsWith("http://") || clean.startsWith("https://")) return clean;
   return `${API_BASE}/${clean.startsWith("/") ? clean.slice(1) : clean}`;
 };
 
@@ -112,6 +118,7 @@ function SuperAdminEducationDetails() {
   const [caseData, setCaseData] = useState(null);
   const [candidate, setCandidate] = useState(null);
   const [records, setRecords] = useState([]);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isView = searchParams.get("mode") === "view";
@@ -231,15 +238,14 @@ function SuperAdminEducationDetails() {
                             <p className="text-sm font-semibold text-gray-800">Degree Certificate / Mark Sheet</p>
                             <p className="text-xs text-gray-400">Attached</p>
                           </div>
-                          <a 
-                            href={getDocUrl(edu.cand_edu_certificate)} 
-                            target="_blank" 
-                            rel="noreferrer" 
+                          <button 
+                            type="button"
+                            onClick={() => setPreviewUrl(getDocUrl(edu.cand_edu_certificate))}
                             className="p-1.5 hover:bg-gray-200 rounded text-gray-600 transition"
-                            title="View Document"
+                            title="Preview Document"
                           >
                             <Eye size={18} />
-                          </a>
+                          </button>
                         </div>
                       </div>
                     ) : (
@@ -264,15 +270,14 @@ function SuperAdminEducationDetails() {
                             <p className="text-sm font-semibold text-gray-800">Final Marksheet</p>
                             <p className="text-xs text-gray-400">Attached</p>
                           </div>
-                          <a 
-                            href={getDocUrl(edu.cand_edu_marksheet)} 
-                            target="_blank" 
-                            rel="noreferrer" 
+                          <button 
+                            type="button"
+                            onClick={() => setPreviewUrl(getDocUrl(edu.cand_edu_marksheet))}
                             className="p-1.5 hover:bg-gray-200 rounded text-gray-600 transition"
-                            title="View Marksheet"
+                            title="Preview Marksheet"
                           >
                             <Eye size={18} />
-                          </a>
+                          </button>
                         </div>
                       </div>
                     ) : (
@@ -374,6 +379,71 @@ function SuperAdminEducationDetails() {
           </div>
         </div>
       </div>
+
+      {/* Document Preview Modal */}
+      {previewUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setPreviewUrl(null)}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center border-b pb-3">
+              <h3 className="text-base font-bold text-gray-900">Document Preview</h3>
+              <div className="flex items-center gap-2">
+                <a
+                  href={previewUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-1.5 hover:bg-indigo-50 text-indigo-700 rounded-lg transition flex items-center gap-1.5 text-xs font-semibold border border-indigo-100"
+                  title="Open in new tab"
+                >
+                  <ExternalLink size={15} />
+                  <span>Open in Tab</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setPreviewUrl(null)}
+                  className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 transition"
+                  title="Close"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+            {previewUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+              <div className="flex justify-center bg-gray-50 rounded-lg p-2">
+                <img
+                  src={previewUrl}
+                  alt="Document preview"
+                  className="max-h-[70vh] rounded-lg object-contain shadow-sm"
+                />
+              </div>
+            ) : previewUrl.match(/\.pdf$/i) ? (
+              <iframe
+                src={previewUrl}
+                className="w-full h-[70vh] rounded-lg border border-gray-200"
+                title="PDF Preview"
+              />
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-sm text-gray-600 mb-3">Preview not available directly in browser for this file type.</p>
+                <a
+                  href={previewUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-4 py-2 bg-[#05058D] text-white rounded-lg text-sm font-semibold hover:bg-blue-800 transition inline-flex items-center gap-2"
+                >
+                  <ExternalLink size={16} />
+                  Download / View File
+                </a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

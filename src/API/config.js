@@ -13,7 +13,20 @@ const runtimeConfig =
   typeof window !== "undefined" && window.__BGV_CONFIG__ ? window.__BGV_CONFIG__ : {};
 
 const resolveApiBaseUrl = () => {
-  const candidate = runtimeConfig.API_URL || import.meta.env.VITE_API_URL || "";
+  let candidate = runtimeConfig.API_URL;
+  // Discard any legacy onrender domain
+  if (typeof candidate === "string" && candidate.includes("onrender.com")) {
+    candidate = "";
+  }
+  if (!candidate) {
+    candidate = import.meta.env.VITE_API_URL || "";
+  }
+  if (!candidate && typeof window !== "undefined" && window.location) {
+    candidate =
+      window.location.hostname === "localhost"
+        ? "http://localhost:5000"
+        : "https://bgv.dqnex.online";
+  }
   return String(candidate).replace(/\/+$/, "");
 };
 
