@@ -33,6 +33,8 @@ function AdminRoutes() {
       <Route path="signup" element={<Signup />} />
       <Route path="forgot-password" element={<ForgotPassword />} />
       <Route path="client-setup-password" element={<SetupClientPasswordPage />} />
+      <Route path="reset-password" element={<SetupClientPasswordPage />} />
+      <Route path="setup-password" element={<SetupClientPasswordPage />} />
 
       {/* PROTECTED ADMIN LAYOUT */}
       <Route

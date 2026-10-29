@@ -16,6 +16,9 @@ function CandidateRoutes() {
       <Route path="/" element={<LoginPage />} />
       <Route path="login" element={<LoginPage />} />
       <Route path="setup-password" element={<SetupPasswordPage />} />
+      <Route path="reset-password" element={<SetupPasswordPage />} />
+      <Route path="candidate/setup-password" element={<SetupPasswordPage />} />
+      <Route path="candidate/reset-password" element={<SetupPasswordPage />} />
       <Route path="vendor-setup-password" element={<SetupVendorPasswordPage />} />
       <Route path="client-setup-password" element={<SetupClientPasswordPage />} />
       <Route path="hr-setup-password" element={<SetupHRPasswordPage />} />

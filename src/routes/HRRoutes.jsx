@@ -20,6 +20,7 @@ import CreateCandidateForm from "../components/hr/CreateCandidateForm";
 import Login from "../pages/hr/Login";
 import ForgotPassword from "../components/hr/login/ForgotPassword";
 import Analytics from "../pages/hr/Analytics";
+import SetupHRPasswordPage from "../pages/hr/SetupHRPasswordPage";
 
 function HRRoutes() {
 
@@ -37,6 +38,20 @@ function HRRoutes() {
       <Route
         path="forgot-password"
         element={<ForgotPassword />}
+      />
+
+      {/* RESET & SETUP PASSWORD */}
+      <Route
+        path="reset-password"
+        element={<SetupHRPasswordPage />}
+      />
+      <Route
+        path="setup-password"
+        element={<SetupHRPasswordPage />}
+      />
+      <Route
+        path="hr-setup-password"
+        element={<SetupHRPasswordPage />}
       />
 
       {/* HR LAYOUT */}

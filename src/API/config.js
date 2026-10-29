@@ -13,19 +13,23 @@ const runtimeConfig =
   typeof window !== "undefined" && window.__BGV_CONFIG__ ? window.__BGV_CONFIG__ : {};
 
 const resolveApiBaseUrl = () => {
+  // If running locally in development, always use local backend to avoid CORS and wrong proxy routing
+  if (typeof window !== "undefined" && window.location) {
+    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+      return import.meta.env.VITE_API_URL || "http://localhost:5000";
+    }
+  }
+
   let candidate = runtimeConfig.API_URL;
-  // Discard any legacy onrender domain
+  // Discard any legacy onrender domain if set mistakenly
   if (typeof candidate === "string" && candidate.includes("onrender.com")) {
     candidate = "";
   }
   if (!candidate) {
     candidate = import.meta.env.VITE_API_URL || "";
   }
-  if (!candidate && typeof window !== "undefined" && window.location) {
-    candidate =
-      window.location.hostname === "localhost"
-        ? "http://localhost:5000"
-        : "https://bgv.dqnex.online";
+  if (!candidate) {
+    candidate = "https://bgv.dqnex.online";
   }
   return String(candidate).replace(/\/+$/, "");
 };
