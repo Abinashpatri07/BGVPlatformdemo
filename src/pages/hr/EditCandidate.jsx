@@ -36,6 +36,13 @@ const resolveDocUrl = (path) => {
 
 const DocumentPreviewCard = ({ url, title = "Document Preview" }) => {
   const resolvedUrl = resolveDocUrl(url);
+  const [imgSrc, setImgSrc] = useState(resolvedUrl);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    setImgSrc(resolvedUrl);
+    setHasError(false);
+  }, [resolvedUrl]);
 
   if (!resolvedUrl) {
     return (
@@ -63,60 +70,16 @@ const DocumentPreviewCard = ({ url, title = "Document Preview" }) => {
 
       <div className="flex-1 flex flex-col items-center justify-center">
         {isPdf ? (
-          <div className="w-full flex flex-col items-center justify-center py-6 px-4 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-            <div className="w-12 h-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center mb-2 shadow-sm">
-              <FileText size={28} />
-            </div>
-            <p className="text-xs font-semibold text-gray-700 mb-1">PDF Document</p>
-            <p className="text-[11px] text-gray-400 mb-3 max-w-[180px] truncate text-center" title={fileName}>
-              {fileName}
-            </p>
-            <div className="flex items-center gap-2">
-              <a
-                href={resolvedUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-white bg-[#01026E] px-3 py-1.5 rounded-lg hover:bg-indigo-800 transition font-medium"
-              >
-                <Eye size={13} /> View PDF
-              </a>
-              <a
-                href={resolvedUrl}
-                download
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-gray-700 bg-white border border-gray-200 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 transition font-medium"
-                title="Download"
-              >
-                <Download size={13} />
-              </a>
-            </div>
-          </div>
-        ) : (
           <div className="w-full space-y-2">
-            <div className="relative group overflow-hidden rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center min-h-[170px] max-h-[240px] p-1">
-              <img
-                src={resolvedUrl}
-                alt={title}
-                className="max-h-[230px] w-auto max-w-full object-contain mx-auto"
-                onError={(e) => {
-                  e.target.style.display = "none";
-                  const parent = e.target.parentElement;
-                  if (parent) {
-                    parent.innerHTML = `
-                      <div class="flex flex-col items-center justify-center p-4 text-center">
-                        <p class="text-xs text-gray-400 mb-2">Preview unavailable</p>
-                        <a href="${resolvedUrl}" target="_blank" class="text-xs font-medium text-indigo-700 underline">
-                          Open File &rarr;
-                        </a>
-                      </div>
-                    `;
-                  }
-                }}
+            <div className="w-full h-56 rounded-lg overflow-hidden border border-gray-200 bg-gray-50 relative">
+              <iframe
+                src={`${resolvedUrl}#toolbar=0`}
+                title={title}
+                className="w-full h-full"
               />
             </div>
             <div className="flex items-center justify-between pt-1">
-              <span className="text-[11px] text-gray-400 truncate max-w-[140px]" title={fileName}>
+              <span className="text-[11px] text-gray-400 truncate max-w-[180px]" title={fileName}>
                 {fileName}
               </span>
               <div className="flex items-center gap-2">
@@ -124,12 +87,63 @@ const DocumentPreviewCard = ({ url, title = "Document Preview" }) => {
                   href={resolvedUrl}
                   target="_blank"
                   rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs text-white bg-[#01026E] px-3 py-1.5 rounded-lg hover:bg-indigo-800 transition font-medium"
+                >
+                  <Eye size={13} /> View PDF
+                </a>
+                <a
+                  href={resolvedUrl}
+                  download
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-gray-700 bg-white border border-gray-200 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 transition font-medium"
+                  title="Download"
+                >
+                  <Download size={13} />
+                </a>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full space-y-2">
+            <div className="relative group overflow-hidden rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center min-h-[170px] max-h-[240px] p-1">
+              {hasError ? (
+                <div className="flex flex-col items-center justify-center p-4 text-center">
+                  <p className="text-xs text-gray-400 mb-2">Preview unavailable</p>
+                  <a href={imgSrc || resolvedUrl} target="_blank" rel="noreferrer" className="text-xs font-medium text-indigo-700 underline">
+                    Open File &rarr;
+                  </a>
+                </div>
+              ) : (
+                <img
+                  src={imgSrc}
+                  alt={title}
+                  className="max-h-[230px] w-auto max-w-full object-contain mx-auto"
+                  onError={() => {
+                    if (imgSrc && imgSrc.includes("localhost:5000")) {
+                      setImgSrc(imgSrc.replace("http://localhost:5000", "https://api.dqnex.online"));
+                    } else {
+                      setHasError(true);
+                    }
+                  }}
+                />
+              )}
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[11px] text-gray-400 truncate max-w-[140px]" title={fileName}>
+                {fileName}
+              </span>
+              <div className="flex items-center gap-2">
+                <a
+                  href={imgSrc || resolvedUrl}
+                  target="_blank"
+                  rel="noreferrer"
                   className="inline-flex items-center gap-1 text-xs text-[#01026E] hover:underline font-medium"
                 >
                   <Eye size={13} /> Full View
                 </a>
                 <a
-                  href={resolvedUrl}
+                  href={imgSrc || resolvedUrl}
                   download
                   target="_blank"
                   rel="noreferrer"

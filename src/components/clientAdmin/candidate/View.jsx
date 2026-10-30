@@ -52,6 +52,13 @@ const resolveDocUrl = (path) => {
 // Renders an enhanced document preview: image, pdf view/link, or clean empty state
 const DocumentPreview = ({ url, title = "Document Preview", noDocMessage }) => {
   const resolvedUrl = resolveDocUrl(url);
+  const [imgSrc, setImgSrc] = useState(resolvedUrl);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    setImgSrc(resolvedUrl);
+    setHasError(false);
+  }, [resolvedUrl]);
 
   if (!resolvedUrl) {
     return (
@@ -81,64 +88,12 @@ const DocumentPreview = ({ url, title = "Document Preview", noDocMessage }) => {
 
       <div className="flex-1 flex flex-col items-center justify-center">
         {isPdf ? (
-          <div className="w-full flex flex-col items-center justify-center py-6 px-4 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-            <div className="w-14 h-14 bg-red-50 text-red-600 rounded-xl flex items-center justify-center mb-3 shadow-sm">
-              <FileText size={32} />
-            </div>
-            <p className="text-xs font-semibold text-gray-700 mb-1">PDF Document</p>
-            <p className="text-[11px] text-gray-400 mb-4 max-w-[200px] truncate text-center" title={fileName}>
-              {fileName}
-            </p>
-            <div className="flex items-center gap-2">
-              <a
-                href={resolvedUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-white bg-[#01026E] px-3.5 py-1.5 rounded-lg hover:bg-indigo-800 transition font-medium shadow-sm"
-              >
-                <Eye size={14} /> View PDF
-              </a>
-              <a
-                href={resolvedUrl}
-                download
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-gray-700 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition font-medium"
-                title="Download"
-              >
-                <Download size={13} />
-              </a>
-            </div>
-          </div>
-        ) : (
           <div className="w-full space-y-3">
-            <div className="relative group overflow-hidden rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center min-h-[180px] max-h-[250px] p-1">
-              <img
-                src={resolvedUrl}
-                alt={title}
-                className="max-h-[240px] w-auto max-w-full object-contain mx-auto transition-transform duration-200 group-hover:scale-105"
-                onError={(e) => {
-                  if (e.target.src && e.target.src.includes("localhost:5000") && !e.target.dataset.retried) {
-                    e.target.dataset.retried = "true";
-                    e.target.src = e.target.src.replace("http://localhost:5000", "https://api.dqnex.online");
-                    return;
-                  }
-                  e.target.style.display = "none";
-                  const parent = e.target.parentElement;
-                  if (parent) {
-                    parent.innerHTML = `
-                      <div class="flex flex-col items-center justify-center p-6 text-center">
-                        <svg class="w-10 h-10 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        <p class="text-xs text-gray-500 mb-2">Unable to display preview directly</p>
-                        <a href="${resolvedUrl}" target="_blank" class="text-xs font-semibold text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded border border-indigo-200 hover:bg-indigo-100">
-                          Open Document &rarr;
-                        </a>
-                      </div>
-                    `;
-                  }
-                }}
+            <div className="w-full h-64 rounded-lg overflow-hidden border border-gray-200 bg-gray-50 relative">
+              <iframe
+                src={`${resolvedUrl}#toolbar=0`}
+                title={title}
+                className="w-full h-full"
               />
             </div>
             <div className="flex items-center justify-between pt-1">
@@ -150,12 +105,69 @@ const DocumentPreview = ({ url, title = "Document Preview", noDocMessage }) => {
                   href={resolvedUrl}
                   target="_blank"
                   rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs text-white bg-[#01026E] px-3.5 py-1.5 rounded-lg hover:bg-indigo-800 transition font-medium shadow-sm"
+                >
+                  <Eye size={14} /> View PDF
+                </a>
+                <a
+                  href={resolvedUrl}
+                  download
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-gray-700 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition font-medium"
+                  title="Download"
+                >
+                  <Download size={13} />
+                </a>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full space-y-3">
+            <div className="relative group overflow-hidden rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center min-h-[180px] max-h-[250px] p-1">
+              {hasError ? (
+                <div className="flex flex-col items-center justify-center p-6 text-center">
+                  <FileText className="w-10 h-10 text-gray-400 mb-2" />
+                  <p className="text-xs text-gray-500 mb-2">Unable to display preview directly</p>
+                  <a
+                    href={imgSrc || resolvedUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded border border-indigo-200 hover:bg-indigo-100"
+                  >
+                    Open Document &rarr;
+                  </a>
+                </div>
+              ) : (
+                <img
+                  src={imgSrc}
+                  alt={title}
+                  className="max-h-[240px] w-auto max-w-full object-contain mx-auto transition-transform duration-200 group-hover:scale-105"
+                  onError={() => {
+                    if (imgSrc && imgSrc.includes("localhost:5000")) {
+                      setImgSrc(imgSrc.replace("http://localhost:5000", "https://api.dqnex.online"));
+                    } else {
+                      setHasError(true);
+                    }
+                  }}
+                />
+              )}
+            </div>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[11px] text-gray-400 truncate max-w-[150px]" title={fileName}>
+                {fileName}
+              </span>
+              <div className="flex items-center gap-2">
+                <a
+                  href={imgSrc || resolvedUrl}
+                  target="_blank"
+                  rel="noreferrer"
                   className="inline-flex items-center gap-1 text-xs text-[#01026E] hover:underline font-medium"
                 >
                   <Eye size={13} /> Full View
                 </a>
                 <a
-                  href={resolvedUrl}
+                  href={imgSrc || resolvedUrl}
                   download
                   target="_blank"
                   rel="noreferrer"
