@@ -118,6 +118,11 @@ const DocumentPreview = ({ url, title = "Document Preview", noDocMessage }) => {
                 alt={title}
                 className="max-h-[240px] w-auto max-w-full object-contain mx-auto transition-transform duration-200 group-hover:scale-105"
                 onError={(e) => {
+                  if (e.target.src && e.target.src.includes("localhost:5000") && !e.target.dataset.retried) {
+                    e.target.dataset.retried = "true";
+                    e.target.src = e.target.src.replace("http://localhost:5000", "https://api.dqnex.online");
+                    return;
+                  }
                   e.target.style.display = "none";
                   const parent = e.target.parentElement;
                   if (parent) {

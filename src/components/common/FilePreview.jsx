@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { API_BASE_URL } from "../../API/config.js";
 
 /**
  * FilePreview — Universal Image & PDF Preview Component
@@ -13,10 +14,7 @@ import React, { useState } from "react";
  *   label     — small label shown above the preview card (optional)
  */
 
-const API_BASE =
-  (typeof window !== "undefined" && window.__BGV_CONFIG__?.API_URL) ||
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:5000";
+const API_BASE = API_BASE_URL || "http://localhost:5000";
 
 /** Build a browser-accessible URL from whatever the backend stored */
 export function buildFileUrl(src) {

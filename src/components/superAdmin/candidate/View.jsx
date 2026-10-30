@@ -31,7 +31,9 @@ const Label = ({ label, value }) => (
 const getDocUrl = (path) => {
   if (!path) return null;
   if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  const clean = path.replace(/\\/g, "/");
+  let clean = path.replace(/\\/g, "/");
+  if (clean.startsWith("/")) clean = clean.slice(1);
+  if (!clean.startsWith("uploads/")) clean = `uploads/${clean}`;
   const base = API_BASE_URL;
   return `${base}/${clean.startsWith("/") ? clean.slice(1) : clean}`;
 };
@@ -77,6 +79,11 @@ const DocumentPreview = ({ url, noDocMessage }) => {
             alt="document"
             className="rounded-lg shadow-sm mx-auto h-56 object-contain w-full bg-gray-50 border"
             onError={(e) => {
+              if (e.target.src && e.target.src.includes("localhost:5000") && !e.target.dataset.retried) {
+                e.target.dataset.retried = "true";
+                e.target.src = e.target.src.replace("http://localhost:5000", "https://api.dqnex.online");
+                return;
+              }
               e.target.outerHTML = `<div class="flex flex-col items-center justify-center min-h-[160px] bg-gray-50 rounded-lg"><svg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 24 24' fill='none' stroke='#6b7280' stroke-width='1.5'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg><a href='${fullUrl}' target='_blank' class='mt-2 text-xs text-indigo-700 underline font-medium'>Open Document</a></div>`;
             }}
           />
