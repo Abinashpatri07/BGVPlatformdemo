@@ -31,17 +31,23 @@ const resolveDocUrl = (path) => {
   if (!clean.startsWith("uploads/")) {
     clean = `uploads/${clean}`;
   }
-  return `${API_BASE_URL}/${clean}`;
+  // In local dev, route directly to production CDN to bypass 3-5s localhost TCP connection timeouts
+  const isLocalDev = typeof window !== "undefined" && 
+    (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+  const base = isLocalDev ? "https://api.dqnex.online" : API_BASE_URL;
+  return `${base.replace(/\/+$/, "")}/${clean}`;
 };
 
 const DocumentPreviewCard = ({ url, title = "Document Preview" }) => {
   const resolvedUrl = resolveDocUrl(url);
   const [imgSrc, setImgSrc] = useState(resolvedUrl);
   const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setImgSrc(resolvedUrl);
     setHasError(false);
+    setIsLoading(true);
   }, [resolvedUrl]);
 
   if (!resolvedUrl) {
@@ -107,6 +113,12 @@ const DocumentPreviewCard = ({ url, title = "Document Preview" }) => {
         ) : (
           <div className="w-full space-y-2">
             <div className="relative group overflow-hidden rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center min-h-[170px] max-h-[240px] p-1">
+              {isLoading && !hasError && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50/90 z-10">
+                  <div className="w-7 h-7 border-2 border-indigo-200 border-t-[#01026E] rounded-full animate-spin mb-2"></div>
+                  <span className="text-[11px] text-gray-400 font-medium animate-pulse">Loading preview...</span>
+                </div>
+              )}
               {hasError ? (
                 <div className="flex flex-col items-center justify-center p-4 text-center">
                   <p className="text-xs text-gray-400 mb-2">Preview unavailable</p>
@@ -118,11 +130,20 @@ const DocumentPreviewCard = ({ url, title = "Document Preview" }) => {
                 <img
                   src={imgSrc}
                   alt={title}
-                  className="max-h-[230px] w-auto max-w-full object-contain mx-auto"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  onLoad={() => setIsLoading(false)}
+                  className={`max-h-[230px] w-auto max-w-full object-contain mx-auto transition-all duration-300 ${
+                    isLoading ? "opacity-0" : "opacity-100"
+                  }`}
                   onError={() => {
                     if (imgSrc && imgSrc.includes("localhost:5000")) {
                       setImgSrc(imgSrc.replace("http://localhost:5000", "https://api.dqnex.online"));
+                    } else if (imgSrc && imgSrc.includes("https://api.dqnex.online") && typeof window !== "undefined" && window.location.hostname === "localhost") {
+                      setImgSrc(imgSrc.replace("https://api.dqnex.online", "http://localhost:5000"));
                     } else {
+                      setIsLoading(false);
                       setHasError(true);
                     }
                   }}
