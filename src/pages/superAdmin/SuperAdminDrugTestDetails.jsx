@@ -24,7 +24,11 @@ const getDocUrl = (path) => {
     clean = clean.replace("https://bgvplatform-backend.onrender.com", API_BASE).replace("http://bgvplatform-backend.onrender.com", API_BASE);
   }
   if (clean.startsWith("http://") || clean.startsWith("https://")) return clean;
-  return `${API_BASE}/${clean.startsWith("/") ? clean.slice(1) : clean}`;
+  if (!clean.startsWith("uploads/")) clean = `uploads/${clean}`;
+  const isLocalDev = typeof window !== "undefined" && 
+    (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+  const base = isLocalDev ? "https://api.dqnex.online" : API_BASE;
+  return `${base.replace(/\/+$/, "")}/${clean.startsWith("/") ? clean.slice(1) : clean}`;
 };
 
 const Field = ({ label, value }) => (

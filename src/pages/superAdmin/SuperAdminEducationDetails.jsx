@@ -103,7 +103,11 @@ const getDocUrl = (path) => {
                  .replace("http://bgvplatform-backend.onrender.com", API_BASE);
   }
   if (clean.startsWith("http://") || clean.startsWith("https://")) return clean;
-  return `${API_BASE}/${clean.startsWith("/") ? clean.slice(1) : clean}`;
+  if (!clean.startsWith("uploads/")) clean = `uploads/${clean}`;
+  const isLocalDev = typeof window !== "undefined" && 
+    (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+  const base = isLocalDev ? "https://api.dqnex.online" : API_BASE;
+  return `${base.replace(/\/+$/, "")}/${clean.startsWith("/") ? clean.slice(1) : clean}`;
 };
 
 const Field = ({ label, value }) => (
@@ -414,11 +418,19 @@ function SuperAdminEducationDetails() {
               </div>
             </div>
             {previewUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
-              <div className="flex justify-center bg-gray-50 rounded-lg p-2">
+              <div className="flex justify-center bg-gray-50 rounded-lg p-2 min-h-[200px]">
                 <img
                   src={previewUrl}
                   alt="Document preview"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
                   className="max-h-[70vh] rounded-lg object-contain shadow-sm"
+                  onError={(e) => {
+                    if (e.target.src && e.target.src.includes("localhost:5000")) {
+                      e.target.src = e.target.src.replace("http://localhost:5000", "https://api.dqnex.online");
+                    }
+                  }}
                 />
               </div>
             ) : previewUrl.match(/\.pdf$/i) ? (

@@ -20,6 +20,92 @@ import {
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axiosInstance from "../../API/axiosInstance";
 
+// Fast-loading Document Preview with direct CDN routing, high fetch priority, and loading indicator
+function UploadedDocViewer({ cleanPath, docUrl, isPdf, title }) {
+  const [imgSrc, setImgSrc] = useState(docUrl);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    setImgSrc(docUrl);
+    setIsLoading(true);
+    setHasError(false);
+  }, [docUrl]);
+
+  return (
+    <div className="w-full flex flex-col items-center gap-3">
+      <div className="w-full bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm flex items-center justify-center p-2 min-h-[260px] max-h-[380px] relative">
+        {isPdf ? (
+          <iframe
+            src={`${docUrl}#toolbar=0`}
+            title="Uploaded Document PDF"
+            className="w-full h-72 rounded-lg border border-slate-100"
+          />
+        ) : (
+          <>
+            {isLoading && !hasError && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50/90 z-10">
+                <div className="w-7 h-7 border-2 border-indigo-200 border-t-[#01026E] rounded-full animate-spin mb-2"></div>
+                <span className="text-[11px] text-slate-400 font-medium animate-pulse">Loading preview...</span>
+              </div>
+            )}
+            {hasError ? (
+              <div className="flex flex-col items-center justify-center p-6 text-center">
+                <FileText className="w-10 h-10 text-slate-400 mb-2" />
+                <p className="text-xs text-slate-500 mb-2">Unable to display preview directly</p>
+                <a
+                  href={imgSrc || docUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs font-semibold text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded border border-indigo-200 hover:bg-indigo-100"
+                >
+                  Open Document &rarr;
+                </a>
+              </div>
+            ) : (
+              <img
+                src={imgSrc}
+                alt={title || "Candidate Uploaded Document"}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                onLoad={() => setIsLoading(false)}
+                className={`rounded-lg max-h-72 w-auto max-w-full object-contain select-none transition-all duration-300 ${
+                  isLoading ? "opacity-0" : "opacity-100"
+                }`}
+                onError={() => {
+                  if (imgSrc && imgSrc.includes("localhost:5000")) {
+                    setImgSrc(imgSrc.replace("http://localhost:5000", "https://api.dqnex.online"));
+                  } else if (imgSrc && imgSrc.includes("https://api.dqnex.online") && typeof window !== "undefined" && window.location.hostname === "localhost") {
+                    setImgSrc(imgSrc.replace("https://api.dqnex.online", "http://localhost:5000"));
+                  } else {
+                    setIsLoading(false);
+                    setHasError(true);
+                  }
+                }}
+              />
+            )}
+          </>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between w-full pt-2 px-1 text-xs text-slate-500">
+        <span className="truncate max-w-[200px] text-left font-mono text-[11px]">
+          {cleanPath.split("/").pop()}
+        </span>
+        <a
+          href={imgSrc || docUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold transition"
+        >
+          <Eye size={14} /> Open Full Size
+        </a>
+      </div>
+    </div>
+  );
+}
+
 export default function SuperAdminIdentificationDetails() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -269,43 +355,21 @@ export default function SuperAdminIdentificationDetails() {
                   {activeDoc?.cand_iden_docu ? (
                     (() => {
                       const cleanPath = activeDoc.cand_iden_docu.replace(/\\/g, "/");
+                      const isLocalDev = typeof window !== "undefined" && 
+                        (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+                      const base = isLocalDev ? "https://api.dqnex.online" : API_BASE_URL;
                       const docUrl = cleanPath.startsWith("http")
                         ? cleanPath
-                        : `${API_BASE_URL}/${cleanPath.startsWith("/") ? cleanPath.slice(1) : cleanPath}`;
+                        : `${base.replace(/\/+$/, "")}/${cleanPath.startsWith("/") ? cleanPath.slice(1) : cleanPath}`;
                       const isPdf = cleanPath.toLowerCase().endsWith(".pdf");
 
                       return (
-                        <div className="w-full flex flex-col items-center gap-3">
-                          <div className="w-full bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm flex items-center justify-center p-2 min-h-[260px] max-h-[380px]">
-                            {isPdf ? (
-                              <iframe
-                                src={docUrl}
-                                title="Uploaded Document PDF"
-                                className="w-full h-72 rounded-lg border border-slate-100"
-                              />
-                            ) : (
-                              <img
-                                src={docUrl}
-                                alt="Candidate Uploaded Document"
-                                className="rounded-lg max-h-72 w-auto max-w-full object-contain select-none"
-                              />
-                            )}
-                          </div>
-
-                          <div className="flex items-center justify-between w-full pt-2 px-1 text-xs text-slate-500">
-                            <span className="truncate max-w-[200px] text-left font-mono text-[11px]">
-                              {cleanPath.split("/").pop()}
-                            </span>
-                            <a
-                              href={docUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold transition"
-                            >
-                              <Eye size={14} /> Open Full Size
-                            </a>
-                          </div>
-                        </div>
+                        <UploadedDocViewer
+                          cleanPath={cleanPath}
+                          docUrl={docUrl}
+                          isPdf={isPdf}
+                          title={activeDoc?.cand_iden_type}
+                        />
                       );
                     })()
                   ) : (
